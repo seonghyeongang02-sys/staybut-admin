@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>스테이벗 어드민</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" rel="stylesheet">
+<style>
+:root {
+  --bg:#f7f8fa; --white:#fff; --border:#e5e7eb; --border2:#d1d5db;
+  --text:#111827; --text2:#374151; --muted:#6b7280; --light:#9ca3af;
+  --primary:#2563eb; --primary-soft:#eff6ff;
+  --airbnb:#FF385C; --airbnb-soft:#fff1f2;
+  --booking:#003580; --booking-soft:#eff6ff;
+  --success:#059669; --success-soft:#ecfdf5;
+  --warning:#d97706; --warning-soft:#fffbeb;
+  --danger:#dc2626; --danger-soft:#fef2f2;
+  --sidebar-w:220px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Pretendard',-apple-system,sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+
+/* ── LOGIN ── */
+#login-screen {
+  min-height:100vh;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 100%);
+  padding:20px;
+}
+.login-box {
+  background:#fff;border-radius:16px;padding:40px 36px;width:100%;max-width:380px;
+  box-shadow:0 24px 60px rgba(0,0,0,.25);
+}
+.login-logo {font-size:13px;font-weight:700;color:var(--airbnb);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px}
+.login-title {font-size:24px;font-weight:700;color:var(--text);margin-bottom:4px;letter-spacing:-.02em}
+.login-sub {font-size:13px;color:var(--muted);margin-bottom:28px}
+.form-group {margin-bottom:16px}
+.form-label {font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px;display:block;letter-spacing:.02em}
+.form-input {
+  width:100%;padding:11px 14px;border:1px solid var(--border);border-radius:8px;
+  font-size:14px;font-family:inherit;color:var(--text);background:#fff;outline:none;transition:border .15s;
+}
+.form-input:focus {border-color:var(--primary);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+.login-btn {
+  width:100%;padding:12px;background:var(--primary);color:#fff;border:none;border-radius:8px;
+  font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;transition:background .15s;margin-top:4px;
+}
+.login-btn:hover {background:#1d4ed8}
+.login-err {font-size:12px;color:var(--danger);margin-top:8px;display:none}
+.login-accounts {margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.login-accounts-title {font-size:11px;color:var(--muted);margin-bottom:8px;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.account-chip {
+  display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border:1px solid var(--border);
+  border-radius:6px;font-size:11px;cursor:pointer;margin:3px 3px 0 0;transition:all .12s;background:#fff;
+}
+.account-chip:hover {border-color:var(--primary);background:var(--primary-soft);color:var(--primary)}
+.chip-role {font-size:9px;color:var(--muted);font-weight:600;text-transform:uppercase}
+
+/* ── APP LAYOUT ── */
+#app {display:none;min-height:100vh}
+.layout {display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar {
+  width:var(--sidebar-w);background:#0f172a;color:#fff;
+  display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:100;overflow-y:auto;
+}
+.sidebar-brand {padding:20px 18px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand-name {font-size:15px;font-weight:700;color:#fff;letter-spacing:-.01em}
+.brand-tag {font-size:10px;color:#64748b;margin-top:2px;font-weight:500}
+.sidebar-user {padding:12px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:10px}
+.user-avatar {width:32px;height:32px;border-radius:8px;background:var(--airbnb);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.user-name {font-size:12px;font-weight:600;color:#e2e8f0}
+.user-role {font-size:10px;color:#64748b;margin-top:1px}
+.sidebar-nav {padding:12px 0;flex:1}
+.nav-section {padding:8px 18px 4px;font-size:10px;font-weight:700;color:#475569;letter-spacing:.08em;text-transform:uppercase}
+.nav-item {
+  display:flex;align-items:center;gap:10px;padding:9px 18px;font-size:13px;font-weight:500;
+  color:#94a3b8;cursor:pointer;transition:all .12s;border-left:2px solid transparent;
+}
+.nav-item:hover {color:#e2e8f0;background:rgba(255,255,255,.04)}
+.nav-item.active {color:#fff;background:rgba(255,255,255,.08);border-left-color:var(--airbnb)}
+.nav-icon {font-size:16px;width:20px;text-align:center}
+.nav-badge {margin-left:auto;background:var(--airbnb);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:99px}
+.sidebar-bottom {padding:16px 18px;border-top:1px solid rgba(255,255,255,.08)}
+.logout-btn {
+  width:100%;padding:8px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+  border-radius:6px;color:#94a3b8;font-size:12px;cursor:pointer;font-family:inherit;transition:all .15s;
+}
+.logout-btn:hover {background:rgba(255,255,255,.1);color:#fff}
+
+/* MAIN */
+.main {margin-left:var(--sidebar-w);flex:1;padding:28px 28px 60px;min-width:0}
+.page {display:none}
+.page.active {display:block}
+
+/* PAGE HEADER */
+.page-header {display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+.page-title {font-size:20px;font-weight:700;letter-spacing:-.02em}
+.page-sub {font-size:12px;color:var(--muted);margin-top:3px}
+
+/* KPI GRID */
+.kpi-grid {display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+@media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+.kpi {background:var(--white);border:1px solid var(--border);border-radius:8px;padding:16px 18px}
+.kpi.highlight {border-color:var(--primary);background:var(--primary-soft)}
+.kpi-label {font-size:11px;color:var(--muted);font-weight:600;letter-spacing:.03em;text-transform:uppercase;margin-bottom:8px}
+.kpi-value {font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1}
+.kpi-sub {font-size:11px;color:var(--muted);margin-top:5px}
+.kpi-sub.good {color:var(--success)}
+.kpi-sub.bad {color:var(--danger)}
+
+/* CARDS */
+.grid-2 {display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
+@media(max-width:900px){.grid-2{grid-template-columns:1fr}}
+.card {background:var(--white);border:1px solid var(--border);border-radius:8px;padding:18px 20px}
+.card-title {font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card-title .ct-sub {font-size:11px;color:var(--muted);font-weight:400;margin-left:auto}
+
+/* TABLE */
+.table-wrap {overflow-x:auto}
+table.t {width:100%;border-collapse:collapse;font-size:12px}
+table.t th {font-size:10px;font-weight:700;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);background:var(--bg);white-space:nowrap;letter-spacing:.04em;text-transform:uppercase}
+table.t th:not(:first-child) {text-align:right}
+table.t td {padding:9px 10px;border-bottom:1px solid var(--border);color:var(--text2);font-size:12px}
+table.t td:not(:first-child) {text-align:right}
+table.t tr:last-child td {border-bottom:none}
+table.t tr:hover td {background:#fafafa}
+.t-good {color:var(--success);font-weight:700}
+.t-bad {color:var(--danger);font-weight:700}
+.t-muted {color:var(--muted)}
+.mono {font-family:monospace;font-weight:600}
+
+/* BADGES */
+.badge {font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-block}
+.badge-airbnb {background:var(--airbnb-soft);color:var(--airbnb)}
+.badge-booking {background:var(--booking-soft);color:var(--booking)}
+.badge-success {background:var(--success-soft);color:var(--success)}
+.badge-warning {background:var(--warning-soft);color:var(--warning)}
+.badge-danger {background:var(--danger-soft);color:var(--danger)}
+.badge-neutral {background:var(--bg);color:var(--muted);border:1px solid var(--border)}
+
+/* ROOM PILLS */
+.room-grid {display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:14px}
+@media(max-width:900px){.room-grid{grid-template-columns:repeat(3,1fr)}}
+.room-pill {background:var(--white);border:1px solid var(--border);border-radius:8px;padding:14px 12px;text-align:center;border-top:3px solid var(--border)}
+.room-pill.r101 {border-top-color:var(--airbnb)}
+.room-pill.r102 {border-top-color:#0ea5e9}
+.room-pill.r201 {border-top-color:#f59e0b}
+.room-pill.r202 {border-top-color:var(--success)}
+.room-pill.r301 {border-top-color:#8b5cf6}
+.room-num {font-size:14px;font-weight:800;margin-bottom:4px}
+.room-pill.r101 .room-num {color:var(--airbnb)}
+.room-pill.r102 .room-num {color:#0ea5e9}
+.room-pill.r201 .room-num {color:#f59e0b}
+.room-pill.r202 .room-num {color:var(--success)}
+.room-pill.r301 .room-num {color:#8b5cf6}
+.room-stat {font-size:18px;font-weight:700;color:var(--text)}
+.room-label {font-size:10px;color:var(--muted);margin-top:2px}
+
+/* FORM */
+.form-row {display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+@media(max-width:700px){.form-row{grid-template-columns:1fr}}
+.f-group {display:flex;flex-direction:column;gap:5px}
+.f-label {font-size:11px;font-weight:600;color:var(--text2);letter-spacing:.02em}
+.f-input,.f-select {
+  padding:9px 12px;border:1px solid var(--border);border-radius:6px;
+  font-size:13px;font-family:inherit;color:var(--text);background:#fff;outline:none;transition:border .15s;
+}
+.f-input:focus,.f-select:focus {border-color:var(--primary)}
+.btn {padding:9px 18px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s}
+.btn-primary {background:var(--primary);color:#fff}
+.btn-primary:hover {background:#1d4ed8}
+.btn-sm {padding:6px 12px;font-size:11px}
+.btn-danger {background:var(--danger-soft);color:var(--danger);border:1px solid #fecaca}
+.btn-danger:hover {background:var(--danger);color:#fff}
+.btn-ghost {background:var(--bg);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover {background:var(--border)}
+
+/* UPLOAD ZONE */
+.upload-zone {
+  border:2px dashed var(--border);border-radius:8px;padding:32px;text-align:center;cursor:pointer;
+  transition:all .15s;position:relative;margin-bottom:16px;
+}
+.upload-zone:hover,.upload-zone.drag {border-color:var(--primary);background:var(--primary-soft)}
+.upload-zone input {position:absolute;inset:0;opacity:0;cursor:pointer}
+.upload-icon {font-size:32px;margin-bottom:8px}
+.upload-text {font-size:13px;color:var(--muted)}
+.upload-text strong {display:block;color:var(--text);margin-bottom:2px}
+
+/* STAT BAR */
+.stat-bar {display:flex;gap:16px;padding:12px 0;border-bottom:1px solid var(--border);margin-bottom:16px;flex-wrap:wrap}
+.sb-item {text-align:center}
+.sb-val {font-size:18px;font-weight:700;color:var(--text)}
+.sb-label {font-size:10px;color:var(--muted);margin-top:1px}
+
+/* TOAST */
+.toast {
+  position:fixed;bottom:24px;right:24px;background:#111827;color:#fff;padding:12px 18px;
+  border-radius:8px;font-size:13px;font-weight:500;display:none;z-index:1000;
+  box-shadow:0 8px 24px rgba(0,0,0,.25);animation:slideIn .2s ease;
+}
+@keyframes slideIn {from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
+
+/* MODAL */
+.modal-overlay {position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:200;padding:20px}
+.modal-overlay.open {display:flex}
+.modal {background:#fff;border-radius:12px;padding:24px;width:100%;max-width:500px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal-title {font-size:16px;font-weight:700;margin-bottom:18px}
+.modal-footer {display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ LOGIN ══════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">StayBUT</div>
+    <div class="login-title">어드민 로그인</div>
+    <div class="login-sub">스테이벗 성수 운영 관리 시스템</div>
+    <div class="form-group">
+      <label class="form-label">아이디</label>
+      <input class="form-input" id="login-id" placeholder="아이디 입력" autocomplete="username"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">비밀번호</label>
+      <input class="form-input" id="login-pw" type="password" placeholder="비밀번호 입력" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <div class="login-err" id="login-err">아이디 또는 비밀번호가 올바르지 않습니다.</div>
+    <button class="login-btn" onclick="doLogin()">로그인</button>
+    <div class="login-accounts">
+      <div class="login-accounts-title">빠른 로그인</div>
+      <span class="account-chip" onclick="fillLogin('juno','staybut2026')">👤 준노 <span class="chip-role">팀장</span></span>
+      <span class="account-chip" onclick="fillLogin('staff','stay1234')">👤 스태프 <span class="chip-role">운영</span></span>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ APP ══════════════ -->
+<div id="app">
+  <div class="layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-name">스테이벗 성수</div>
+        <div class="brand-tag">Admin Dashboard</div>
+      </div>
+      <div class="sidebar-user">
+        <div class="user-avatar" id="user-avatar">J</div>
+        <div>
+          <div class="user-name" id="user-name-display">준노</div>
+          <div class="user-role" id="user-role-display">팀장</div>
+        </div>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="nav-section">메인</div>
+        <div class="nav-item active" onclick="goPage('dashboard',this)"><span class="nav-icon">📊</span> 대시보드</div>
+        <div class="nav-item" onclick="goPage('reservations',this)"><span class="nav-icon">📅</span> 예약 현황 <span class="nav-badge" id="badge-res">0</span></div>
+        <div class="nav-section">정산</div>
+        <div class="nav-item" onclick="goPage('revenue',this)"><span class="nav-icon">💰</span> 매출 정산</div>
+        <div class="nav-item" onclick="goPage('upload',this)"><span class="nav-icon">📤</span> CSV 업로드</div>
+        <div class="nav-section">운영</div>
+        <div class="nav-item" onclick="goPage('rooms',this)"><span class="nav-icon">🏠</span> 객실 현황</div>
+        <div class="nav-item" onclick="goPage('reviews',this)"><span class="nav-icon">⭐</span> 리뷰 관리</div>
+        <div class="nav-section">관리</div>
+        <div class="nav-item" onclick="goPage('settings',this)"><span class="nav-icon">⚙️</span> 설정</div>
+      </nav>
+      <div class="sidebar-bottom">
+        <button class="logout-btn" onclick="doLogout()">로그아웃</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-header">
+          <div><div class="page-title">대시보드</div><div class="page-sub" id="today-date"></div></div>
+          <button class="btn btn-primary btn-sm" onclick="goPage('reservations',null);openAddModal()">+ 예약 추가</button>
+        </div>
+        <div class="kpi-grid" id="kpi-grid"></div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">이번 달 예약 현황 <span class="ct-sub" id="month-label"></span></div>
+            <div id="dash-reservations"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">플랫폼별 매출</div>
+            <div id="dash-platform"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">객실별 현황</div>
+          <div class="room-grid" id="dash-rooms"></div>
+        </div>
+      </div>
+
+      <!-- ── RESERVATIONS ── -->
+      <div class="page" id="page-reservations">
+        <div class="page-header">
+          <div><div class="page-title">예약 현황</div></div>
+          <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ 예약 추가</button>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table class="t">
+              <thead><tr><th>예약명</th><th style="text-align:left">객실</th><th style="text-align:left">플랫폼</th><th>체크인</th><th>박수</th><th>매출</th><th>정산금액</th><th>상태</th><th></th></tr></thead>
+              <tbody id="res-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── REVENUE ── -->
+      <div class="page" id="page-revenue">
+        <div class="page-header">
+          <div><div class="page-title">매출 정산</div></div>
+        </div>
+        <div class="kpi-grid" id="rev-kpi"></div>
+        <div class="card">
+          <div class="card-title">정산 내역</div>
+          <div class="table-wrap">
+            <table class="t">
+              <thead><tr><th>예약명</th><th style="text-align:left">플랫폼</th><th style="text-align:left">객실</th><th>날짜</th><th>매출</th><th>수수료</th><th>정산</th><th>상태</th></tr></thead>
+              <tbody id="rev-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── CSV UPLOAD ── -->
+      <div class="page" id="page-upload">
+        <div class="page-header">
+          <div><div class="page-title">CSV 업로드</div><div class="page-sub">Airbnb · Booking.com 정산 파일 자동 파싱</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title" style="color:var(--airbnb)">✈️ Airbnb CSV</div>
+            <div class="upload-zone" id="drop-ab" ondragover="dz(event,'ab')" ondragleave="dzl('ab')" ondrop="dzd(event,'ab')">
+              <input type="file" accept=".csv" onchange="handleCSV(event,'airbnb')"/>
+              <div class="upload-icon">📂</div>
+              <div class="upload-text"><strong>클릭 또는 드래그</strong>Airbnb 거래내역 CSV</div>
+            </div>
+            <div id="ab-result" style="font-size:12px;color:var(--success);display:none"></div>
+          </div>
+          <div class="card">
+            <div class="card-title" style="color:var(--booking)">🏨 Booking.com CSV</div>
+            <div class="upload-zone" id="drop-bk" ondragover="dz(event,'bk')" ondragleave="dzl('bk')" ondrop="dzd(event,'bk')">
+              <input type="file" accept=".csv" onchange="handleCSV(event,'booking')"/>
+              <div class="upload-icon">📂</div>
+              <div class="upload-text"><strong>클릭 또는 드래그</strong>Booking.com 정산내역 CSV</div>
+            </div>
+            <div id="bk-result" style="font-size:12px;color:var(--success);display:none"></div>
+          </div>
+        </div>
+        <div id="upload-preview" style="display:none">
+          <div class="card">
+            <div class="card-title">파싱 결과 미리보기 <span class="ct-sub" id="preview-cnt"></span></div>
+            <div class="table-wrap">
+              <table class="t">
+                <thead><tr><th style="text-align:left">플랫폼</th><th>예약코드</th><th>날짜</th><th style="text-align:left">객실</th><th>박수</th><th>매출</th><th>수수료</th><th>정산</th></tr></thead>
+                <tbody id="upload-tbody"></tbody>
+              </table>
+            </div>
+            <div style="margin-top:16px;display:flex;gap:8px">
+              <button class="btn btn-primary" onclick="importAll()">전체 가져오기</button>
+              <button class="btn btn-ghost" onclick="clearUpload()">취소</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ROOMS ── -->
+      <div class="page" id="page-rooms">
+        <div class="page-header">
+          <div><div class="page-title">객실 현황</div></div>
+        </div>
+        <div class="room-grid" id="rooms-detail"></div>
+        <div class="card">
+          <div class="card-title">객실별 예약 내역</div>
+          <div class="table-wrap">
+            <table class="t">
+              <thead><tr><th style="text-align:left">객실</th><th>총 예약</th><th>Airbnb</th><th>Booking</th><th>총 매출</th><th>평균 단가</th></tr></thead>
+              <tbody id="rooms-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── REVIEWS ── -->
+      <div class="page" id="page-reviews">
+        <div class="page-header">
+          <div><div class="page-title">리뷰 관리</div></div>
+        </div>
+        <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="kpi highlight"><div class="kpi-label">Airbnb 평균 별점</div><div class="kpi-value">4.9<span style="font-size:14px;color:var(--muted)">/5</span></div><div class="kpi-sub good">5점 만점 96%</div></div>
+          <div class="kpi"><div class="kpi-label">Booking 평균 평점</div><div class="kpi-value">9.2<span style="font-size:14px;color:var(--muted)">/10</span></div><div class="kpi-sub good">만점 30%</div></div>
+          <div class="kpi"><div class="kpi-label">총 리뷰</div><div class="kpi-value">114<span style="font-size:14px;color:var(--muted)">건</span></div><div class="kpi-sub">Airbnb 104 + Booking 10</div></div>
+        </div>
+        <div class="card">
+          <div class="card-title">주요 키워드</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+            <span style="background:var(--success-soft);color:var(--success);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600">✅ 청결 107건</span>
+            <span style="background:var(--success-soft);color:var(--success);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600">✅ 호스트 친절 96건</span>
+            <span style="background:var(--success-soft);color:var(--success);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600">✅ 사진 일치 78건</span>
+            <span style="background:var(--success-soft);color:var(--success);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600">✅ 아늑함 76건</span>
+            <span style="background:var(--danger-soft);color:var(--danger);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600">⚠️ 좁은 공간 16건</span>
+            <span style="background:var(--danger-soft);color:var(--danger);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600">⚠️ 번화가 거리 14건</span>
+            <span style="background:var(--warning-soft);color:var(--warning);padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600">⚠️ 방음 7건</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SETTINGS ── -->
+      <div class="page" id="page-settings">
+        <div class="page-header"><div><div class="page-title">설정</div></div></div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="card-title">계정 관리</div>
+          <div id="account-list"></div>
+          <button class="btn btn-primary btn-sm" style="margin-top:14px" onclick="openAccountModal()">+ 계정 추가</button>
+        </div>
+        <div class="card">
+          <div class="card-title">데이터 관리</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-ghost btn-sm" onclick="exportData()">📤 데이터 내보내기</button>
+            <button class="btn btn-danger btn-sm" onclick="clearData()">🗑️ 전체 데이터 초기화</button>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:10px">데이터는 이 브라우저에 저장됩니다. 다른 기기에서 사용하려면 내보내기 후 가져오기 하세요.</div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ── ADD RESERVATION MODAL ── -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <div class="modal-title">예약 추가</div>
+    <div class="form-row">
+      <div class="f-group"><label class="f-label">예약명 / 확인코드</label><input class="f-input" id="f-name" placeholder="예: HMAB123X"/></div>
+      <div class="f-group"><label class="f-label">플랫폼</label>
+        <select class="f-select" id="f-platform">
+          <option>Airbnb</option><option>Booking.com</option><option>직접예약</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="f-group"><label class="f-label">객실</label>
+        <select class="f-select" id="f-room">
+          <option>101호</option><option>102호</option><option>201호</option><option>202호</option><option>301호</option>
+        </select>
+      </div>
+      <div class="f-group"><label class="f-label">체크인 날짜</label><input class="f-input" id="f-date" type="date"/></div>
+    </div>
+    <div class="form-row">
+      <div class="f-group"><label class="f-label">숙박 박수</label><input class="f-input" id="f-nights" type="number" min="1" value="1"/></div>
+      <div class="f-group"><label class="f-label">매출금액 (원)</label><input class="f-input" id="f-gross" type="number" placeholder="100000"/></div>
+    </div>
+    <div class="form-row">
+      <div class="f-group"><label class="f-label">수수료 (원)</label><input class="f-input" id="f-fee" type="number" placeholder="3000"/></div>
+      <div class="f-group"><label class="f-label">정산상태</label>
+        <select class="f-select" id="f-status">
+          <option>정산대기</option><option>정산완료</option><option>취소</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('add-modal')">취소</button>
+      <button class="btn btn-primary" onclick="addReservation()">추가</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ACCOUNT MODAL ── -->
+<div class="modal-overlay" id="account-modal">
+  <div class="modal">
+    <div class="modal-title">계정 추가</div>
+    <div class="form-row">
+      <div class="f-group"><label class="f-label">이름</label><input class="f-input" id="a-name" placeholder="이름"/></div>
+      <div class="f-group"><label class="f-label">아이디</label><input class="f-input" id="a-id" placeholder="아이디"/></div>
+    </div>
+    <div class="form-row">
+      <div class="f-group"><label class="f-label">비밀번호</label><input class="f-input" id="a-pw" type="password" placeholder="비밀번호"/></div>
+      <div class="f-group"><label class="f-label">역할</label>
+        <select class="f-select" id="a-role"><option>팀장</option><option>운영</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('account-modal')">취소</button>
+      <button class="btn btn-primary" onclick="addAccount()">추가</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── SUPABASE CONFIG ──────────────────────────────
+const SB_URL = 'https://ijvfwajtotbqfxpdlcal.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqdmZ3YWp0b3RicWZ4cGRsY2FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODE1NDYsImV4cCI6MjA5NDA1NzU0Nn0.39TLrxZyfYthQggvef_RIQQ0YtR2DCu79KmEfEZwGZM';
+
+async function sbFetch(path, method='GET', body=null) {
+  const opts = {
+    method,
+    headers: {
+      'apikey': SB_KEY,
+      'Authorization': 'Bearer ' + SB_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': method==='POST' ? 'return=representation' : '',
+    }
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(SB_URL + '/rest/v1/' + path, opts);
+  if (!res.ok) throw new Error(await res.text());
+  return res.status === 204 ? null : res.json();
+}
+
+// ── DATA ──────────────────────────────────────
+let reservations = [];
+let accounts = [];
+let currentUser = null;
+
+async function loadData() {
+  try {
+    [reservations, accounts] = await Promise.all([
+      sbFetch('reservations?order=created_at.desc'),
+      sbFetch('accounts?order=created_at.asc'),
+    ]);
+  } catch(e) {
+    console.error('데이터 로드 실패', e);
+    reservations = [];
+    accounts = [];
+  }
+}
+
+function save() {} // Supabase에 직접 저장하므로 불필요
+
+// ── AUTH ──────────────────────────────────────
+function fillLogin(id, pw) {
+  document.getElementById('login-id').value = id;
+  document.getElementById('login-pw').value = pw;
+}
+async function doLogin() {
+  const id = document.getElementById('login-id').value.trim();
+  const pw = document.getElementById('login-pw').value;
+  const loginBtn = document.querySelector('.login-btn');
+  loginBtn.textContent = '로그인 중...';
+  loginBtn.disabled = true;
+  try {
+    await loadData();
+    const user = accounts.find(a => a.username === id && a.password === pw);
+    if (!user) {
+      document.getElementById('login-err').style.display = 'block';
+      loginBtn.textContent = '로그인';
+      loginBtn.disabled = false;
+      return;
+    }
+    currentUser = user;
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('user-avatar').textContent = user.name[0];
+    document.getElementById('user-name-display').textContent = user.name;
+    document.getElementById('user-role-display').textContent = user.role;
+    renderAll();
+  } catch(e) {
+    alert('연결 오류: ' + e.message);
+  }
+  loginBtn.textContent = '로그인';
+  loginBtn.disabled = false;
+}
+function doLogout() {
+  currentUser = null;
+  reservations = [];
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-id').value = '';
+  document.getElementById('login-pw').value = '';
+  document.getElementById('login-err').style.display = 'none';
+}
+
+// ── NAVIGATION ────────────────────────────────
+function goPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  if (el) el.classList.add('active');
+  renderPage(id);
+}
+
+function renderAll() {
+  renderDashboard();
+  document.getElementById('badge-res').textContent = reservations.filter(r=>r.status!=='취소').length;
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric',weekday:'long'});
+  document.getElementById('month-label').textContent = new Date().toLocaleDateString('ko-KR',{year:'numeric',month:'long'});
+}
+function renderPage(id) {
+  if (id==='dashboard') renderDashboard();
+  else if (id==='reservations') renderReservations();
+  else if (id==='revenue') renderRevenue();
+  else if (id==='rooms') renderRooms();
+  else if (id==='settings') renderSettings();
+}
+
+// ── FORMAT ────────────────────────────────────
+const fmt = n => n==null?'-':'₩'+Math.round(n).toLocaleString('ko-KR');
+
+// ── DASHBOARD ─────────────────────────────────
+function renderDashboard() {
+  const active = reservations.filter(r=>r.status!=='취소');
+  const thisMonth = new Date().toISOString().slice(0,7);
+  const monthly = active.filter(r=>(r.date||'').startsWith(thisMonth));
+  const totalGross = active.reduce((s,r)=>s+(+r.gross||0),0);
+  const totalNet = active.reduce((s,r)=>s+(+r.net||0),0);
+  const monthNet = monthly.reduce((s,r)=>s+(+r.net||0),0);
+
+  document.getElementById('kpi-grid').innerHTML = `
+    <div class="kpi highlight"><div class="kpi-label">이번달 정산</div><div class="kpi-value">${fmt(monthNet)}</div><div class="kpi-sub good">${monthly.length}건</div></div>
+    <div class="kpi"><div class="kpi-label">총 예약</div><div class="kpi-value">${active.length}<span style="font-size:14px;color:var(--muted)">건</span></div><div class="kpi-sub">취소 제외</div></div>
+    <div class="kpi"><div class="kpi-label">누적 매출</div><div class="kpi-value" style="font-size:18px">${fmt(totalGross)}</div></div>
+    <div class="kpi"><div class="kpi-label">누적 정산</div><div class="kpi-value" style="font-size:18px">${fmt(totalNet)}</div></div>
+  `;
+
+  const recent = [...active].sort((a,b)=>(b.date||'').localeCompare(a.date||'')).slice(0,5);
+  document.getElementById('dash-reservations').innerHTML = recent.length ? `
+    <table class="t">
+      <thead><tr><th style="text-align:left">예약명</th><th style="text-align:left">객실</th><th>날짜</th><th>정산</th></tr></thead>
+      <tbody>${recent.map(r=>`
+        <tr>
+          <td><span class="badge ${r.platform==='Airbnb'?'badge-airbnb':'badge-booking'}" style="margin-right:6px">${r.platform==='Airbnb'?'AB':'BK'}</span>${r.name}</td>
+          <td>${r.room||'-'}</td>
+          <td style="text-align:right">${r.date||'-'}</td>
+          <td style="text-align:right" class="mono t-good">${fmt(+r.net)}</td>
+        </tr>`).join('')}</tbody>
+    </table>` : '<div style="text-align:center;color:var(--muted);padding:24px;font-size:13px">예약 데이터가 없어요<br><small>+ 예약 추가 버튼으로 시작하세요</small></div>';
+
+  const ab = active.filter(r=>r.platform==='Airbnb');
+  const bk = active.filter(r=>r.platform==='Booking.com');
+  const abNet = ab.reduce((s,r)=>s+(+r.net||0),0);
+  const bkNet = bk.reduce((s,r)=>s+(+r.net||0),0);
+  document.getElementById('dash-platform').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <span class="badge badge-airbnb">Airbnb</span>
+          <span style="font-size:13px;font-weight:700">${fmt(abNet)}</span>
+        </div>
+        <div style="height:8px;background:var(--bg);border-radius:99px;overflow:hidden">
+          <div style="height:100%;width:${totalNet?Math.round(abNet/totalNet*100):0}%;background:var(--airbnb);border-radius:99px"></div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">${ab.length}건</div>
+      </div>
+      <div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+          <span class="badge badge-booking">Booking.com</span>
+          <span style="font-size:13px;font-weight:700">${fmt(bkNet)}</span>
+        </div>
+        <div style="height:8px;background:var(--bg);border-radius:99px;overflow:hidden">
+          <div style="height:100%;width:${totalNet?Math.round(bkNet/totalNet*100):0}%;background:var(--booking);border-radius:99px"></div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">${bk.length}건</div>
+      </div>
+    </div>`;
+
+  const rooms = ['101호','102호','201호','202호','301호'];
+  const rClass = ['r101','r102','r201','r202','r301'];
+  document.getElementById('dash-rooms').innerHTML = rooms.map((r,i)=>{
+    const rRes = active.filter(x=>x.room===r);
+    return `<div class="room-pill ${rClass[i]}">
+      <div class="room-num">${r}</div>
+      <div class="room-stat">${rRes.length}</div>
+      <div class="room-label">예약</div>
+    </div>`;
+  }).join('');
+}
+
+// ── RESERVATIONS ──────────────────────────────
+function renderReservations() {
+  const tbody = document.getElementById('res-tbody');
+  const sorted = [...reservations].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  tbody.innerHTML = sorted.length ? sorted.map((r)=>`
+    <tr>
+      <td style="font-weight:600">${r.name}</td>
+      <td>${r.room||'-'}</td>
+      <td><span class="badge ${r.platform==='Airbnb'?'badge-airbnb':r.platform==='Booking.com'?'badge-booking':'badge-neutral'}">${r.platform}</span></td>
+      <td>${r.date||'-'}</td>
+      <td>${r.nights||1}박</td>
+      <td class="mono">${fmt(+r.gross)}</td>
+      <td class="mono t-good">${fmt(+r.net)}</td>
+      <td><span class="badge ${r.status==='정산완료'?'badge-success':r.status==='취소'?'badge-danger':'badge-warning'}">${r.status||'정산대기'}</span></td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteRes('${r.id}')">삭제</button></td>
+    </tr>`).join('') : '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">예약 데이터가 없어요</td></tr>';
+}
+
+// ── REVENUE ───────────────────────────────────
+function renderRevenue() {
+  const active = reservations.filter(r=>r.status!=='취소');
+  const totalGross = active.reduce((s,r)=>s+(+r.gross||0),0);
+  const totalFee = active.reduce((s,r)=>s+(+r.fee||0),0);
+  const totalNet = active.reduce((s,r)=>s+(+r.net||0),0);
+  const pending = reservations.filter(r=>r.status==='정산대기').reduce((s,r)=>s+(+r.net||0),0);
+
+  document.getElementById('rev-kpi').innerHTML = `
+    <div class="kpi"><div class="kpi-label">총 매출</div><div class="kpi-value" style="font-size:18px">${fmt(totalGross)}</div></div>
+    <div class="kpi"><div class="kpi-label">총 수수료</div><div class="kpi-value" style="font-size:18px;color:var(--danger)">${fmt(totalFee)}</div></div>
+    <div class="kpi highlight"><div class="kpi-label">총 정산금액</div><div class="kpi-value" style="font-size:18px">${fmt(totalNet)}</div></div>
+    <div class="kpi"><div class="kpi-label">정산 대기</div><div class="kpi-value" style="font-size:18px;color:var(--warning)">${fmt(pending)}</div></div>
+  `;
+  const sorted = [...reservations].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  document.getElementById('rev-tbody').innerHTML = sorted.length ? sorted.map(r=>`
+    <tr>
+      <td style="font-weight:600">${r.name}</td>
+      <td><span class="badge ${r.platform==='Airbnb'?'badge-airbnb':'badge-booking'}">${r.platform}</span></td>
+      <td>${r.room||'-'}</td>
+      <td>${r.date||'-'}</td>
+      <td class="mono">${fmt(+r.gross)}</td>
+      <td class="mono t-bad">-${fmt(+r.fee||0)}</td>
+      <td class="mono t-good">${fmt(+r.net)}</td>
+      <td><span class="badge ${r.status==='정산완료'?'badge-success':r.status==='취소'?'badge-danger':'badge-warning'}">${r.status||'정산대기'}</span></td>
+    </tr>`).join('') : '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">데이터가 없어요</td></tr>';
+}
+
+// ── ROOMS ─────────────────────────────────────
+function renderRooms() {
+  const rooms = ['101호','102호','201호','202호','301호'];
+  const rClass = ['r101','r102','r201','r202','r301'];
+  const active = reservations.filter(r=>r.status!=='취소');
+  document.getElementById('rooms-detail').innerHTML = rooms.map((r,i)=>{
+    const rRes = active.filter(x=>x.room===r);
+    const net = rRes.reduce((s,x)=>s+(+x.net||0),0);
+    return `<div class="room-pill ${rClass[i]}">
+      <div class="room-num">${r}</div>
+      <div class="room-stat">${rRes.length}</div>
+      <div class="room-label">예약</div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">${fmt(net)}</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('rooms-tbody').innerHTML = rooms.map(r=>{
+    const rRes = active.filter(x=>x.room===r);
+    const ab = rRes.filter(x=>x.platform==='Airbnb').length;
+    const bk = rRes.filter(x=>x.platform==='Booking.com').length;
+    const total = rRes.reduce((s,x)=>s+(+x.gross||0),0);
+    const avg = rRes.length ? Math.round(total/rRes.length) : 0;
+    return `<tr>
+      <td style="font-weight:700">${r}</td>
+      <td>${rRes.length}</td>
+      <td style="color:var(--airbnb)">${ab}</td>
+      <td style="color:var(--booking)">${bk}</td>
+      <td class="mono t-good">${fmt(total)}</td>
+      <td class="mono">${fmt(avg)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── SETTINGS ──────────────────────────────────
+function renderSettings() {
+  document.getElementById('account-list').innerHTML = accounts.map((a,i)=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="width:32px;height:32px;border-radius:8px;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0">${a.name[0]}</div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:600">${a.name}</div><div style="font-size:11px;color:var(--muted)">${a.username} · ${a.role}</div></div>
+      ${accounts.length>1?`<button class="btn btn-danger btn-sm" onclick="deleteAccount('${a.id}')">삭제</button>`:''}</div>`).join('');
+}
+
+// ── ADD RESERVATION ───────────────────────────
+function openAddModal() {
+  document.getElementById('add-modal').classList.add('open');
+  document.getElementById('f-date').value = new Date().toISOString().slice(0,10);
+}
+async function addReservation() {
+  const gross = parseFloat(document.getElementById('f-gross').value)||0;
+  const fee = parseFloat(document.getElementById('f-fee').value)||0;
+  const r = {
+    name: document.getElementById('f-name').value||'예약',
+    platform: document.getElementById('f-platform').value,
+    room: document.getElementById('f-room').value,
+    date: document.getElementById('f-date').value,
+    nights: parseInt(document.getElementById('f-nights').value)||1,
+    gross, fee, net: gross-fee,
+    status: document.getElementById('f-status').value,
+  };
+  try {
+    const added = await sbFetch('reservations', 'POST', r);
+    reservations.unshift(added[0]);
+    closeModal('add-modal');
+    renderAll(); renderPage('reservations');
+    toast('예약이 추가되었습니다 ✅');
+  } catch(e) { alert('오류: '+e.message); }
+}
+async function deleteRes(id) {
+  if(!confirm('삭제하시겠습니까?')) return;
+  try {
+    await sbFetch('reservations?id=eq.'+id, 'DELETE');
+    reservations = reservations.filter(r=>r.id!==id);
+    renderReservations(); renderAll();
+    toast('삭제되었습니다');
+  } catch(e) { alert('오류: '+e.message); }
+}
+
+// ── ACCOUNTS ──────────────────────────────────
+function openAccountModal() { document.getElementById('account-modal').classList.add('open'); }
+async function addAccount() {
+  const a = {
+    name: document.getElementById('a-name').value,
+    username: document.getElementById('a-id').value,
+    password: document.getElementById('a-pw').value,
+    role: document.getElementById('a-role').value,
+  };
+  if(!a.name||!a.username||!a.password){alert('모두 입력해주세요');return;}
+  try {
+    const added = await sbFetch('accounts', 'POST', a);
+    accounts.push(added[0]);
+    closeModal('account-modal'); renderSettings();
+    toast('계정이 추가되었습니다 ✅');
+  } catch(e) { alert('오류: '+e.message); }
+}
+async function deleteAccount(id) {
+  if(accounts.find(a=>a.id===id)?.username===currentUser.username){alert('현재 로그인 중인 계정은 삭제할 수 없어요');return;}
+  if(!confirm('삭제하시겠습니까?')) return;
+  try {
+    await sbFetch('accounts?id=eq.'+id, 'DELETE');
+    accounts = accounts.filter(a=>a.id!==id);
+    renderSettings(); toast('계정이 삭제되었습니다');
+  } catch(e) { alert('오류: '+e.message); }
+}
+
+// ── CSV UPLOAD ────────────────────────────────
+let uploadBuf = [];
+function dz(e,id){e.preventDefault();document.getElementById('drop-'+id).classList.add('drag')}
+function dzl(id){document.getElementById('drop-'+id).classList.remove('drag')}
+function dzd(e,id){e.preventDefault();dzl(id);const f=e.dataTransfer.files[0];if(f)processUpload(f,id==='ab'?'airbnb':'booking')}
+function handleCSV(e,p){const f=e.target.files[0];if(f)processUpload(f,p)}
+function processUpload(file, platform) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    const rows = parseCSV(e.target.result);
+    if(rows.length < 2){alert('데이터가 없습니다');return;}
+    const parsed = platform==='airbnb' ? parseAB(rows) : parseBK(rows);
+    uploadBuf = [...uploadBuf, ...parsed];
+    const rid = platform==='airbnb'?'ab-result':'bk-result';
+    document.getElementById(rid).style.display='block';
+    document.getElementById(rid).textContent='✅ '+file.name+' — '+parsed.length+'건 파싱 완료';
+    renderUploadPreview();
+  };
+  reader.readAsText(file,'UTF-8');
+}
+function parseCSV(text) {
+  if(text.charCodeAt(0)===0xFEFF) text=text.slice(1);
+  return text.split(/\r?\n/).filter(l=>l.trim()).map(line=>{
+    const r=[];let cur='',inQ=false;
+    for(const c of line){if(c==='"'){inQ=!inQ}else if(c===','&&!inQ){r.push(cur.trim());cur=''}else{cur+=c}}
+    r.push(cur.trim());return r;
+  });
+}
+function parseAB(rows){
+  const h=rows[0].map(x=>x.toLowerCase().replace(/\s/g,''));
+  const fi=keys=>keys.map(k=>h.findIndex(x=>x.includes(k))).find(i=>i>=0)??-1;
+  return rows.slice(1).filter(r=>r[0]).map((r,i)=>{
+    const gross=pn(r[fi(['gross','amount','금액'])])||0;
+    const fee=Math.abs(pn(r[fi(['fee','수수료'])])||0);
+    const net=pn(r[fi(['paid','payout','정산'])])||(gross-fee);
+    return {name:r[fi(['code','확인','confirmation'])]||'AB-'+(i+1),platform:'Airbnb',room:dr(r.join(' ')),date:nd(r[fi(['date','날짜'])]||''),nights:parseInt(r[fi(['nights'])])||1,gross,fee,net,status:net>0?'정산완료':'정산대기'};
+  }).filter(r=>r.gross!==0||r.net!==0);
+}
+function parseBK(rows){
+  const h=rows[0].map(x=>x.toLowerCase().replace(/\s/g,''));
+  const fi=keys=>keys.map(k=>h.findIndex(x=>x.includes(k))).find(i=>i>=0)??-1;
+  return rows.slice(1).filter(r=>r[0]).map((r,i)=>{
+    const gross=pn(r[fi(['amount','total','금액','revenue'])])||0;
+    const fee=Math.abs(pn(r[fi(['commission','fee','수수료'])])||0);
+    const net=pn(r[fi(['net','payout','정산','paid'])])||(gross-fee);
+    return {name:r[fi(['reservation','booking','번호','id'])]||'BK-'+(i+1),platform:'Booking.com',room:dr((r[fi(['room','객실','unit'])]||'')+' '+r.join(' ')),date:nd(r[fi(['checkin','date','체크인','arrival'])]||''),nights:1,gross,fee,net,status:'정산대기'};
+  }).filter(r=>r.gross!==0||r.net!==0);
+}
+function pn(s){if(!s&&s!==0)return 0;return parseFloat(String(s).replace(/[^0-9.\-]/g,''))||0}
+function dr(t){const s=t.toLowerCase();if(s.includes('301'))return'301호';if(s.includes('202')||s.includes('발코니'))return'202호';if(s.includes('201')||s.includes('빔'))return'201호';if(s.includes('102')||s.includes('서울숲'))return'102호';return'101호'}
+function nd(d){if(!d)return'';const m1=d.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);if(m1)return`${m1[3]}-${m1[1].padStart(2,'0')}-${m1[2].padStart(2,'0')}`;const m2=d.match(/^(\d{4})-(\d{2})-(\d{2})/);if(m2)return d.slice(0,10);return''}
+
+function renderUploadPreview() {
+  if(!uploadBuf.length) return;
+  document.getElementById('upload-preview').style.display='block';
+  document.getElementById('preview-cnt').textContent='총 '+uploadBuf.length+'건';
+  document.getElementById('upload-tbody').innerHTML = uploadBuf.slice(0,15).map(r=>`
+    <tr>
+      <td><span class="badge ${r.platform==='Airbnb'?'badge-airbnb':'badge-booking'}">${r.platform==='Airbnb'?'Airbnb':'Booking'}</span></td>
+      <td style="text-align:right;font-family:monospace">${r.name}</td>
+      <td style="text-align:right">${r.date||'-'}</td>
+      <td>${r.room}</td>
+      <td>${r.nights}박</td>
+      <td class="mono">${fmt(r.gross)}</td>
+      <td class="mono t-bad">-${fmt(r.fee)}</td>
+      <td class="mono t-good">${fmt(r.net)}</td>
+    </tr>`).join('');
+  if(uploadBuf.length>15) document.getElementById('upload-tbody').innerHTML+=`<tr><td colspan="8" style="text-align:center;color:var(--muted);font-size:11px;padding:8px">... 외 ${uploadBuf.length-15}건</td></tr>`;
+}
+async function importAll() {
+  if(!uploadBuf.length) return;
+  try {
+    const added = await sbFetch('reservations', 'POST', uploadBuf);
+    reservations = [...(Array.isArray(added)?added:[]), ...reservations];
+    clearUpload(); renderAll();
+    toast('✅ '+uploadBuf.length+'건 가져오기 완료');
+    uploadBuf=[];
+  } catch(e) { alert('오류: '+e.message); }
+}
+function clearUpload() {
+  uploadBuf=[];
+  document.getElementById('upload-preview').style.display='none';
+  document.getElementById('ab-result').style.display='none';
+  document.getElementById('bk-result').style.display='none';
+}
+
+// ── SETTINGS ACTIONS ──────────────────────────
+function exportData() {
+  const data = JSON.stringify({reservations, accounts}, null, 2);
+  const a = document.createElement('a');
+  a.href = 'data:application/json;charset=utf-8,'+encodeURIComponent(data);
+  a.download = 'staybut_backup_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click(); toast('데이터를 내보냈습니다');
+}
+async function clearData() {
+  if(!confirm('모든 예약 데이터를 초기화하시겠습니까?')) return;
+  try {
+    await sbFetch('reservations?id=neq.00000000-0000-0000-0000-000000000000', 'DELETE');
+    reservations=[]; renderAll(); toast('초기화되었습니다');
+  } catch(e) { alert('오류: '+e.message); }
+}
+
+// ── MODAL / TOAST ─────────────────────────────
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open')}));
+function toast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.style.display='block';
+  setTimeout(()=>t.style.display='none',2500);
+}
+</script>
