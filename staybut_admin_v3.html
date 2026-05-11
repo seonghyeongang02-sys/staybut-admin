@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stay BUT 성수 · Admin</title>
+
+  <!-- Pretendard (Korean modern sans) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+
+  <!-- Fraunces (display serif for accents) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet" />
+
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root {
+      --bg: #faf7f2;
+      --surface: #ffffff;
+      --surface-soft: #f0ebe3;
+      --border: #e5e0d8;
+      --border-strong: #c9c2b6;
+      --text: #1a1815;
+      --text-soft: #6b6660;
+      --text-muted: #9a948b;
+      --accent: #2d5040;
+      --accent-hover: #1f3a2d;
+      --accent-soft: #e8efe9;
+      --danger: #b85c3f;
+      --warning: #c89a3f;
+
+      --radius: 6px;
+      --radius-lg: 10px;
+      --shadow-sm: 0 1px 2px rgba(26, 24, 21, 0.04);
+      --shadow: 0 4px 12px rgba(26, 24, 21, 0.06);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      height: 100%;
+      font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    body { min-height: 100vh; }
+
+    /* ========== Login ========== */
+    #login-view {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 48px 40px;
+      box-shadow: var(--shadow);
+    }
+
+    .login-brand {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      margin-bottom: 4px;
+    }
+
+    .login-sub {
+      font-size: 13px;
+      color: var(--text-soft);
+      margin-bottom: 36px;
+    }
+
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-soft);
+      margin-bottom: 6px;
+      letter-spacing: 0.02em;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text);
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .form-input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(45, 80, 64, 0.1);
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text);
+      cursor: pointer;
+    }
+
+    .form-textarea {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--surface);
+      font-family: inherit;
+      font-size: 14px;
+      color: var(--text);
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 11px 18px;
+      border-radius: var(--radius);
+      border: 1px solid transparent;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+    }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary:disabled { background: var(--text-muted); cursor: not-allowed; }
+
+    .btn-secondary {
+      background: var(--surface);
+      color: var(--text);
+      border-color: var(--border-strong);
+    }
+    .btn-secondary:hover { background: var(--surface-soft); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--text-soft);
+    }
+    .btn-ghost:hover { background: var(--surface-soft); color: var(--text); }
+
+    .btn-block { width: 100%; }
+
+    .alert {
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    .alert-error {
+      background: #fdf0ec;
+      color: var(--danger);
+      border: 1px solid #f4d5c8;
+    }
+    .alert-info {
+      background: var(--accent-soft);
+      color: var(--accent);
+      border: 1px solid #c9dbcf;
+    }
+
+    /* ========== App layout ========== */
+    #app-view { display: none; min-height: 100vh; }
+
+    .app-shell {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      padding: 24px 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar-brand {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+      padding: 0 8px 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .sidebar-brand small {
+      display: block;
+      font-family: 'Pretendard', sans-serif;
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-muted);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 9px 12px;
+      border-radius: var(--radius);
+      color: var(--text-soft);
+      font-size: 13.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.12s, color 0.12s;
+      margin-bottom: 2px;
+      user-select: none;
+    }
+
+    .nav-item:hover { background: var(--surface-soft); color: var(--text); }
+    .nav-item.active { background: var(--accent-soft); color: var(--accent); }
+
+    .nav-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 12px 12px 6px;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .user-info {
+      padding: 8px 12px;
+      font-size: 12px;
+      color: var(--text-soft);
+      margin-bottom: 6px;
+    }
+
+    /* ========== Main ========== */
+    main {
+      padding: 32px 40px;
+      overflow-x: auto;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .page-title {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 500;
+      letter-spacing: -0.02em;
+    }
+
+    .page-subtitle {
+      font-size: 13px;
+      color: var(--text-soft);
+      margin-top: 4px;
+    }
+
+    /* ========== Stat cards ========== */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--text-soft);
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-family: 'Fraunces', serif;
+      font-size: 26px;
+      font-weight: 500;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.01em;
+    }
+
+    .stat-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* ========== Tables ========== */
+    .data-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+    }
+
+    .data-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .data-card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-variant-numeric: tabular-nums;
+    }
+
+    thead th {
+      text-align: left;
+      padding: 10px 16px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      background: var(--surface-soft);
+      border-bottom: 1px solid var(--border);
+    }
+
+    tbody td {
+      padding: 12px 16px;
+      font-size: 13px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--surface-soft); }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+    }
+    .badge-success { background: var(--accent-soft); color: var(--accent); }
+    .badge-warning { background: #fbf3df; color: var(--warning); }
+    .badge-error { background: #fdf0ec; color: var(--danger); }
+    .badge-muted { background: var(--surface-soft); color: var(--text-soft); }
+
+    .empty-state {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .empty-state h3 {
+      font-family: 'Fraunces', serif;
+      font-weight: 500;
+      font-size: 18px;
+      color: var(--text-soft);
+      margin-bottom: 6px;
+    }
+
+    /* ========== Modal ========== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(26, 24, 21, 0.4);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 100;
+    }
+    .modal-backdrop.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 540px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 50px rgba(26, 24, 21, 0.15);
+    }
+
+    .modal-header {
+      padding: 20px 24px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-title {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      font-weight: 500;
+    }
+
+    .modal-body { padding: 24px; }
+    .modal-footer {
+      padding: 16px 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      background: var(--surface-soft);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    /* ========== Misc ========== */
+    .loading {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .text-right { text-align: right; }
+    .text-muted { color: var(--text-muted); }
+
+    @media (max-width: 768px) {
+      .app-shell { grid-template-columns: 1fr; }
+      .sidebar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        top: auto;
+        border-right: none;
+        border-top: 1px solid var(--border);
+        flex-direction: row;
+        padding: 8px;
+        z-index: 50;
+      }
+      .sidebar-brand, .nav-section-label, .sidebar-footer { display: none; }
+      main { padding: 20px; padding-bottom: 80px; }
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================== -->
+  <!-- 로그인 화면                                                      -->
+  <!-- ============================================================== -->
+  <div id="login-view">
+    <div class="login-card">
+      <div class="login-brand">Stay BUT</div>
+      <div class="login-sub">성수점 운영 관리 시스템</div>
+
+      <div id="login-alert"></div>
+
+      <form id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="login-email">이메일</label>
+          <input type="email" id="login-email" class="form-input" autocomplete="username" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="login-password">비밀번호</label>
+          <input type="password" id="login-password" class="form-input" autocomplete="current-password" required />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="login-btn" style="margin-top: 8px;">
+          로그인
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 메인 앱                                                          -->
+  <!-- ============================================================== -->
+  <div id="app-view">
+    <div class="app-shell">
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          Stay BUT
+          <small>성수 · Admin</small>
+        </div>
+
+        <div class="nav-section-label">메인</div>
+        <div class="nav-item active" data-view="dashboard">📊 대시보드</div>
+        <div class="nav-item" data-view="bookings">📅 예약 관리</div>
+        <div class="nav-item" data-view="rooms">🏠 객실 관리</div>
+
+        <div class="nav-section-label">곧 추가 예정</div>
+        <div class="nav-item" style="opacity: 0.5; cursor: not-allowed;">💰 정산 관리</div>
+        <div class="nav-item" style="opacity: 0.5; cursor: not-allowed;">⭐ 리뷰 관리</div>
+        <div class="nav-item" style="opacity: 0.5; cursor: not-allowed;">📤 CSV 업로드</div>
+
+        <div class="sidebar-footer">
+          <div class="user-info" id="user-info"></div>
+          <div class="nav-item" id="logout-btn">↩ 로그아웃</div>
+        </div>
+      </aside>
+
+      <!-- Main -->
+      <main>
+        <!-- 대시보드 -->
+        <section id="view-dashboard">
+          <div class="page-header">
+            <div>
+              <div class="page-title">대시보드</div>
+              <div class="page-subtitle" id="dashboard-period"></div>
+            </div>
+          </div>
+
+          <div class="stat-grid" id="stat-grid">
+            <!-- 동적 채워짐 -->
+          </div>
+
+          <div class="data-card" style="margin-bottom: 20px;">
+            <div class="data-card-header">
+              <div class="data-card-title">객실별 현황 (이번 달)</div>
+            </div>
+            <table>
+              <thead>
+                <tr>
+                  <th>객실</th>
+                  <th>최대 인원</th>
+                  <th class="text-right">이번 달 예약</th>
+                  <th class="text-right">이번 달 매출</th>
+                </tr>
+              </thead>
+              <tbody id="dashboard-rooms-tbody">
+                <tr><td colspan="4" class="empty-state">로딩중…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 예약 관리 -->
+        <section id="view-bookings" style="display:none;">
+          <div class="page-header">
+            <div>
+              <div class="page-title">예약 관리</div>
+              <div class="page-subtitle">예약 한 건이 매출·정산·리뷰의 시작점입니다</div>
+            </div>
+            <button class="btn btn-primary" id="open-booking-modal">+ 예약 추가</button>
+          </div>
+
+          <div class="data-card">
+            <table>
+              <thead>
+                <tr>
+                  <th>고객번호</th>
+                  <th>채널</th>
+                  <th>객실</th>
+                  <th>체크인</th>
+                  <th>박수</th>
+                  <th class="text-right">매출</th>
+                  <th>예약</th>
+                  <th>정산</th>
+                </tr>
+              </thead>
+              <tbody id="bookings-tbody">
+                <tr><td colspan="8" class="empty-state">로딩중…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- 객실 관리 -->
+        <section id="view-rooms" style="display:none;">
+          <div class="page-header">
+            <div>
+              <div class="page-title">객실 관리</div>
+              <div class="page-subtitle">5개 객실의 기본 정보</div>
+            </div>
+          </div>
+
+          <div class="data-card">
+            <table>
+              <thead>
+                <tr>
+                  <th>객실</th>
+                  <th>최대 인원</th>
+                  <th>특징</th>
+                  <th class="text-right">기준가</th>
+                  <th>상태</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="rooms-tbody">
+                <tr><td colspan="6" class="empty-state">로딩중…</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </main>
+
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 예약 추가/수정 모달                                              -->
+  <!-- ============================================================== -->
+  <div class="modal-backdrop" id="booking-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="booking-modal-title">예약 추가</div>
+        <button class="btn btn-ghost" id="close-booking-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="booking-form">
+          <input type="hidden" id="booking-id" />
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">채널</label>
+              <select id="booking-channel" class="form-select" required></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">객실</label>
+              <select id="booking-room" class="form-select" required></select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">채널 예약번호 (선택)</label>
+            <input type="text" id="booking-code" class="form-input" placeholder="예: HMABCDXX" />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">체크인</label>
+              <input type="date" id="booking-checkin" class="form-input" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">체크아웃</label>
+              <input type="date" id="booking-checkout" class="form-input" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">인원</label>
+              <input type="number" id="booking-guests" class="form-input" min="1" value="2" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">국적 (선택)</label>
+              <input type="text" id="booking-country" class="form-input" placeholder="KR, JP, US…" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">매출 (원)</label>
+              <input type="number" id="booking-gross" class="form-input" min="0" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">수수료 (원)</label>
+              <input type="number" id="booking-commission" class="form-input" min="0" value="0" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">예약 상태</label>
+              <select id="booking-status" class="form-select">
+                <option value="confirmed">확정</option>
+                <option value="completed">완료</option>
+                <option value="cancelled">취소</option>
+                <option value="no_show">노쇼</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">정산 상태</label>
+              <select id="booking-payment" class="form-select">
+                <option value="pending">대기</option>
+                <option value="paid">결제완료</option>
+                <option value="settled">정산완료</option>
+                <option value="refunded">환불</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">메모 (선택)</label>
+            <textarea id="booking-notes" class="form-textarea"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancel-booking">취소</button>
+        <button class="btn btn-primary" id="save-booking">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 객실 수정 모달                                                   -->
+  <!-- ============================================================== -->
+  <div class="modal-backdrop" id="room-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">객실 수정</div>
+        <button class="btn btn-ghost" id="close-room-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="room-form">
+          <input type="hidden" id="room-id" />
+
+          <div class="form-group">
+            <label class="form-label">객실 번호</label>
+            <input type="text" id="room-number" class="form-input" disabled />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">최대 인원</label>
+              <input type="number" id="room-capacity" class="form-input" min="1" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">기준가 (원)</label>
+              <input type="number" id="room-price" class="form-input" min="0" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">반려동물 가능</label>
+              <select id="room-pet" class="form-select">
+                <option value="false">아니오</option>
+                <option value="true">예</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">빔프로젝터</label>
+              <select id="room-projector" class="form-select">
+                <option value="false">없음</option>
+                <option value="true">있음</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">운영중</label>
+            <select id="room-active" class="form-select">
+              <option value="true">운영중</option>
+              <option value="false">운영 중지</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancel-room">취소</button>
+        <button class="btn btn-primary" id="save-room">저장</button>
+      </div>
+    </div>
+  </div>
+
+
+<script>
+// ==========================================================================
+// Supabase 연결
+// ==========================================================================
+const SUPABASE_URL = 'https://ijvfwajtotbqfxpdlcal.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqdmZ3YWp0b3RicWZ4cGRsY2FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODE1NDYsImV4cCI6MjA5NDA1NzU0Nn0.39TLrxZyfYthQggvef_RIQQ0YtR2DCu79KmEfEZwGZM';
+
+// window.supabase는 CDN에서 가져온 라이브러리이고, 우리가 만드는 클라이언트는 db로 명명
+const { createClient } = window.supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ==========================================================================
+// 헬퍼
+// ==========================================================================
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => document.querySelectorAll(sel);
+
+const fmtKRW = (n) => {
+  if (n === null || n === undefined) return '-';
+  return '₩' + Number(n).toLocaleString('ko-KR');
+};
+
+const fmtDate = (d) => {
+  if (!d) return '-';
+  return new Date(d).toLocaleDateString('ko-KR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+};
+
+const monthRange = (date = new Date()) => {
+  const start = new Date(date.getFullYear(), date.getMonth(), 1);
+  const end = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  const fmt = (d) => d.toISOString().slice(0, 10);
+  return { start: fmt(start), end: fmt(end) };
+};
+
+const showAlert = (containerSel, message, type = 'error') => {
+  const c = $(containerSel);
+  c.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+  if (type !== 'error') setTimeout(() => c.innerHTML = '', 4000);
+};
+
+// ==========================================================================
+// 인증
+// ==========================================================================
+async function checkAuth() {
+  const { data: { session } } = await db.auth.getSession();
+  if (session) {
+    showApp(session.user);
+  } else {
+    showLogin();
+  }
+}
+
+function showLogin() {
+  $('#login-view').style.display = 'flex';
+  $('#app-view').style.display = 'none';
+}
+
+function showApp(user) {
+  $('#login-view').style.display = 'none';
+  $('#app-view').style.display = 'block';
+  $('#user-info').textContent = user.email;
+  loadInitialData();
+}
+
+$('#login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = $('#login-email').value;
+  const password = $('#login-password').value;
+  const btn = $('#login-btn');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="loading"></span> 로그인 중…';
+  $('#login-alert').innerHTML = '';
+
+  const { data, error } = await db.auth.signInWithPassword({ email, password });
+
+  btn.disabled = false;
+  btn.textContent = '로그인';
+
+  if (error) {
+    showAlert('#login-alert', error.message || '로그인 실패');
+    return;
+  }
+  showApp(data.user);
+});
+
+$('#logout-btn').addEventListener('click', async () => {
+  await db.auth.signOut();
+  showLogin();
+});
+
+// ==========================================================================
+// 네비게이션
+// ==========================================================================
+$$('.nav-item[data-view]').forEach(item => {
+  item.addEventListener('click', () => {
+    $$('.nav-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+
+    const view = item.dataset.view;
+    $$('section[id^="view-"]').forEach(s => s.style.display = 'none');
+    $(`#view-${view}`).style.display = 'block';
+
+    if (view === 'dashboard') loadDashboard();
+    if (view === 'bookings') loadBookings();
+    if (view === 'rooms') loadRooms();
+  });
+});
+
+// ==========================================================================
+// 데이터 로딩
+// ==========================================================================
+let cachedRooms = [];
+let cachedChannels = [];
+
+async function loadInitialData() {
+  // 객실과 채널은 자주 안 바뀌니까 한 번만 로드해서 캐시
+  const [{ data: rooms }, { data: channels }] = await Promise.all([
+    db.from('rooms').select('*').order('room_number'),
+    db.from('channels').select('*').eq('is_active', true).order('name'),
+  ]);
+  cachedRooms = rooms || [];
+  cachedChannels = channels || [];
+  loadDashboard();
+}
+
+// ---- 대시보드 ----
+async function loadDashboard() {
+  const { start, end } = monthRange();
+  $('#dashboard-period').textContent = `${start.slice(0, 7)} (이번 달)`;
+
+  // 이번 달 예약들
+  const { data: bookings, error } = await supabase
+    .from('bookings')
+    .select('*, channels(name), rooms(room_number)')
+    .gte('checkin_date', start)
+    .lte('checkin_date', end);
+
+  if (error) {
+    console.error(error);
+    $('#stat-grid').innerHTML = `<div class="alert alert-error">데이터 로딩 실패: ${error.message}</div>`;
+    return;
+  }
+
+  const valid = (bookings || []).filter(b => b.booking_status !== 'cancelled');
+  const totalBookings = valid.length;
+  const totalGross = valid.reduce((s, b) => s + (b.gross_amount || 0), 0);
+  const totalNet = valid.reduce((s, b) => s + (b.net_amount || 0), 0);
+  const totalNights = valid.reduce((s, b) => s + (b.nights || 0), 0);
+
+  // 채널별 매출
+  const byChannel = {};
+  valid.forEach(b => {
+    const name = b.channels?.name || '직접';
+    byChannel[name] = (byChannel[name] || 0) + (b.gross_amount || 0);
+  });
+
+  const channelStats = Object.entries(byChannel)
+    .map(([k, v]) => `<div class="stat-sub">${k}: ${fmtKRW(v)}</div>`)
+    .join('');
+
+  $('#stat-grid').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">예약 건수</div>
+      <div class="stat-value">${totalBookings}</div>
+      <div class="stat-sub">총 ${totalNights}박</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">매출 (총)</div>
+      <div class="stat-value">${fmtKRW(totalGross)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">실수령 (수수료 차감)</div>
+      <div class="stat-value">${fmtKRW(totalNet)}</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">채널별 매출</div>
+      ${channelStats || '<div class="stat-sub text-muted">데이터 없음</div>'}
+    </div>
+  `;
+
+  // 객실별 현황
+  const roomStats = {};
+  valid.forEach(b => {
+    const room = b.rooms?.room_number || '-';
+    if (!roomStats[room]) roomStats[room] = { count: 0, revenue: 0 };
+    roomStats[room].count++;
+    roomStats[room].revenue += (b.gross_amount || 0);
+  });
+
+  if (cachedRooms.length === 0) {
+    $('#dashboard-rooms-tbody').innerHTML = `<tr><td colspan="4" class="empty-state"><h3>객실 데이터 없음</h3><div>객실 관리에서 추가해주세요</div></td></tr>`;
+    return;
+  }
+
+  $('#dashboard-rooms-tbody').innerHTML = cachedRooms.map(r => {
+    const stat = roomStats[r.room_number] || { count: 0, revenue: 0 };
+    return `<tr>
+      <td><strong>${r.room_number}호</strong></td>
+      <td>${r.capacity}인</td>
+      <td class="text-right">${stat.count}건</td>
+      <td class="text-right">${fmtKRW(stat.revenue)}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ---- 예약 목록 ----
+async function loadBookings() {
+  const { data: bookings, error } = await supabase
+    .from('bookings')
+    .select('*, channels(name), rooms(room_number)')
+    .order('checkin_date', { ascending: false })
+    .limit(100);
+
+  if (error) {
+    $('#bookings-tbody').innerHTML = `<tr><td colspan="8" class="empty-state">에러: ${error.message}</td></tr>`;
+    return;
+  }
+
+  if (!bookings || bookings.length === 0) {
+    $('#bookings-tbody').innerHTML = `
+      <tr><td colspan="8" class="empty-state">
+        <h3>아직 예약이 없습니다</h3>
+        <div>우측 상단 "예약 추가" 버튼을 눌러 첫 예약을 등록해보세요</div>
+      </td></tr>`;
+    return;
+  }
+
+  const statusBadge = (s) => {
+    const map = {
+      confirmed: ['확정', 'badge-success'],
+      completed: ['완료', 'badge-muted'],
+      cancelled: ['취소', 'badge-error'],
+      no_show:   ['노쇼', 'badge-error'],
+    };
+    const [label, cls] = map[s] || [s, 'badge-muted'];
+    return `<span class="badge ${cls}">${label}</span>`;
+  };
+
+  const paymentBadge = (s) => {
+    const map = {
+      pending:  ['대기', 'badge-warning'],
+      paid:     ['결제완료', 'badge-success'],
+      settled:  ['정산완료', 'badge-success'],
+      refunded: ['환불', 'badge-error'],
+    };
+    const [label, cls] = map[s] || [s, 'badge-muted'];
+    return `<span class="badge ${cls}">${label}</span>`;
+  };
+
+  $('#bookings-tbody').innerHTML = bookings.map(b => `
+    <tr style="cursor:pointer" onclick="editBooking('${b.id}')">
+      <td><strong>${b.guest_code}</strong></td>
+      <td>${b.channels?.name || '-'}</td>
+      <td>${b.rooms?.room_number || '-'}호</td>
+      <td>${fmtDate(b.checkin_date)}</td>
+      <td>${b.nights || 0}박</td>
+      <td class="text-right">${fmtKRW(b.gross_amount)}</td>
+      <td>${statusBadge(b.booking_status)}</td>
+      <td>${paymentBadge(b.payment_status)}</td>
+    </tr>
+  `).join('');
+}
+
+// ---- 객실 목록 ----
+async function loadRooms() {
+  const { data: rooms, error } = await supabase
+    .from('rooms')
+    .select('*')
+    .order('room_number');
+
+  if (error) {
+    $('#rooms-tbody').innerHTML = `<tr><td colspan="6" class="empty-state">에러: ${error.message}</td></tr>`;
+    return;
+  }
+
+  cachedRooms = rooms || [];
+
+  if (rooms.length === 0) {
+    $('#rooms-tbody').innerHTML = `<tr><td colspan="6" class="empty-state"><h3>객실이 없습니다</h3></td></tr>`;
+    return;
+  }
+
+  $('#rooms-tbody').innerHTML = rooms.map(r => {
+    const features = [];
+    if (r.pet_friendly) features.push('🐶 반려동물');
+    if (r.has_projector) features.push('📽️ 빔프로젝터');
+    if (r.features?.theme) features.push(r.features.theme);
+    if (r.features?.near) features.push(r.features.near);
+
+    return `<tr>
+      <td><strong>${r.room_number}호</strong></td>
+      <td>${r.capacity}인</td>
+      <td>${features.join(' · ') || '-'}</td>
+      <td class="text-right">${fmtKRW(r.base_price)}</td>
+      <td>${r.is_active ? '<span class="badge badge-success">운영중</span>' : '<span class="badge badge-muted">중지</span>'}</td>
+      <td><button class="btn btn-secondary" onclick="editRoom('${r.id}')">수정</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ==========================================================================
+// 예약 모달
+// ==========================================================================
+function openBookingModal(booking = null) {
+  // 채널·객실 옵션 채우기
+  $('#booking-channel').innerHTML = cachedChannels.map(c =>
+    `<option value="${c.id}">${c.name}</option>`).join('');
+  $('#booking-room').innerHTML = cachedRooms.map(r =>
+    `<option value="${r.id}">${r.room_number}호</option>`).join('');
+
+  if (booking) {
+    $('#booking-modal-title').textContent = '예약 수정';
+    $('#booking-id').value = booking.id;
+    $('#booking-channel').value = booking.channel_id;
+    $('#booking-room').value = booking.room_id;
+    $('#booking-code').value = booking.channel_booking_code || '';
+    $('#booking-checkin').value = booking.checkin_date;
+    $('#booking-checkout').value = booking.checkout_date;
+    $('#booking-guests').value = booking.num_guests || 2;
+    $('#booking-country').value = booking.guest_country || '';
+    $('#booking-gross').value = booking.gross_amount;
+    $('#booking-commission').value = booking.channel_commission || 0;
+    $('#booking-status').value = booking.booking_status;
+    $('#booking-payment').value = booking.payment_status;
+    $('#booking-notes').value = booking.notes || '';
+  } else {
+    $('#booking-modal-title').textContent = '예약 추가';
+    $('#booking-form').reset();
+    $('#booking-id').value = '';
+  }
+  $('#booking-modal').classList.add('open');
+}
+
+async function editBooking(id) {
+  const { data, error } = await db.from('bookings').select('*').eq('id', id).single();
+  if (error) { alert('에러: ' + error.message); return; }
+  openBookingModal(data);
+}
+
+$('#open-booking-modal').addEventListener('click', () => openBookingModal());
+$('#close-booking-modal').addEventListener('click', () => $('#booking-modal').classList.remove('open'));
+$('#cancel-booking').addEventListener('click', () => $('#booking-modal').classList.remove('open'));
+
+$('#save-booking').addEventListener('click', async () => {
+  const id = $('#booking-id').value;
+  const payload = {
+    channel_id: $('#booking-channel').value,
+    room_id: $('#booking-room').value,
+    channel_booking_code: $('#booking-code').value || null,
+    checkin_date: $('#booking-checkin').value,
+    checkout_date: $('#booking-checkout').value,
+    num_guests: parseInt($('#booking-guests').value) || null,
+    guest_country: $('#booking-country').value || null,
+    gross_amount: parseInt($('#booking-gross').value),
+    channel_commission: parseInt($('#booking-commission').value) || 0,
+    booking_status: $('#booking-status').value,
+    payment_status: $('#booking-payment').value,
+    notes: $('#booking-notes').value || null,
+  };
+
+  let result;
+  if (id) {
+    result = await db.from('bookings').update(payload).eq('id', id);
+  } else {
+    result = await db.from('bookings').insert(payload);
+  }
+
+  if (result.error) {
+    alert('저장 실패: ' + result.error.message);
+    return;
+  }
+
+  $('#booking-modal').classList.remove('open');
+  loadBookings();
+});
+
+// ==========================================================================
+// 객실 모달
+// ==========================================================================
+function editRoom(id) {
+  const r = cachedRooms.find(x => x.id === id);
+  if (!r) return;
+  $('#room-id').value = r.id;
+  $('#room-number').value = r.room_number + '호';
+  $('#room-capacity').value = r.capacity;
+  $('#room-price').value = r.base_price || '';
+  $('#room-pet').value = String(r.pet_friendly);
+  $('#room-projector').value = String(r.has_projector);
+  $('#room-active').value = String(r.is_active);
+  $('#room-modal').classList.add('open');
+}
+
+$('#close-room-modal').addEventListener('click', () => $('#room-modal').classList.remove('open'));
+$('#cancel-room').addEventListener('click', () => $('#room-modal').classList.remove('open'));
+
+$('#save-room').addEventListener('click', async () => {
+  const id = $('#room-id').value;
+  const payload = {
+    capacity: parseInt($('#room-capacity').value),
+    base_price: parseInt($('#room-price').value) || null,
+    pet_friendly: $('#room-pet').value === 'true',
+    has_projector: $('#room-projector').value === 'true',
+    is_active: $('#room-active').value === 'true',
+  };
+
+  const { error } = await db.from('rooms').update(payload).eq('id', id);
+  if (error) {
+    alert('저장 실패: ' + error.message);
+    return;
+  }
+  $('#room-modal').classList.remove('open');
+  loadRooms();
+});
+
+// ==========================================================================
+// 시작
+// ==========================================================================
+checkAuth();
+</script>
+
+</body>
+</html>
