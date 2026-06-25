@@ -35,16 +35,16 @@
       --neutral-900: #1a1815;
 
       /* ─── Color: Primary (Sage Green — staybut brand) ─── */
-      --primary-50:  #faf1ec;
-      --primary-100: #f1ddd3;
-      --primary-200: #e3bba9;
-      --primary-300: #d0937a;
-      --primary-400: #b86e4e;
-      --primary-500: #a1583b;
-      --primary-600: #934e34;
-      --primary-700: #8c4a33;
-      --primary-800: #6e3a28;
-      --primary-900: #4a2619;
+      --primary-50:  #f4f4f5;
+      --primary-100: #e7e7e9;
+      --primary-200: #cfcfd3;
+      --primary-300: #a9a9af;
+      --primary-400: #7c7c83;
+      --primary-500: #57575d;
+      --primary-600: #3a3a3f;
+      --primary-700: #1f1f23;
+      --primary-800: #161619;
+      --primary-900: #0d0d0f;
 
       /* ─── Status colors ─── */
       --success-50:  #ecf6e9;
@@ -96,7 +96,7 @@
       --shadow-inner: inset 0 1px 2px rgba(26, 24, 21, 0.05);
 
       /* ─── Focus ring ─── */
-      --ring:     0 0 0 3px rgba(140, 74, 51, 0.16);
+      --ring:     0 0 0 3px rgba(17, 17, 17, 0.14);
       --ring-danger: 0 0 0 3px rgba(184, 92, 63, 0.18);
 
       /* ─── Transition ─── */
@@ -170,7 +170,7 @@
 
     .login-left {
       flex: 1.05;
-      background: var(--primary-700);
+      background: #0f0f0f;
       color: #fff;
       padding: 64px 60px;
       display: flex;
@@ -187,8 +187,9 @@
       right: -120px; bottom: -120px;
       width: 360px; height: 360px;
       border-radius: 50%;
-      background: rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.04);
     }
+    .login-logo-img { max-width: 260px; width: 68%; height: auto; display: block; }
     .login-left-title {
       font-family: 'Pretendard', sans-serif;
       font-size: 68px; font-weight: 700;
@@ -199,14 +200,14 @@
 
     .login-right {
       flex: 1;
-      background: var(--primary-50);
+      background: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
       padding: 40px;
     }
     .login-form-wrap { width: 100%; max-width: 348px; }
-    .login-form-title { font-size: 21px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 6px; color: var(--primary-800); }
+    .login-form-title { font-size: 21px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 6px; color: #1a1a1a; }
     .login-form-hint { font-size: 13px; color: var(--text-soft); margin-bottom: 30px; }
 
     .login-brand { font-size: 28px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 4px; }
@@ -567,12 +568,12 @@
       letter-spacing: -0.005em;
     }
 
-    .nav-item:hover { background: var(--neutral-100); color: var(--text); }
+    .nav-item:hover { background: var(--primary-50); color: var(--primary-800); }
     .nav-item.active {
-      background: var(--primary-50);
+      background: var(--primary-100);
       color: var(--primary-800);
       font-weight: 700;
-      box-shadow: inset 2px 0 0 var(--primary-700);
+      box-shadow: inset 3px 0 0 var(--primary-700);
     }
     .nav-badge {
       margin-left: auto;
@@ -623,7 +624,7 @@
       justify-content: flex-end;
       padding: 20px;
     }
-    .chatbot-modal.show { display: flex; }
+    .chatbot-modal.show { display: flex !important; }
     .chatbot-panel {
       width: 420px;
       max-width: 100%;
@@ -6063,7 +6064,9 @@
       <div class="login-left">
         <div></div>
         <div>
-          <div class="login-left-title">Stay BUT</div>
+          <img src="logo.png" alt="Stay BUT" class="login-logo-img"
+               onerror="if(!this.dataset.t2){this.dataset.t2=1;this.src='logo.png.png';}else{this.style.display='none';var f=document.getElementById('login-logo-fallback');if(f)f.style.display='block';}" />
+          <div id="login-logo-fallback" class="login-left-title" style="display:none;">Stay BUT</div>
           <div class="login-left-sub">성수점 운영 관리 시스템</div>
         </div>
         <div class="login-left-foot"></div>
@@ -6084,7 +6087,7 @@
               <label class="form-label" for="login-password">비밀번호</label>
               <input type="password" id="login-password" class="form-input" autocomplete="current-password" required />
             </div>
-            <button type="submit" class="btn btn-primary btn-block" id="login-btn" style="margin-top: 8px;">
+            <button type="submit" class="btn btn-primary btn-block" id="login-btn" style="margin-top: 8px; background:#111;">
               로그인
             </button>
           </form>
@@ -6184,16 +6187,15 @@
 
           <!-- 📅 예약/정산 타임라인 -->
           <div style="display:flex; align-items:center; justify-content:space-between; margin: 4px 0 10px; flex-wrap:wrap; gap:8px;">
-            <div class="section-label" style="margin:0;">타임라인</div>
-            <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
               <button class="btn btn-secondary" id="tl-prev" style="padding:5px 9px;">‹</button>
-              <span id="tl-range" style="font-size:22px; font-weight:700; min-width:215px; text-align:center; letter-spacing:-0.01em;">—</span>
+              <span id="tl-range" style="font-size:24px; font-weight:700; text-align:left; letter-spacing:-0.01em;">—</span>
               <button class="btn btn-secondary" id="tl-next" style="padding:5px 9px;">›</button>
               <button class="btn btn-secondary" id="tl-today" style="padding:5px 9px; font-size:12px;">오늘</button>
-              <div style="display:inline-flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-left:4px;">
-                <button class="tl-mode-btn" data-tlmode="booking" style="font-size:12px; padding:5px 12px; border:none; cursor:pointer; background:#1f2937; color:#fff;">예약</button>
-                <button class="tl-mode-btn" data-tlmode="payout" style="font-size:12px; padding:5px 12px; border:none; cursor:pointer; background:transparent; color:#8a8f98;">정산</button>
-              </div>
+            </div>
+            <div style="display:inline-flex; border:1px solid var(--border); border-radius:8px; overflow:hidden;">
+              <button class="tl-mode-btn" data-tlmode="booking" style="font-size:12px; padding:5px 12px; border:none; cursor:pointer; background:#1f2937; color:#fff;">예약</button>
+              <button class="tl-mode-btn" data-tlmode="payout" style="font-size:12px; padding:5px 12px; border:none; cursor:pointer; background:transparent; color:#8a8f98;">정산</button>
             </div>
           </div>
           <div id="timeline-wrap" style="overflow-x:auto; border:1px solid #e8ebef; border-radius:12px; background:#ffffff;">
@@ -6352,7 +6354,7 @@
                   <option value="cancelled">취소</option>
                   <option value="no_show">노쇼</option>
                 </select>
-                <button class="btn btn-danger" id="bk-bulk-delete" style="font-size:12px; padding:6px 12px; display:none;">🗑️ 선택 삭제 (<span id="bk-sel-count">0</span>)</button>
+                <button class="btn btn-danger" id="bk-bulk-delete" style="font-size:12px; padding:6px 12px;" disabled>🗑️ 선택 삭제 (<span id="bk-sel-count">0</span>)</button>
               </div>
             </div>
             <table>
@@ -6500,8 +6502,8 @@
                 <div class="data-card-title" id="payout-pending-title">🟡 정산 처리 필요</div>
               </div>
               <div class="payout-process-controls" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px;">
-                <input type="text" id="payout-pending-search" class="form-input" placeholder="🔍 청소사 검색" style="font-size:12px; padding:6px 10px; flex:1; min-width:130px;">
-                <select id="payout-pending-room" class="form-input" style="font-size:12px; padding:6px 10px;">
+                <input type="text" id="payout-pending-search" class="form-input" placeholder="🔍 청소사 검색" style="font-size:12px; padding:6px 10px; flex:1; min-width:130px; width:auto;">
+                <select id="payout-pending-room" class="form-input" style="font-size:12px; padding:6px 10px; width:auto;">
                   <option value="all">전체 객실</option>
                   <option value="101">101호</option>
                   <option value="102">102호</option>
@@ -6510,9 +6512,9 @@
                   <option value="301">301호</option>
                 </select>
                 <span style="font-size:12px; color:var(--text-muted);">기간</span>
-                <input type="date" id="payout-pending-from" class="form-input" style="font-size:12px; padding:6px 8px;">
+                <input type="date" id="payout-pending-from" class="form-input" style="font-size:12px; padding:6px 8px; width:148px;">
                 <span style="color:var(--text-muted);">~</span>
-                <input type="date" id="payout-pending-to" class="form-input" style="font-size:12px; padding:6px 8px;">
+                <input type="date" id="payout-pending-to" class="form-input" style="font-size:12px; padding:6px 8px; width:148px;">
                 <button class="btn btn-secondary" id="payout-week-btn" style="font-size:12px; padding:6px 10px;" title="이번 주 월요일~일요일로 설정">이번 주(월~일)</button>
                 <button class="btn btn-primary" id="payout-bulk-settle" style="font-size:12px; padding:6px 12px;">✓ 이 기간 일괄 정산</button>
               </div>
@@ -9511,7 +9513,7 @@ function renderTimeline() {
   for (let i = 0; i < TL_DAYS; i++) {
     const d = new Date(tlStart); d.setDate(d.getDate() + i);
     const we = (d.getDay() === 0 || d.getDay() === 6);
-    hdr += `<div style="width:${DAYW}px;text-align:center;padding:6px 0;border-left:${d.getDate()===1?'2px solid #8c4a33':'1px solid '+TL_BD};${i===todayIdx?`background:${TL_TODAY};`:''}"><div style="font-size:9px;color:${we?TL_WK:TL_MUT};">${dows[d.getDay()]}</div><div style="font-size:12px;font-weight:600;color:${TL_TXT};">${d.getDate()}</div></div>`;
+    hdr += `<div style="width:${DAYW}px;text-align:center;padding:6px 0;border-left:${d.getDate()===1?'2px solid #1f1f23':'1px solid '+TL_BD};${i===todayIdx?`background:${TL_TODAY};`:''}"><div style="font-size:9px;color:${we?TL_WK:TL_MUT};">${dows[d.getDay()]}</div><div style="font-size:12px;font-weight:600;color:${TL_TXT};">${d.getDate()}</div></div>`;
   }
   hdr += `</div></div>`;
 
@@ -9560,7 +9562,7 @@ function renderTimeline() {
       const dd = new Date(tlStart); dd.setDate(dd.getDate() + _gi + cnt);
       if (dd.getMonth() === mo && dd.getFullYear() === yr) cnt++; else break;
     }
-    monthBand += `<div style="width:${cnt*DAYW}px;text-align:center;padding:4px 0;border-left:1px solid ${TL_BD};font-size:11px;font-weight:700;color:#8c4a33;">${mo+1}월</div>`;
+    monthBand += `<div style="width:${cnt*DAYW}px;text-align:center;padding:4px 0;border-left:1px solid ${TL_BD};font-size:11px;font-weight:700;color:#1f1f23;">${mo+1}월</div>`;
     _gi += cnt;
   }
   monthBand += `</div></div>`;
@@ -10741,7 +10743,7 @@ function updateBookingSelCount() {
   const checks = document.querySelectorAll('.bk-row-check:checked');
   const n = checks.length;
   const cntEl = $('#bk-sel-count'); if (cntEl) cntEl.textContent = n;
-  const btn = $('#bk-bulk-delete'); if (btn) btn.style.display = n > 0 ? '' : 'none';
+  const btn = $('#bk-bulk-delete'); if (btn) { btn.disabled = n === 0; btn.style.opacity = n === 0 ? '0.45' : '1'; }
 }
 
 // 선택 예약 일괄 삭제
@@ -14816,25 +14818,39 @@ function renderPayoutPending() {
     $('#payout-pending-list').innerHTML = '<div class="empty-state">조건에 해당하는 정산 대기 건이 없습니다.</div>';
     return;
   }
-  $('#payout-pending-list').innerHTML = list.map(t => {
-    const staff = staffMap[t.assigned_to];
-    const accountInfo = (staff?.bank_name && staff?.account_number)
-      ? `<div class="payout-pending-account">🏦 ${staff.bank_name} · ${staff.account_number}</div>`
-      : `<div class="payout-pending-account missing">⚠ 계좌 미등록 (청소사 계좌 탭에서 등록 필요)</div>`;
-    return `
-      <div class="payout-pending-card">
-        <input type="checkbox" class="payout-pending-check" value="${t.id}" style="width:16px; height:16px; margin-right:6px; flex-shrink:0;">
-        <div class="payout-pending-icon">!</div>
-        <div class="payout-pending-info">
-          <div class="payout-pending-title">${t.rooms?.room_number || '?'}호 · ${t.assigned_staff?.name || '담당 미지정'}</div>
-          <div class="payout-pending-meta">청소일 ${t.scheduled_date}${t.completed_at ? ' · 완료 ' + new Date(t.completed_at).toLocaleString('ko-KR', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'}) : ''}</div>
-          ${accountInfo}
-        </div>
-        <div class="payout-pending-amount">${fmtKRW(t.payout_amount)}</div>
-        <button class="btn btn-primary" onclick="markPayoutPaid('${t.id}')" style="min-width: 84px;">✓ 정산</button>
-      </div>
-    `;
-  }).join('');
+  $('#payout-pending-list').innerHTML = `
+    <div style="overflow-x:auto;">
+    <table style="width:100%; border-collapse:collapse; font-size:13px;">
+      <thead>
+        <tr style="text-align:left; color:var(--text-soft); border-bottom:1px solid var(--border);">
+          <th style="padding:8px 10px; width:30px;"></th>
+          <th style="padding:8px 10px;">청소일</th>
+          <th style="padding:8px 10px;">객실</th>
+          <th style="padding:8px 10px;">담당 청소사</th>
+          <th style="padding:8px 10px;">계좌</th>
+          <th style="padding:8px 10px; text-align:right;">금액</th>
+          <th style="padding:8px 10px; text-align:center; width:96px;">처리</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${list.map(t => {
+          const staff = staffMap[t.assigned_to];
+          const acct = (staff?.bank_name && staff?.account_number)
+            ? `${staff.bank_name} ${staff.account_number}`
+            : `<span style="color:var(--danger-600);">⚠ 미등록</span>`;
+          return `<tr style="border-bottom:1px solid var(--border);">
+            <td style="padding:8px 10px; text-align:center;"><input type="checkbox" class="payout-pending-check" value="${t.id}" style="width:16px; height:16px;"></td>
+            <td style="padding:8px 10px; white-space:nowrap;">${t.scheduled_date}</td>
+            <td style="padding:8px 10px; font-weight:600;">${t.rooms?.room_number || '?'}호</td>
+            <td style="padding:8px 10px;">${t.assigned_staff?.name || '<span style="color:var(--text-muted);">미지정</span>'}</td>
+            <td style="padding:8px 10px; font-size:12px; color:var(--text-soft);">${acct}</td>
+            <td style="padding:8px 10px; text-align:right; font-weight:600;">${fmtKRW(t.payout_amount)}</td>
+            <td style="padding:8px 10px; text-align:center;"><button class="btn btn-primary" onclick="markPayoutPaid('${t.id}')" style="font-size:12px; padding:4px 10px;">✓ 정산</button></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+    </div>`;
 }
 
 function setPayoutWeek() {
