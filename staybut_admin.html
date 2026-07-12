@@ -1253,12 +1253,14 @@
     }
     .review-channel-badge.airbnb { background: linear-gradient(135deg, #FF5A5F, #FF385C); }
     .review-channel-badge.booking { background: linear-gradient(135deg, #0A5CB8, #003580); }
+    .review-channel-badge.agoda { background: linear-gradient(135deg, #8B5CF6, #4C2FA8); }
     .review-channel-badge.other { background: var(--neutral-400); }
     /* 채널 실제 로고 pill (에어비앤비 / 부킹닷컴) */
     .ch-logo { display:inline-flex; align-items:center; gap:4px; height:30px; padding:0 10px; border-radius:8px; font-weight:800; font-size:13px; flex-shrink:0; white-space:nowrap; letter-spacing:-0.02em; line-height:1; }
     .ch-logo svg { width:16px; height:16px; display:block; }
     .ch-logo-air { background:#ffffff; color:#FF385C; border:1px solid rgba(0,0,0,0.08); }
     .ch-logo-bk { background:#003580; color:#ffffff; font-family:'Pretendard',sans-serif; }
+    .ch-logo-agoda { background:#5C2D91; color:#ffffff; font-family:'Pretendard',sans-serif; letter-spacing:0; }
     .ch-logo-other { background:var(--neutral-200,#eceae6); color:var(--text-secondary,#666); }
     .review-queue-main { min-width: 0; }
     .review-queue-head {
@@ -2006,6 +2008,7 @@
     }
     .ops-channel-bar-fill.airbnb { background: linear-gradient(90deg, #FF5A5F, #FF385C); }
     .ops-channel-bar-fill.booking { background: linear-gradient(90deg, #4F94CD, #1B4480); }
+    .ops-channel-bar-fill.agoda { background: linear-gradient(90deg, #8B5CF6, #4C2FA8); }
     .ops-channel-bar-fill.default { background: linear-gradient(90deg, var(--primary-500), var(--primary-700)); }
     .ops-channel-stats {
       font-size: 12px;
@@ -7509,6 +7512,7 @@
               <div class="import-tabs">
                 <button class="import-tab active" data-import-tab="bookingxls">📊 부킹닷컴 .xls</button>
                 <button class="import-tab" data-import-tab="airbnbcsv">🏠 에어비앤비 CSV</button>
+                <button class="import-tab" data-import-tab="agodacsv">🅰️ 아고다 CSV</button>
                 <button class="import-tab" data-import-tab="csv">📂 CSV 파일</button>
               </div>
 
@@ -7537,6 +7541,20 @@
                   <strong>다운로드 위치:</strong> 에어비앤비 호스트 → 수익 → 거래 내역 → CSV 다운로드<br>
                   <strong>자동 매핑:</strong> 예약코드 · 시작일/종료일 · 게스트명 · 리스팅의 (호실) · 금액(매출=호스팅 총수입, 실수령, 서비스 수수료)<br>
                   <strong>참고:</strong> 이미 등록된 예약번호(메일 자동등록 포함)는 자동으로 제외됩니다. 객실은 리스팅명의 (202호)에서 자동 인식됩니다.
+                </div>
+              </div>
+
+              <!-- 아고다 CSV -->
+              <div id="import-agodacsv" class="import-tab-content" style="display:none;">
+                <div class="form-group">
+                  <label class="form-label">아고다 예약 리포트 CSV 파일</label>
+                  <input type="file" id="import-agodacsv-file" accept=".csv,text/csv" class="form-input" style="padding: 8px;" />
+                </div>
+                <button class="btn btn-primary" id="import-agodacsv-btn">🅰️ 파일 분석</button>
+                <div class="import-help">
+                  <strong>다운로드 위치:</strong> 아고다 YCS(익스트라넷) → 예약 → 리포트 다운로드 요청 → 계정 메일(seongsu@staybut.net)로 도착한 CSV 첨부파일<br>
+                  <strong>자동 매핑:</strong> 예약번호 · 체크인/체크아웃 · 게스트명 · 국적 · 객실유형(호실 자동인식) · 매출(ReferenceSellInclusive) · 수수료(Commission) · 결제수수료(부가세) · 도착예정시간<br>
+                  <strong>참고:</strong> 이미 등록된 예약번호는 자동 제외되고, 취소/노쇼 예약은 cancelled로 저장됩니다. 객실은 룸타입으로 자동 인식됩니다(101·102·201·202·301). 못 알아본 건만 미리보기에서 직접 선택해주세요.
                 </div>
               </div>
 
@@ -9156,6 +9174,7 @@ function channelBadge_(name) {
   const n = (name || '').toLowerCase();
   if (n.includes('air') || n.includes('에어')) return { key: 'airbnb', label: '에어비앤비' };
   if (n.includes('book') || n.includes('부킹')) return { key: 'booking', label: '부킹닷컴' };
+  if (n.includes('agoda') || n.includes('아고다')) return { key: 'agoda', label: '아고다' };
   return { key: 'other', label: name || '직접' };
 }
 
@@ -9169,6 +9188,9 @@ function channelLogo_(name, dim) {
   }
   if (cb.key === 'booking') {
     return `<div class="ch-logo ch-logo-bk" style="${d}" title="부킹닷컴">Booking.com</div>`;
+  }
+  if (cb.key === 'agoda') {
+    return `<div class="ch-logo ch-logo-agoda" style="${d}" title="아고다">agoda</div>`;
   }
   return `<div class="ch-logo ch-logo-other" style="${d}">${cb.label}</div>`;
 }
@@ -11262,14 +11284,16 @@ function renderInsightCharts(bookings) {
   const bk = (bookings || []).filter(b => b.booking_status !== 'cancelled');
 
   // 1) 채널 비중 (건수)
-  let bookingN = 0, airbnbN = 0, etcN = 0;
+  let bookingN = 0, airbnbN = 0, agodaN = 0, etcN = 0;
   bk.forEach(b => {
     const n = (b.channels?.name || '').toLowerCase();
     if (n.includes('air') || n.includes('에어')) airbnbN++;
     else if (n.includes('book') || n.includes('부킹')) bookingN++;
+    else if (n.includes('agoda') || n.includes('아고다')) agodaN++;
     else etcN++;
   });
   const chLabels = ['부킹닷컴', '에어비앤비'], chData = [bookingN, airbnbN], chColors = ['#003580', '#FF385C'];
+  if (agodaN > 0) { chLabels.push('아고다'); chData.push(agodaN); chColors.push('#6C4BD8'); }
   if (etcN > 0) { chLabels.push('기타'); chData.push(etcN); chColors.push('#888780'); }
   const chTotal = chData.reduce((s, v) => s + v, 0) || 1;
   const legend = document.getElementById('insight-channel-legend');
@@ -11830,6 +11854,7 @@ function renderChannelChart(bookings, totalRevenue) {
   const channelColors = {
     '에어비앤비': '#E85D44',
     '부킹닷컴': '#1B4480',
+    '아고다': '#6C4BD8',
     '직접': '#2d5040',
   };
   const fallback = ['#2d5040', '#C89A3F', '#9a948b', '#6B6660', '#B85C3F'];
@@ -14887,6 +14912,126 @@ $('#import-airbnbcsv-btn')?.addEventListener('click', () => {
   reader.readAsText(file, 'UTF-8');
 });
 
+// ── 아고다 CSV 가져오기 ──
+// 아고다 YCS 예약 리포트 컬럼(영문 헤더): BookingIDExternal_reference_ID,Status,StayDateFrom,StayDateTo,
+//   Customer_Name,Customer_Nationality,RoomType,Special_Request,No_of_adult,No_of_children,
+//   Total_inclusive_rate(실지급),ReferenceSellInclusive(판매가=매출),Commission(수수료),PaymentModel ...
+function parseAgodaCsv(rows) {
+  const num = (v) => {
+    if (v == null || v === '') return 0;
+    const m = String(v).replace(/,/g, '').match(/-?[\d.]+/);
+    return m ? Math.round(parseFloat(m[0])) : 0;
+  };
+  // "2026-07-21" 또는 "07/21/2026" → "YYYY-MM-DD"
+  const ymd = (v) => {
+    if (!v) return null;
+    const s = String(v).trim();
+    let m = s.match(/(\d{4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})/);
+    if (m) return `${m[1]}-${String(m[2]).padStart(2,'0')}-${String(m[3]).padStart(2,'0')}`;
+    m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    return m ? `${m[3]}-${String(m[1]).padStart(2,'0')}-${String(m[2]).padStart(2,'0')}` : null;
+  };
+  const pick = (r, names) => {
+    for (const n of names) for (const k of Object.keys(r)) {
+      if (k.replace(/^﻿/, '').trim() === n) return r[k];
+    }
+    return '';
+  };
+  // 아고다 객실유형 → 호실 매핑 (알려진 room-type-ID 우선, 없으면 이름 키워드)
+  //   "아파트 - 발코니"는 102/202 공용이라 null → 미리보기에서 수동 선택
+  const roomOf = (roomType) => {
+    const s = String(roomType || '');
+    const lc = s.toLowerCase();
+    const idm = s.match(/\((\d{6,})\)/);
+    const id = idm ? idm[1] : null;
+    // 알려진 아고다 room-type-ID → 호실 (가장 정확)
+    const byId = {
+      '1425722408': '301',  // Family Suite with Balcony / 패밀리 스위트룸-발코니
+      '1425722412': '201',  // Double or Twin Room with Extra Bed / 더블·트윈 엑스트라베드
+      '1425722413': '202',  // Apartment with Balcony / 아파트-발코니
+    };
+    if (id && byId[id]) return byId[id];
+    // 이름 키워드 폴백 (구체적인 것부터 — 수페리어 두 종류 구분이 핵심)
+    if (/패밀리|스위트|family|suite/.test(lc)) return '301';                       // Family Suite with Balcony
+    if (/엑스트라|extra|트윈|twin/.test(lc)) return '201';                          // Double or Twin + Extra Bed
+    if (/수페리어|superior/.test(lc) && /아파트|apartment/.test(lc)) return '101';  // One-Bedroom Superior Apartment
+    if (/수페리어|superior/.test(lc)) return '102';                                 // 1 Bedroom Superior (아파트 아님)
+    if (/아파트|apartment/.test(lc) && /발코니|balcony/.test(lc)) return '202';     // Apartment with Balcony
+    return null;
+  };
+  const NAT2 = { 'south korea':'kr','korea':'kr','republic of korea':'kr','japan':'jp','china':'cn',
+    'taiwan':'tw','hong kong':'hk','united states':'us','usa':'us','united states of america':'us',
+    'singapore':'sg','thailand':'th','vietnam':'vn','viet nam':'vn','malaysia':'my','philippines':'ph',
+    'indonesia':'id','united kingdom':'gb','germany':'de','france':'fr','australia':'au','canada':'ca' };
+
+  const bookings = rows.map(r => {
+    const status = String(pick(r, ['Status', '상태']) || '');
+    const isCancelled = /취소|cancel|no[-\s]?show|노쇼/i.test(status);
+
+    const roomType = pick(r, ['RoomType', '객실 유형', '객실유형']);
+    const gross = num(pick(r, ['ReferenceSellInclusive']));      // 판매가(게스트 결제) = 매출
+    const commission = num(pick(r, ['Commission', '수수료']));    // 아고다 수수료
+    const netPayout = num(pick(r, ['Total_inclusive_rate']));    // 실지급(수수료+부가세 차감)
+    const payFee = (gross && commission && netPayout) ? Math.max(0, gross - commission - netPayout) : 0; // 수수료 부가세 등
+
+    const special = String(pick(r, ['Special_Request', '요청사항']) || '');
+    let arrivalNote = null;
+    const am = special.match(/ArrivalTime[:\s]+([0-9:\s\-]+)/i) || special.match(/도착\s*(?:예정|예상)[:\s]+([^,\n]+)/);
+    if (am) arrivalNote = am[1].trim();
+
+    const nat = String(pick(r, ['Customer_Nationality', '국적']) || '').trim();
+    const country = nat ? (NAT2[nat.toLowerCase()] || nat.toLowerCase()) : null;
+
+    const adults = parseInt(pick(r, ['No_of_adult'])) || 0;
+    const children = parseInt(pick(r, ['No_of_children'])) || 0;
+
+    const payModel = String(pick(r, ['PaymentModel', '결제 모델']) || '');
+    const payAtProperty = /호텔|property|hotel/i.test(payModel) && !/아고다|agoda/i.test(payModel);
+
+    return {
+      channel: 'agoda',
+      channel_booking_code: String(pick(r, ['BookingIDExternal_reference_ID', 'BookingID', '예약번호']) || '').trim(),
+      room_number: roomOf(roomType),
+      checkin_date: ymd(pick(r, ['StayDateFrom', '체크인'])),
+      checkout_date: ymd(pick(r, ['StayDateTo', '체크아웃'])),
+      num_guests: (adults + children) || 2,
+      guest_country: country,
+      gross_amount: gross,             // 매출 = 판매가(수수료 포함)
+      channel_commission: commission,  // 아고다 수수료
+      payment_fee: payFee,             // 수수료 부가세(판매가-수수료-실지급)
+      booker_name: String(pick(r, ['Customer_Name', '예약자']) || '').trim() || null,
+      arrival_time_note: arrivalNote,
+      notes: special || null,
+      _is_cancelled: isCancelled,       // 저장 시 booking_status 결정 (DB 컬럼 아님)
+      _pay_at_property: payAtProperty,  // 현장/호텔 결제면 pending (DB 컬럼 아님)
+    };
+  }).filter(b => b.channel_booking_code && b.checkin_date && b.checkout_date && b.gross_amount > 0);
+
+  return { bookings };
+}
+
+$('#import-agodacsv-btn')?.addEventListener('click', () => {
+  const file = $('#import-agodacsv-file').files[0];
+  if (!file) { alert('파일을 선택해주세요'); return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const rows = parseCsvToRows(e.target.result);
+      if (!rows || rows.length === 0) { alert('파일이 비어있거나 인식 가능한 데이터가 없어요.'); return; }
+      const parsed = parseAgodaCsv(rows);
+      if (parsed.bookings.length === 0) {
+        alert('인식된 예약이 없어요. 아고다 리포트 CSV(컬럼: BookingID/StayDateFrom/StayDateTo/ReferenceSellInclusive 등)인지 확인해주세요.'); return;
+      }
+      showImportPreview(parsed);
+    } catch (err) {
+      console.error(err);
+      alert('파일 분석 실패: ' + (err.message || err));
+    }
+  };
+  reader.onerror = () => alert('파일 읽기 실패');
+  reader.readAsText(file, 'UTF-8');
+});
+
 // 헤더 기반 CSV → 객체 배열 (따옴표 안 콤마 처리)
 function parseCsvToRows(text) {
   const clean = String(text).replace(/^\uFEFF/, '');   // BOM 제거
@@ -15349,7 +15494,7 @@ $('#import-save-btn').addEventListener('click', async () => {
     }
 
     // OTA 채널은 자동으로 결제완료 처리
-    const isOTA = ch && ['airbnb', 'booking'].includes(ch.code);
+    const isOTA = ch && ['airbnb', 'booking', 'agoda'].includes(ch.code);
     const isCancelled = !!orig._is_cancelled;
 
     insertData.push({
@@ -15365,7 +15510,7 @@ $('#import-save-btn').addEventListener('click', async () => {
       guest_country: orig.guest_country || null,
       booking_status: isCancelled ? 'cancelled' : 'confirmed',
       review_status: 'confirmed',
-      payment_status: isCancelled ? 'refunded' : (isOTA ? 'paid' : 'pending'),
+      payment_status: isCancelled ? 'refunded' : ((isOTA && !orig._pay_at_property) ? 'paid' : 'pending'),
 
       // Phase 2 신규 필드 (orig에서 가져옴, 없으면 null/0)
       booker_name: orig.booker_name || null,
