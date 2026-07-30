@@ -3,14 +3,13 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>채널 캘린더 연결 · StayBUT</title>
+<title>숙소 · 채널 연결 · StayBUT</title>
 <style>
-  :root{--bg:#f4f6f9;--panel:#fff;--line:#e6e9ef;--line2:#d3d8e0;--text:#1b2029;--muted:#5b6573;--dim:#98a1b0;
-    --booking:#3f6ea6;--airbnb:#d96a83;--agoda:#7d6bd0;--ok:#16a34a;--danger:#e0485c;--accent:#2f6fed;--ink:#16161b;}
+  :root{--bg:#f5f5f7;--panel:#fff;--line:#e5e5e7;--line2:#d2d2d7;--text:#1d1d1f;--muted:#6e6e73;--dim:#a1a1a6;
+    --booking:#3f6ea6;--airbnb:#d96a83;--agoda:#7d6bd0;--ok:#16a34a;--danger:#e0485c;--ink:#16161b;}
   *{box-sizing:border-box;}
   body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',Roboto,sans-serif;}
   .wrap{max-width:760px;margin:0 auto;padding:28px 18px 70px;}
-  /* 로그인 */
   #login{min-height:100dvh;display:flex;align-items:center;justify-content:center;}
   #login .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:30px 26px;width:330px;max-width:90%;}
   #login h1{font-size:18px;margin:0 0 2px;text-align:center;}
@@ -19,37 +18,44 @@
   #login input:focus{outline:none;border-color:var(--ink);background:#fff;}
   #login button{width:100%;border:0;background:var(--ink);color:#fff;border-radius:10px;padding:12px;font-size:15px;font-weight:700;cursor:pointer;}
   #login .err{color:var(--danger);font-size:12px;min-height:16px;margin-top:6px;text-align:center;}
-  /* 본문 */
   #app{display:none;}
-  h1.ph{font-size:22px;font-weight:700;margin:0 0 4px;}
-  .ps{font-size:13px;color:var(--muted);margin:0 0 6px;}
-  .note{font-size:12px;color:var(--dim);margin:0 0 18px;display:flex;align-items:center;gap:6px;}
-  .help{border:1px solid var(--line);border-radius:12px;background:#fff;margin:0 0 18px;overflow:hidden;}
-  .help summary{cursor:pointer;list-style:none;padding:12px 15px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
-  .help summary::-webkit-details-marker{display:none;}
-  .help .body{padding:0 15px 14px;font-size:12.5px;color:var(--muted);line-height:1.7;}
-  .help .body b{color:var(--text);}
-  .rc{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px;box-shadow:0 1px 2px rgba(20,30,50,.04);}
-  .rc .rh{font-weight:700;font-size:15px;margin-bottom:10px;}
-  .row{display:flex;align-items:center;gap:10px;margin:8px 0;}
-  .tag{width:88px;flex:none;font-size:11.5px;font-weight:700;padding:4px 8px;border-radius:6px;color:#fff;text-align:center;}
-  .inp{flex:1;min-width:0;height:34px;border:1px solid var(--line2);border-radius:8px;padding:0 11px;font-size:12.5px;font-family:inherit;outline:none;}
-  .inp:focus{border-color:var(--ink);}
-  .st{flex:none;width:74px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px;}
-  .dot{width:8px;height:8px;border-radius:50%;flex:none;}
-  .rc .save{margin-top:8px;border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:8px;padding:8px 16px;font-size:12.5px;font-weight:700;cursor:pointer;}
-  .rc .saved{color:var(--ok);font-size:12px;font-weight:700;margin-left:10px;}
   .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
   .top .who{font-size:12px;color:var(--muted);}
   .top .who button{margin-left:8px;border:1px solid var(--line2);background:#fff;border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;}
-  .empty{padding:30px;text-align:center;color:var(--dim);font-size:13px;}
+  h1.ph{font-size:22px;font-weight:700;margin:0 0 4px;letter-spacing:-.01em;}
+  .ps{font-size:13px;color:var(--muted);margin:0 0 6px;}
+  .note{font-size:12px;color:var(--dim);margin:0 0 16px;}
+  .help{border:1px solid var(--line);border-radius:12px;background:#fff;margin:0 0 18px;overflow:hidden;}
+  .help summary{cursor:pointer;list-style:none;padding:12px 15px;font-size:13px;font-weight:700;}
+  .help summary::-webkit-details-marker{display:none;}
+  .help .body{padding:0 15px 14px;font-size:12.5px;color:var(--muted);line-height:1.7;}
+  .help .body b{color:var(--text);}
+  .rc{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 16px;margin-bottom:12px;box-shadow:0 1px 2px rgba(20,30,50,.04);}
+  .rc .rh{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .rc .rh input.nm{flex:1;min-width:0;font-size:15px;font-weight:700;border:1px solid transparent;border-radius:8px;padding:6px 8px;font-family:inherit;background:#fafafa;}
+  .rc .rh input.nm:focus{outline:none;border-color:var(--ink);background:#fff;}
+  .rc .rh .del{border:1px solid var(--line2);background:#fff;color:var(--danger);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;flex:none;}
+  .row{display:flex;align-items:center;gap:10px;margin:8px 0;}
+  .tag{width:84px;flex:none;font-size:11px;font-weight:700;padding:5px 8px;border-radius:6px;color:#fff;text-align:center;}
+  .inp{flex:1;min-width:0;height:34px;border:1px solid var(--line2);border-radius:8px;padding:0 11px;font-size:12.5px;font-family:inherit;outline:none;}
+  .inp:focus{border-color:var(--ink);}
+  .st{flex:none;width:70px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px;}
+  .dot{width:8px;height:8px;border-radius:50%;flex:none;}
+  .rc .bottom{display:flex;align-items:center;gap:10px;margin-top:10px;}
+  .rc .save{border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:8px;padding:8px 16px;font-size:12.5px;font-weight:700;cursor:pointer;}
+  .rc .saved{color:var(--ok);font-size:12px;font-weight:700;}
+  .addbtn{width:100%;border:1.5px dashed var(--line2);background:#fff;color:var(--text);border-radius:12px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;}
+  .addbtn:hover{border-color:var(--ink);}
+  .fallback{margin-top:18px;border:1px solid var(--line);background:#fff;border-radius:12px;padding:13px 15px;font-size:12.5px;color:var(--muted);line-height:1.6;}
+  .fallback b{color:var(--text);}
+  .empty{padding:26px;text-align:center;color:var(--dim);font-size:13px;}
 </style>
 </head>
 <body>
 <div id="login">
   <div class="card">
-    <h1>채널 캘린더 연결</h1>
-    <p>직원 로그인</p>
+    <h1>숙소 · 채널 연결</h1>
+    <p>호스트 로그인</p>
     <input id="email" type="email" placeholder="이메일" autocomplete="username" />
     <input id="pw" type="password" placeholder="비밀번호" autocomplete="current-password" />
     <button id="loginBtn">로그인</button>
@@ -62,21 +68,26 @@
     <div></div>
     <div class="who"><span id="whoami"></span><button id="logoutBtn">로그아웃</button></div>
   </div>
-  <h1 class="ph">채널 캘린더 연결</h1>
-  <div class="ps">예약 사이트의 <b>iCal(캘린더 내보내기) 주소</b>를 객실별로 붙여넣으면, 예약 날짜가 자동으로 채워져요.</div>
-  <div class="note">🔒 손님 이름·연락처 등 개인정보는 가져오지 않아요. 날짜·객실만 동기화됩니다.</div>
+  <h1 class="ph">숙소 · 채널 연결</h1>
+  <div class="ps">숙소를 추가하고, 각 예약 사이트의 <b>iCal(캘린더 내보내기) 주소</b>를 붙여넣으면 예약 날짜가 자동으로 채워져요.</div>
+  <div class="note">🔒 손님 이름·연락처 등 개인정보는 가져오지 않아요. 날짜·숙소만 동기화됩니다.</div>
 
   <details class="help">
-    <summary>❔ iCal 주소는 어디서 찾나요? (사이트별 안내)</summary>
+    <summary>iCal 주소는 어디서 찾나요? (사이트별)</summary>
     <div class="body">
       <b>부킹닷컴</b> — 익스트라넷 → 객실/요금 → 캘린더 → “캘린더 동기화(Export)” → iCal 링크 복사<br>
       <b>에어비앤비</b> — 리스팅 → 예약 가능 여부 → 캘린더 연결 → “캘린더 내보내기(.ics)” 복사<br>
       <b>아고다</b> — YCS(익스트라넷) → 캘린더/동기화 → 내보내기 링크 복사<br>
-      <span style="color:var(--dim);">※ 링크는 객실마다 하나씩. 한 번만 등록하면 이후 자동으로 예약이 채워져요.</span>
+      <span style="color:var(--dim);">※ 한 숙소를 여러 사이트에 올렸다면, 사이트마다 링크를 각각 넣으면 돼요.</span>
     </div>
   </details>
 
-  <div id="rooms"><div class="empty">불러오는 중…</div></div>
+  <div id="units"><div class="empty">불러오는 중…</div></div>
+  <button class="addbtn" id="addBtn">+ 숙소 추가</button>
+
+  <div class="fallback">
+    <b>iCal이 없나요?</b> 직접예약·전화예약이거나 iCal을 안 쓰면, 어드민에서 예약을 <b>직접 추가</b>하거나 <b>CSV 파일</b>로 한꺼번에 올릴 수 있어요. 그래도 청소·문의 자동화는 똑같이 작동해요.
+  </div>
 </div></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
@@ -85,16 +96,17 @@ const SB_URL='https://ijvfwajtotbqfxpdlcal.supabase.co';
 const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqdmZ3YWp0b3RicWZ4cGRsY2FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODE1NDYsImV4cCI6MjA5NDA1NzU0Nn0.39TLrxZyfYthQggvef_RIQQ0YtR2DCu79KmEfEZwGZM';
 const db=supabase.createClient(SB_URL,SB_KEY);
 const $=s=>document.querySelector(s);
-const CHANNELS=[['booking','Booking.com','var(--booking)'],['airbnb','에어비앤비','var(--airbnb)'],['agoda','아고다','var(--agoda)']];
+const CHANNELS=[['booking','부킹닷컴','var(--booking)'],['airbnb','에어비앤비','var(--airbnb)'],['agoda','아고다','var(--agoda)']];
+function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 
 async function start(){
   const {data:{session}}=await db.auth.getSession();
   if(!session){ $('#login').style.display='flex'; $('#app').style.display='none'; return; }
   const {data:ok}=await db.rpc('is_console_staff');
-  if(!ok){ await db.auth.signOut(); $('#loginErr').textContent='상담/운영 권한이 없는 계정입니다.'; $('#login').style.display='flex'; $('#app').style.display='none'; return; }
+  if(!ok){ await db.auth.signOut(); $('#loginErr').textContent='접근 권한이 없는 계정입니다.'; $('#login').style.display='flex'; $('#app').style.display='none'; return; }
   $('#login').style.display='none'; $('#app').style.display='block';
   $('#whoami').textContent=(session.user.email||'').split('@')[0];
-  loadRooms();
+  loadUnits();
 }
 $('#loginBtn').addEventListener('click',async()=>{
   const email=$('#email').value.trim(), pw=$('#pw').value;
@@ -106,42 +118,64 @@ $('#loginBtn').addEventListener('click',async()=>{
 $('#pw').addEventListener('keydown',e=>{ if(e.key==='Enter') $('#loginBtn').click(); });
 $('#logoutBtn').addEventListener('click',async()=>{ await db.auth.signOut(); location.reload(); });
 
-function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+$('#addBtn').addEventListener('click',async()=>{
+  const name=prompt('숙소 이름을 입력하세요 (예: 강릉 오션뷰 스튜디오)');
+  if(!name||!name.trim()) return;
+  const {error}=await db.from('rooms').insert({room_number:name.trim(),capacity:2,is_active:true});
+  if(error){ alert('추가 실패: '+error.message); return; }
+  loadUnits();
+});
 
-async function loadRooms(){
-  const box=$('#rooms');
-  const {data:rooms,error}=await db.from('rooms').select('id,room_number,is_active').order('room_number');
-  if(error){ box.innerHTML=`<div class="empty">객실을 불러오지 못했어요: ${esc(error.message)}</div>`; return; }
+async function loadUnits(){
+  const box=$('#units');
+  const {data:rooms,error}=await db.from('rooms').select('id,room_number,is_active,created_at').order('created_at');
+  if(error){ box.innerHTML=`<div class="empty">불러오지 못했어요: ${esc(error.message)}</div>`; return; }
   const active=(rooms||[]).filter(r=>r.is_active!==false);
-  if(!active.length){ box.innerHTML='<div class="empty">등록된 객실이 없어요.</div>'; return; }
+  if(!active.length){ box.innerHTML='<div class="empty">아직 숙소가 없어요. 아래 “+ 숙소 추가”로 시작하세요.</div>'; return; }
   const {data:feeds}=await db.from('ical_feeds').select('room_id,channel,url');
   const fmap={}; (feeds||[]).forEach(f=>{ fmap[f.room_id+'|'+f.channel]=f.url; });
-  box.innerHTML = active.map(r=>`
+  box.innerHTML=active.map(r=>`
     <div class="rc" data-room="${r.id}">
-      <div class="rh">${esc(r.room_number)}호</div>
+      <div class="rh">
+        <input class="nm" value="${esc(r.room_number)}" />
+        <button class="del">삭제</button>
+      </div>
       ${CHANNELS.map(([k,label,color])=>{
-        const url=fmap[r.id+'|'+k]||'';
-        const connected=!!url;
+        const url=fmap[r.id+'|'+k]||''; const on=!!url;
         return `<div class="row">
           <span class="tag" style="background:${color};">${label}</span>
           <input class="inp" data-ch="${k}" value="${esc(url)}" placeholder="iCal 주소 붙여넣기…" />
-          <span class="st" data-stfor="${k}" style="color:${connected?'var(--ok)':'var(--dim)'};"><span class="dot" style="background:${connected?'#22c55e':'#cfd5df'};"></span>${connected?'연결됨':'미연결'}</span>
+          <span class="st" data-stfor="${k}" style="color:${on?'var(--ok)':'var(--dim)'};"><span class="dot" style="background:${on?'#22c55e':'#cfd5df'};"></span>${on?'연결됨':'미연결'}</span>
         </div>`;
       }).join('')}
-      <button class="save">저장</button><span class="saved" style="display:none;">✓ 저장됨</span>
+      <div class="bottom"><button class="save">저장</button><span class="saved" style="display:none;">✓ 저장됨</span></div>
     </div>`).join('');
   box.querySelectorAll('.rc').forEach(card=>{
-    card.querySelector('.save').addEventListener('click',()=>saveRoom(card));
+    card.querySelector('.save').addEventListener('click',()=>saveFeeds(card));
+    card.querySelector('.del').addEventListener('click',()=>delUnit(card));
+    const nm=card.querySelector('.nm');
+    nm.addEventListener('blur',()=>renameUnit(card,nm.value));
+    nm.addEventListener('keydown',e=>{ if(e.key==='Enter') nm.blur(); });
   });
 }
 
-async function saveRoom(card){
+async function renameUnit(card,name){
+  name=(name||'').trim(); if(!name) return;
+  await db.from('rooms').update({room_number:name}).eq('id',card.dataset.room);
+}
+async function delUnit(card){
+  if(!confirm('이 숙소를 삭제할까요? (예약이 있으면 삭제되지 않아요)')) return;
+  const {error}=await db.from('rooms').delete().eq('id',card.dataset.room);
+  if(error){ alert('삭제할 수 없어요. 연결된 예약/청소가 있는 숙소는 삭제되지 않아요.'); return; }
+  loadUnits();
+}
+async function saveFeeds(card){
   const roomId=card.dataset.room;
-  const btn=card.querySelector('.save'); const savedTag=card.querySelector('.saved');
+  const btn=card.querySelector('.save'), savedTag=card.querySelector('.saved');
   btn.disabled=true; btn.textContent='저장 중…';
   try{
     for(const inp of card.querySelectorAll('.inp')){
-      const ch=inp.dataset.ch; const url=inp.value.trim();
+      const ch=inp.dataset.ch, url=inp.value.trim();
       const stEl=card.querySelector(`.st[data-stfor="${ch}"]`);
       if(url){
         const {error}=await db.from('ical_feeds').upsert({room_id:roomId,channel:ch,url,is_active:true},{onConflict:'tenant_id,room_id,channel'});
@@ -156,7 +190,6 @@ async function saveRoom(card){
   }catch(e){ alert('저장 실패: '+(e.message||e)); }
   btn.disabled=false; btn.textContent='저장';
 }
-
 start();
 </script>
 </body>
