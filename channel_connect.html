@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>채널 캘린더 연결 · StayBUT</title>
+<style>
+  :root{--bg:#f4f6f9;--panel:#fff;--line:#e6e9ef;--line2:#d3d8e0;--text:#1b2029;--muted:#5b6573;--dim:#98a1b0;
+    --booking:#3f6ea6;--airbnb:#d96a83;--agoda:#7d6bd0;--ok:#16a34a;--danger:#e0485c;--accent:#2f6fed;--ink:#16161b;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',Roboto,sans-serif;}
+  .wrap{max-width:760px;margin:0 auto;padding:28px 18px 70px;}
+  /* 로그인 */
+  #login{min-height:100dvh;display:flex;align-items:center;justify-content:center;}
+  #login .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:30px 26px;width:330px;max-width:90%;}
+  #login h1{font-size:18px;margin:0 0 2px;text-align:center;}
+  #login p{font-size:12.5px;color:var(--muted);margin:0 0 18px;text-align:center;}
+  #login input{width:100%;border:1px solid var(--line2);border-radius:10px;padding:11px 12px;font-size:14px;margin-bottom:9px;font-family:inherit;background:var(--bg);}
+  #login input:focus{outline:none;border-color:var(--ink);background:#fff;}
+  #login button{width:100%;border:0;background:var(--ink);color:#fff;border-radius:10px;padding:12px;font-size:15px;font-weight:700;cursor:pointer;}
+  #login .err{color:var(--danger);font-size:12px;min-height:16px;margin-top:6px;text-align:center;}
+  /* 본문 */
+  #app{display:none;}
+  h1.ph{font-size:22px;font-weight:700;margin:0 0 4px;}
+  .ps{font-size:13px;color:var(--muted);margin:0 0 6px;}
+  .note{font-size:12px;color:var(--dim);margin:0 0 18px;display:flex;align-items:center;gap:6px;}
+  .help{border:1px solid var(--line);border-radius:12px;background:#fff;margin:0 0 18px;overflow:hidden;}
+  .help summary{cursor:pointer;list-style:none;padding:12px 15px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:8px;}
+  .help summary::-webkit-details-marker{display:none;}
+  .help .body{padding:0 15px 14px;font-size:12.5px;color:var(--muted);line-height:1.7;}
+  .help .body b{color:var(--text);}
+  .rc{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:12px;box-shadow:0 1px 2px rgba(20,30,50,.04);}
+  .rc .rh{font-weight:700;font-size:15px;margin-bottom:10px;}
+  .row{display:flex;align-items:center;gap:10px;margin:8px 0;}
+  .tag{width:88px;flex:none;font-size:11.5px;font-weight:700;padding:4px 8px;border-radius:6px;color:#fff;text-align:center;}
+  .inp{flex:1;min-width:0;height:34px;border:1px solid var(--line2);border-radius:8px;padding:0 11px;font-size:12.5px;font-family:inherit;outline:none;}
+  .inp:focus{border-color:var(--ink);}
+  .st{flex:none;width:74px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px;}
+  .dot{width:8px;height:8px;border-radius:50%;flex:none;}
+  .rc .save{margin-top:8px;border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:8px;padding:8px 16px;font-size:12.5px;font-weight:700;cursor:pointer;}
+  .rc .saved{color:var(--ok);font-size:12px;font-weight:700;margin-left:10px;}
+  .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+  .top .who{font-size:12px;color:var(--muted);}
+  .top .who button{margin-left:8px;border:1px solid var(--line2);background:#fff;border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;}
+  .empty{padding:30px;text-align:center;color:var(--dim);font-size:13px;}
+</style>
+</head>
+<body>
+<div id="login">
+  <div class="card">
+    <h1>채널 캘린더 연결</h1>
+    <p>직원 로그인</p>
+    <input id="email" type="email" placeholder="이메일" autocomplete="username" />
+    <input id="pw" type="password" placeholder="비밀번호" autocomplete="current-password" />
+    <button id="loginBtn">로그인</button>
+    <div class="err" id="loginErr"></div>
+  </div>
+</div>
+
+<div id="app"><div class="wrap">
+  <div class="top">
+    <div></div>
+    <div class="who"><span id="whoami"></span><button id="logoutBtn">로그아웃</button></div>
+  </div>
+  <h1 class="ph">채널 캘린더 연결</h1>
+  <div class="ps">예약 사이트의 <b>iCal(캘린더 내보내기) 주소</b>를 객실별로 붙여넣으면, 예약 날짜가 자동으로 채워져요.</div>
+  <div class="note">🔒 손님 이름·연락처 등 개인정보는 가져오지 않아요. 날짜·객실만 동기화됩니다.</div>
+
+  <details class="help">
+    <summary>❔ iCal 주소는 어디서 찾나요? (사이트별 안내)</summary>
+    <div class="body">
+      <b>부킹닷컴</b> — 익스트라넷 → 객실/요금 → 캘린더 → “캘린더 동기화(Export)” → iCal 링크 복사<br>
+      <b>에어비앤비</b> — 리스팅 → 예약 가능 여부 → 캘린더 연결 → “캘린더 내보내기(.ics)” 복사<br>
+      <b>아고다</b> — YCS(익스트라넷) → 캘린더/동기화 → 내보내기 링크 복사<br>
+      <span style="color:var(--dim);">※ 링크는 객실마다 하나씩. 한 번만 등록하면 이후 자동으로 예약이 채워져요.</span>
+    </div>
+  </details>
+
+  <div id="rooms"><div class="empty">불러오는 중…</div></div>
+</div></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SB_URL='https://ijvfwajtotbqfxpdlcal.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqdmZ3YWp0b3RicWZ4cGRsY2FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODE1NDYsImV4cCI6MjA5NDA1NzU0Nn0.39TLrxZyfYthQggvef_RIQQ0YtR2DCu79KmEfEZwGZM';
+const db=supabase.createClient(SB_URL,SB_KEY);
+const $=s=>document.querySelector(s);
+const CHANNELS=[['booking','Booking.com','var(--booking)'],['airbnb','에어비앤비','var(--airbnb)'],['agoda','아고다','var(--agoda)']];
+
+async function start(){
+  const {data:{session}}=await db.auth.getSession();
+  if(!session){ $('#login').style.display='flex'; $('#app').style.display='none'; return; }
+  const {data:ok}=await db.rpc('is_console_staff');
+  if(!ok){ await db.auth.signOut(); $('#loginErr').textContent='상담/운영 권한이 없는 계정입니다.'; $('#login').style.display='flex'; $('#app').style.display='none'; return; }
+  $('#login').style.display='none'; $('#app').style.display='block';
+  $('#whoami').textContent=(session.user.email||'').split('@')[0];
+  loadRooms();
+}
+$('#loginBtn').addEventListener('click',async()=>{
+  const email=$('#email').value.trim(), pw=$('#pw').value;
+  $('#loginErr').textContent='';
+  const {error}=await db.auth.signInWithPassword({email,password:pw});
+  if(error){ $('#loginErr').textContent='로그인 실패: 이메일/비밀번호 확인'; return; }
+  start();
+});
+$('#pw').addEventListener('keydown',e=>{ if(e.key==='Enter') $('#loginBtn').click(); });
+$('#logoutBtn').addEventListener('click',async()=>{ await db.auth.signOut(); location.reload(); });
+
+function esc(t){ return String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+async function loadRooms(){
+  const box=$('#rooms');
+  const {data:rooms,error}=await db.from('rooms').select('id,room_number,is_active').order('room_number');
+  if(error){ box.innerHTML=`<div class="empty">객실을 불러오지 못했어요: ${esc(error.message)}</div>`; return; }
+  const active=(rooms||[]).filter(r=>r.is_active!==false);
+  if(!active.length){ box.innerHTML='<div class="empty">등록된 객실이 없어요.</div>'; return; }
+  const {data:feeds}=await db.from('ical_feeds').select('room_id,channel,url');
+  const fmap={}; (feeds||[]).forEach(f=>{ fmap[f.room_id+'|'+f.channel]=f.url; });
+  box.innerHTML = active.map(r=>`
+    <div class="rc" data-room="${r.id}">
+      <div class="rh">${esc(r.room_number)}호</div>
+      ${CHANNELS.map(([k,label,color])=>{
+        const url=fmap[r.id+'|'+k]||'';
+        const connected=!!url;
+        return `<div class="row">
+          <span class="tag" style="background:${color};">${label}</span>
+          <input class="inp" data-ch="${k}" value="${esc(url)}" placeholder="iCal 주소 붙여넣기…" />
+          <span class="st" data-stfor="${k}" style="color:${connected?'var(--ok)':'var(--dim)'};"><span class="dot" style="background:${connected?'#22c55e':'#cfd5df'};"></span>${connected?'연결됨':'미연결'}</span>
+        </div>`;
+      }).join('')}
+      <button class="save">저장</button><span class="saved" style="display:none;">✓ 저장됨</span>
+    </div>`).join('');
+  box.querySelectorAll('.rc').forEach(card=>{
+    card.querySelector('.save').addEventListener('click',()=>saveRoom(card));
+  });
+}
+
+async function saveRoom(card){
+  const roomId=card.dataset.room;
+  const btn=card.querySelector('.save'); const savedTag=card.querySelector('.saved');
+  btn.disabled=true; btn.textContent='저장 중…';
+  try{
+    for(const inp of card.querySelectorAll('.inp')){
+      const ch=inp.dataset.ch; const url=inp.value.trim();
+      const stEl=card.querySelector(`.st[data-stfor="${ch}"]`);
+      if(url){
+        const {error}=await db.from('ical_feeds').upsert({room_id:roomId,channel:ch,url,is_active:true},{onConflict:'tenant_id,room_id,channel'});
+        if(error) throw error;
+        stEl.innerHTML='<span class="dot" style="background:#22c55e;"></span>연결됨'; stEl.style.color='var(--ok)';
+      }else{
+        await db.from('ical_feeds').delete().eq('room_id',roomId).eq('channel',ch);
+        stEl.innerHTML='<span class="dot" style="background:#cfd5df;"></span>미연결'; stEl.style.color='var(--dim)';
+      }
+    }
+    savedTag.style.display='inline'; setTimeout(()=>savedTag.style.display='none',1800);
+  }catch(e){ alert('저장 실패: '+(e.message||e)); }
+  btn.disabled=false; btn.textContent='저장';
+}
+
+start();
+</script>
+</body>
+</html>
