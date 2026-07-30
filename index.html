@@ -8382,6 +8382,7 @@ const SUPABASE_ANON_KEY = 'sb_publishable_NMLr44iM9YQ7QsswludEqA_QSVes1IE';
 // window.supabase는 CDN에서 가져온 라이브러리이고, 우리가 만드는 클라이언트는 db로 명명
 const { createClient } = window.supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+function RH(x){x=(x==null?'':String(x)).trim();return /^\d+$/.test(x)?x+'호':x;}
 
 // ── DeepL 번역 사용량 위젯 (사이드바 하단) ──
 async function loadDeeplUsage(force){
@@ -8856,7 +8857,7 @@ async function buildSearchIndex() {
   searchIndex = {
     bookings: (bookings.data || []).map(b => ({
       id: b.id,
-      title: `${b.rooms?.room_number || '?'}호 · ${b.guest_code || '예약'}`,
+      title: `${RH(b.rooms?.room_number || '?')} · ${b.guest_code || '예약'}`,
       meta: `${b.channels?.name || '직접'} · ${b.checkin_date} ~ ${b.checkout_date} · ${b.guest_country || '?'}`,
       searchable: `${b.guest_code || ''} ${b.channel_booking_code || ''} ${b.rooms?.room_number || ''} ${b.guest_country || ''} ${b.checkin_date || ''}`,
     })),
@@ -8874,7 +8875,7 @@ async function buildSearchIndex() {
     })),
     rooms: (rooms.data || []).map(r => ({
       id: r.id,
-      title: `${r.room_number}호`,
+      title: `${RH(r.room_number)}`,
       meta: '객실',
       searchable: r.room_number,
     })),
@@ -9257,7 +9258,7 @@ function renderNewArrivalRow_(b) {
     ? Math.max(1, Math.round((new Date(b.checkout_date) - new Date(b.checkin_date)) / 86400000)) : '?';
   const roomsActive = (cachedRooms || []).filter(r => r.is_active !== false);
   // 아파트-발코니는 102·202 공용이라 검증 필요 → 102·202를 맨 위 추천으로, 나머지는 아래에.
-  const optOf = (r) => `<option value="${r.id}">${r.room_number}호</option>`;
+  const optOf = (r) => `<option value="${r.id}">${RH(r.room_number)}</option>`;
   const rec = roomsActive.filter(r => r.room_number === '102' || r.room_number === '202');
   const others = roomsActive.filter(r => r.room_number !== '102' && r.room_number !== '202');
   const roomOptions =
@@ -9272,7 +9273,7 @@ function renderNewArrivalRow_(b) {
     : `<span style="font-size:10px;font-weight:700;color:#0C447C;background:#E6F1FB;padding:1px 7px;border-radius:100px;margin-left:6px;display:inline-block;vertical-align:middle;">신규</span>`;
 
   // 첫 줄: 호실 · 이름 (+태그).  취소는 취소선.
-  const roomLabel = (hasRoom || isCancel) ? (room ? room + '호' : '객실 미정') : '';
+  const roomLabel = (hasRoom || isCancel) ? (room ? RH(room) : '객실 미정') : '';
   const titleLine = (hasRoom || isCancel)
     ? `<span style="${isCancel ? 'text-decoration:line-through;color:var(--text-secondary);' : 'color:var(--text-primary);'}">${roomLabel} · ${name}</span>${tagPill}`
     : `<span style="display:inline-flex;align-items:center;gap:4px;color:var(--text-primary);">${name}${tagPill}
@@ -9370,10 +9371,10 @@ function renderReviewQueueItemCompact_(b) {
 
   const roomOptions = (cachedRooms || [])
     .filter(r => r.is_active !== false)
-    .map(r => `<option value="${r.id}">${r.room_number}호</option>`).join('');
+    .map(r => `<option value="${r.id}">${RH(r.room_number)}</option>`).join('');
   const roomCell = (!hasRoom && !isCancelled)
     ? `<select class="rq-room-select" id="review-room-${b.id}" onclick="event.stopPropagation()"><option value="">102/202?</option>${roomOptions}</select>`
-    : `<span class="rq-room">${room}호</span>`;
+    : `<span class="rq-room">${RH(room)}</span>`;
 
   const actions = isCancelled
     ? `<button class="rq-act-btn reject" onclick="rejectReviewBooking('${b.id}')" title="확인(제거)">✕</button>`
@@ -9430,10 +9431,10 @@ function renderReviewQueueItem_(b) {
 
   const roomOptions = (cachedRooms || [])
     .filter(r => r.is_active !== false)
-    .map(r => `<option value="${r.id}">${r.room_number}호</option>`).join('');
+    .map(r => `<option value="${r.id}">${RH(r.room_number)}</option>`).join('');
   const roomCell = (!hasRoom && !isCancelled)
     ? `<span class="review-queue-info-item">🚪 <select id="review-room-${b.id}" onclick="event.stopPropagation()" style="font-size:12px; padding:3px 6px; border:1px solid var(--warning, #d99); border-radius:6px;"><option value="">객실 선택</option>${roomOptions}</select></span>`
-    : `<span class="review-queue-info-item">🚪 <strong>${room}호</strong></span>`;
+    : `<span class="review-queue-info-item">🚪 <strong>${RH(room)}</strong></span>`;
 
   return `
     <div class="review-queue-item ${isCancelled ? 'cancelled' : ''}">
@@ -9699,7 +9700,7 @@ const CHATBOT_COMMANDS = [
 const CHATBOT_FAQ = [
   { id:'doorlock', cat:'체크인/아웃', title:'도어락 비밀번호', keys:['도어락 비번','도어락 비밀번호'], ai:'O', room:true,
     ref:'체크인 당일 오전 7시 일괄 발송. 객실별 도어락 번호는 객실 정보에 저장.',
-    draft:(r)=>`안녕하세요, 스테이벗입니다 :)\n\n${r.room_number||''}호 도어락 비밀번호는 ${r.door_code||'(등록 필요)'} 입니다.\n공동현관 비밀번호는 1369369* 입니다.\n\n편안하게 들어오시고, 궁금한 점 있으시면 언제든 말씀해 주세요!` },
+    draft:(r)=>`안녕하세요, 스테이벗입니다 :)\n\n${RH(r.room_number||'')} 도어락 비밀번호는 ${r.door_code||'(등록 필요)'} 입니다.\n공동현관 비밀번호는 1369369* 입니다.\n\n편안하게 들어오시고, 궁금한 점 있으시면 언제든 말씀해 주세요!` },
   { id:'entrance', cat:'체크인/아웃', title:'공동현관 비밀번호', keys:['공동현관','현관 비번','현관 비밀번호'], ai:'O',
     ref:'공동현관 비밀번호 1369369* 안내.',
     draft:()=>`안녕하세요, 스테이벗입니다 :)\n\n공동현관 비밀번호는 1369369* 입니다.\n편하게 이용하시고 궁금한 점 있으시면 말씀해 주세요!` },
@@ -9981,7 +9982,7 @@ const chatbotHandlers = {
       msg = f.draft ? f.draft() : f.ref;
     }
     const forCopy = msg.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$');
-    return `<strong>✍ ${f.title} 답장 초안${room ? ' · ' + room + '호' : ''}</strong>
+    return `<strong>✍ ${f.title} 답장 초안${room ? ' · ' + RH(room) : ''}</strong>
       <div style="margin-top:8px;padding:11px 13px;background:var(--surface-soft);border-radius:8px;white-space:pre-wrap;font-size:12.5px;line-height:1.6;color:var(--text);">${escapeHtml_(msg)}</div>
       <div class="chatbot-suggest"><span class="chatbot-suggest-chip" onclick="navigator.clipboard.writeText(\`${forCopy}\`); this.textContent='✓ 복사됨';">📋 복사</span></div>
       ${f.ai === '△' ? '<div style="font-size:11px;color:var(--text-muted);margin-top:6px;">🟡 상황(당일 가부 등) 확인 후 보내세요.</div>' : ''}`;
@@ -9999,7 +10000,7 @@ const chatbotHandlers = {
         ${data.map(b => {
           const ci = b.checkin_date === iso ? ' · <span style="color:var(--primary-700);font-weight:700;">입실</span>' : '';
           const co = b.checkout_date === iso ? ' · <span style="color:var(--danger-600);font-weight:700;">퇴실</span>' : '';
-          return `<li>${b.rooms?.room_number || '?'}호 · ${escapeHtml_(guestLabel_(b))} (${b.num_guests || 1}명, ${fmtCountry(b.guest_country)}) · ${b.channels?.name || '-'} · ${b.checkin_date}~${b.checkout_date}${ci}${co}</li>`;
+          return `<li>${RH(b.rooms?.room_number || '?')} · ${escapeHtml_(guestLabel_(b))} (${b.num_guests || 1}명, ${fmtCountry(b.guest_country)}) · ${b.channels?.name || '-'} · ${b.checkin_date}~${b.checkout_date}${ci}${co}</li>`;
         }).join('')}
       </ul>`;
   },
@@ -10014,7 +10015,7 @@ const chatbotHandlers = {
     return `📅 <strong>오늘 체크인 ${data.length}팀</strong>
       <ul class="chatbot-msg-list">
         ${data.map(b => `<li>
-          ${b.rooms?.room_number || '?'}호 · ${b.guest_name || b.guest_code} (${b.num_guests}명, ${fmtCountry(b.guest_country)}) · ${b.channels?.name || '-'}
+          ${RH(b.rooms?.room_number || '?')} · ${b.guest_name || b.guest_code} (${b.num_guests}명, ${fmtCountry(b.guest_country)}) · ${b.channels?.name || '-'}
         </li>`).join('')}
       </ul>`;
   },
@@ -10028,7 +10029,7 @@ const chatbotHandlers = {
     if (!data?.length) return `📅 <strong>오늘 체크아웃 없음</strong>`;
     return `📅 <strong>오늘 체크아웃 ${data.length}팀</strong>
       <ul class="chatbot-msg-list">
-        ${data.map(b => `<li>${b.rooms?.room_number || '?'}호 · ${b.guest_name || b.guest_code}</li>`).join('')}
+        ${data.map(b => `<li>${RH(b.rooms?.room_number || '?')} · ${b.guest_name || b.guest_code}</li>`).join('')}
       </ul>
       <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">⏰ 12시까지 퇴실 안내</div>`;
   },
@@ -10041,7 +10042,7 @@ const chatbotHandlers = {
     if (!data?.length) return `📅 <strong>내일 체크인 없음</strong>`;
     return `📅 <strong>내일 체크인 ${data.length}팀</strong>
       <ul class="chatbot-msg-list">
-        ${data.map(b => `<li>${b.rooms?.room_number || '?'}호 · ${b.guest_name || b.guest_code} (${b.num_guests}명, ${fmtCountry(b.guest_country)})</li>`).join('')}
+        ${data.map(b => `<li>${RH(b.rooms?.room_number || '?')} · ${b.guest_name || b.guest_code} (${b.num_guests}명, ${fmtCountry(b.guest_country)})</li>`).join('')}
       </ul>`;
   },
 
@@ -10089,7 +10090,7 @@ const chatbotHandlers = {
     const total = data.reduce((s, b) => s + (b.gross_amount || 0), 0);
     return `💰 <strong>오늘 체크인 매출 ₩${total.toLocaleString()}</strong>
       <ul class="chatbot-msg-list">
-        ${data.map(b => `<li>${b.rooms?.room_number}호 · ${b.guest_code} · ₩${(b.gross_amount || 0).toLocaleString()}</li>`).join('')}
+        ${data.map(b => `<li>${RH(b.rooms?.room_number)} · ${b.guest_code} · ₩${(b.gross_amount || 0).toLocaleString()}</li>`).join('')}
       </ul>`;
   },
 
@@ -10101,7 +10102,7 @@ const chatbotHandlers = {
     return `🔔 <strong>검토 대기 ${count}건</strong>
       <ul class="chatbot-msg-list">
         ${(data || []).map(b => `<li onclick="document.querySelector('[data-view=review]').click(); closeChatbot();">
-          ${b.rooms?.room_number || '?'}호 · ${b.guest_name || b.guest_code || '?'} · ${b.checkin_date} (${b.channel_booking_code || '코드 없음'})
+          ${RH(b.rooms?.room_number || '?')} · ${b.guest_name || b.guest_code || '?'} · ${b.checkin_date} (${b.channel_booking_code || '코드 없음'})
         </li>`).join('')}
       </ul>
       <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">👆 클릭하면 검토 페이지로 이동</div>`;
@@ -10130,7 +10131,7 @@ const chatbotHandlers = {
     const statusMap = { pending: '대기', in_progress: '진행중', completed: '완료', skipped: '스킵' };
     return `🧹 <strong>오늘 청소 ${data.length}건</strong>
       <ul class="chatbot-msg-list">
-        ${data.map(t => `<li>${t.rooms?.room_number || '?'}호 · ${statusMap[t.status] || t.status} · ${t.staff?.name || '<span style="color:var(--danger-600);">미배정</span>'}</li>`).join('')}
+        ${data.map(t => `<li>${RH(t.rooms?.room_number || '?')} · ${statusMap[t.status] || t.status} · ${t.staff?.name || '<span style="color:var(--danger-600);">미배정</span>'}</li>`).join('')}
       </ul>`;
   },
 
@@ -10141,7 +10142,7 @@ const chatbotHandlers = {
     if (!data?.length) return `✅ 미배정 청소 작업 없음`;
     return `⚠ <strong>미배정 청소 ${data.length}건</strong>
       <ul class="chatbot-msg-list">
-        ${data.map(t => `<li>${t.rooms?.room_number || '?'}호</li>`).join('')}
+        ${data.map(t => `<li>${RH(t.rooms?.room_number || '?')}</li>`).join('')}
       </ul>
       <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">청소 관리 페이지에서 배정하세요</div>`;
   },
@@ -10204,7 +10205,7 @@ const chatbotHandlers = {
     const list = rooms.length ? rooms : ['101', '102', '201', '202', '301'];
     return `🔑 <strong>어느 방 도어락 비밀번호를 알려드릴까요?</strong>
       <div class="chatbot-suggest" style="flex-direction:row; flex-wrap:wrap;">
-        ${list.map(n => `<span class="chatbot-suggest-chip" style="flex:0 0 auto;" onclick="runChatbotCommand('도어락 ${n}')">${n}호</span>`).join('')}
+        ${list.map(n => `<span class="chatbot-suggest-chip" style="flex:0 0 auto;" onclick="runChatbotCommand('도어락 ${n}')">${RH(n)}</span>`).join('')}
       </div>`;
   },
 
@@ -10213,7 +10214,7 @@ const chatbotHandlers = {
     const list = rooms.length ? rooms : ['101', '102', '201', '202', '301'];
     return `📶 <strong>어느 방 Wi-Fi 비밀번호를 알려드릴까요?</strong>
       <div class="chatbot-suggest" style="flex-direction:row; flex-wrap:wrap;">
-        ${list.map(n => `<span class="chatbot-suggest-chip" style="flex:0 0 auto;" onclick="runChatbotCommand('wifi ${n}')">${n}호</span>`).join('')}
+        ${list.map(n => `<span class="chatbot-suggest-chip" style="flex:0 0 auto;" onclick="runChatbotCommand('wifi ${n}')">${RH(n)}</span>`).join('')}
       </div>`;
   },
 
@@ -10224,7 +10225,7 @@ const chatbotHandlers = {
     if (!data?.length) return `❌ 객실 정보 없음`;
     return `🔑 <strong>출입 비밀번호</strong>
       <ul class="chatbot-msg-list">
-        ${data.map(r => `<li>${r.room_number}호 · 현관 <strong>${r.entrance_code || '-'}</strong> / 도어락 <strong>${r.door_code || '-'}</strong></li>`).join('')}
+        ${data.map(r => `<li>${RH(r.room_number)} · 현관 <strong>${r.entrance_code || '-'}</strong> / 도어락 <strong>${r.door_code || '-'}</strong></li>`).join('')}
       </ul>`;
   },
 
@@ -10235,20 +10236,20 @@ const chatbotHandlers = {
     if (!data?.length) return `❌ 객실 정보 없음`;
     return `📶 <strong>Wi-Fi 정보</strong>
       <ul class="chatbot-msg-list">
-        ${data.map(r => `<li>${r.room_number}호 · <strong>${r.wifi_id || '-'}</strong> / ${r.wifi_password || '-'}</li>`).join('')}
+        ${data.map(r => `<li>${RH(r.room_number)} · <strong>${r.wifi_id || '-'}</strong> / ${r.wifi_password || '-'}</li>`).join('')}
       </ul>`;
   },
 
   roomDetail: async (roomNum) => {
     const { data: room } = await db.from('rooms').select('*').eq('room_number', roomNum).single();
-    if (!room) return `❌ ${roomNum}호 정보 없음`;
+    if (!room) return `❌ ${RH(roomNum)} 정보 없음`;
     const today = new Date().toISOString().slice(0, 10);
     const { data: currentBks } = await db.from('bookings')
       .select('guest_code, checkin_date, checkout_date, num_guests')
       .eq('room_id', room.id).lte('checkin_date', today).gt('checkout_date', today)
       .neq('booking_status', 'cancelled');
     const current = currentBks?.[0];
-    return `🚪 <strong>${room.room_number}호 (${room.room_type || ''})</strong>
+    return `🚪 <strong>${RH(room.room_number)} (${room.room_type || ''})</strong>
       <ul class="chatbot-msg-list">
         <li>${current ? `<strong>재실 중</strong> · ${current.guest_name || current.guest_code} · ${current.checkin_date} ~ ${current.checkout_date}` : '<strong>공실</strong>'}</li>
         <li>인원 기준 ${room.base_guests || 2} / 최대 ${room.max_guests || 4}명</li>
@@ -10325,7 +10326,7 @@ const chatbotHandlers = {
     if (!count) return `✅ 이번 달 취소된 예약 없음`;
     return `🚫 <strong>이번 달 취소 ${count}건</strong>
       <ul class="chatbot-msg-list">
-        ${(data || []).map(b => `<li>${b.rooms?.room_number || '?'}호 · ${b.checkin_date} · ${b.channel_booking_code || '-'}</li>`).join('')}
+        ${(data || []).map(b => `<li>${RH(b.rooms?.room_number || '?')} · ${b.checkin_date} · ${b.channel_booking_code || '-'}</li>`).join('')}
       </ul>`;
   },
 
@@ -10339,7 +10340,7 @@ const chatbotHandlers = {
     if (!data?.length) return `🧹 내일 예정된 청소 없음`;
     return `🧹 <strong>내일 청소 ${data.length}건</strong>
       <ul class="chatbot-msg-list">
-        ${data.map(t => `<li>${t.rooms?.room_number || '?'}호 · ${t.assigned_staff?.name || '<span style="color:var(--warning-600);">담당 미정</span>'}</li>`).join('')}
+        ${data.map(t => `<li>${RH(t.rooms?.room_number || '?')} · ${t.assigned_staff?.name || '<span style="color:var(--warning-600);">담당 미정</span>'}</li>`).join('')}
       </ul>`;
   },
 
@@ -10361,7 +10362,7 @@ const chatbotHandlers = {
       <ul class="chatbot-msg-list">
         ${Object.entries(byDate).map(([d, arr]) => {
           const dow = DOW[new Date(d + 'T00:00:00').getDay()];
-          return `<li>${d.slice(5)} (${dow}) · ${arr.map(t => `${t.rooms?.room_number || '?'}호${t.assigned_staff?.name ? '' : '⚠'}`).join(', ')}</li>`;
+          return `<li>${d.slice(5)} (${dow}) · ${arr.map(t => `${RH(t.rooms?.room_number || '?')}${t.assigned_staff?.name ? '' : '⚠'}`).join(', ')}</li>`;
         }).join('')}
       </ul>`;
   },
@@ -10392,7 +10393,7 @@ const chatbotHandlers = {
     if (!empty.length) return `🏠 오늘 빈 방 없음 — 만실입니다`;
     return `🛏 <strong>오늘 빈 방 ${empty.length}개</strong>
       <ul class="chatbot-msg-list">
-        ${empty.sort((a, b) => (a.room_number || '').localeCompare(b.room_number || '')).map(r => `<li>${r.room_number}호</li>`).join('')}
+        ${empty.sort((a, b) => (a.room_number || '').localeCompare(b.room_number || '')).map(r => `<li>${RH(r.room_number)}</li>`).join('')}
       </ul>`;
   },
 
@@ -11698,7 +11699,7 @@ function renderRoomMiniCards(bookings, periodDays) {
   const _occs = activeRooms.map(r => { const nn = bookings.filter(b => b.room_id === r.id).reduce((s, b) => s + (b.nights || 0), 0); return periodDays > 0 ? Math.min(100, nn / periodDays * 100) : 0; });
   const _cnts = activeRooms.map(r => bookings.filter(b => b.room_id === r.id).length);
   const _nights = activeRooms.map(r => bookings.filter(b => b.room_id === r.id).reduce((s, b) => s + (b.nights || 0), 0));
-  const _labels = activeRooms.map(r => r.room_number + '호');
+  const _labels = activeRooms.map(r => RH(r.room_number));
   grid.innerHTML = '<div style="position:relative; width:100%; height:190px;"><canvas id="room-perf-canvas" role="img" aria-label="객실별 점유율 막대 그래프"></canvas></div>';
   if (window.Chart) {
     window.__roomPerfChart = new Chart(document.getElementById('room-perf-canvas'), {
@@ -12081,7 +12082,7 @@ function renderRecentActivity(recentBookings) {
       <div class="ops-activity-item" onclick="document.querySelector('[data-view=bookings]').click()">
         <div class="ops-activity-dot" style="background: ${channelDot};"></div>
         <div class="ops-activity-body">
-          <div class="ops-activity-title">${b.rooms?.room_number || '?'}호 · ${b.channels?.name || '직접'} · ${b.guest_code}</div>
+          <div class="ops-activity-title">${RH(b.rooms?.room_number || '?')} · ${b.channels?.name || '직접'} · ${b.guest_code}</div>
           <div class="ops-activity-meta">${b.checkin_date} 체크인 · 입력 ${timeAgoText(b.created_at)}</div>
         </div>
         <div class="ops-activity-amount">${b.gross_amount ? fmtKRW(b.gross_amount) : '-'}</div>
@@ -12373,7 +12374,7 @@ function renderRoomCards(bookings, daysInMonth) {
     return `
       <div class="room-card">
         <div class="room-card-header">
-          <div class="room-card-number">${r.room_number}호</div>
+          <div class="room-card-number">${RH(r.room_number)}</div>
           <div class="room-card-occ" style="color: ${occColor}">${occ}%</div>
         </div>
         <div class="room-card-features">
@@ -12448,7 +12449,7 @@ function renderOccupancyCalendar(bookings, year, month) {
   // 객실 행
   let bodyRows = '';
   cachedRooms.forEach(r => {
-    let row = `<tr><td class="calendar-room-label">${r.room_number}호</td>`;
+    let row = `<tr><td class="calendar-room-label">${RH(r.room_number)}</td>`;
     for (let d = 1; d <= daysInMonth; d++) {
       const date = new Date(year, month, d);
       const wd = date.getDay();
@@ -12459,7 +12460,7 @@ function renderOccupancyCalendar(bookings, year, month) {
         isOccupied ? 'occupied' : '',
         isWeekend ? 'weekend' : '',
       ].filter(Boolean).join(' ');
-      row += `<td class="${cls}" title="${r.room_number}호 - ${month + 1}/${d} ${isOccupied ? '예약됨' : '빈 객실'}"></td>`;
+      row += `<td class="${cls}" title="${RH(r.room_number)} - ${month + 1}/${d} ${isOccupied ? '예약됨' : '빈 객실'}"></td>`;
     }
     row += '</tr>';
     bodyRows += row;
@@ -12593,7 +12594,7 @@ function renderBookingCalendar(bookings) {
 
     rowsHtml += `
       <div style="display:grid; grid-template-columns:70px repeat(7, 1fr); border-bottom:1px solid var(--border); min-height:${rowH}px;">
-        <div style="display:flex; align-items:center; padding:0 8px; font-size:13px; font-weight:700; border-right:2px solid var(--border-stronger); background:var(--surface-soft);">${room.room_number}호</div>
+        <div style="display:flex; align-items:center; padding:0 8px; font-size:13px; font-weight:700; border-right:2px solid var(--border-stronger); background:var(--surface-soft);">${RH(room.room_number)}</div>
         <div style="grid-column:2 / 9; display:grid; grid-template-columns:repeat(7, 1fr); grid-auto-rows:30px; position:relative;">
           ${bg}${barsHtml || ''}
         </div>
@@ -12642,7 +12643,7 @@ window.showDayBookings = function(dateStr) {
       return `
         <div style="display:flex; align-items:center; gap:10px; padding:11px 16px; border-bottom:1px solid var(--border); cursor:pointer;" onclick="editBooking('${b.id}'); closeDayBookings();">
           <div style="width:4px; align-self:stretch; background:${accent}; border-radius:2px; flex-shrink:0;"></div>
-          <div style="font-weight:700; font-size:15px; min-width:44px;">${room}호</div>
+          <div style="font-weight:700; font-size:15px; min-width:44px;">${RH(room)}</div>
           <div style="flex:1; min-width:0;">
             <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${name}</div>
             <div style="font-size:12px; color:var(--text-muted);">${ch} · ${b.checkin_date} ~ ${b.checkout_date} · ${b.num_guests || '?'}명</div>
@@ -12826,7 +12827,7 @@ function bkRenderRangeSummary_(start, end) {
     if (rn != null) byRoom[rn] = (byRoom[rn] || 0) + 1;
   });
   const roomChips = Object.keys(byRoom).sort().map(rn =>
-    `<span style="font-size:12px; padding:3px 9px; border-radius:6px; background:${byRoom[rn] ? '#E6F1FB' : 'var(--neutral-100)'}; color:${byRoom[rn] ? '#0C447C' : 'var(--text-muted)'}; font-weight:600;">${rn}호 ${byRoom[rn]}건</span>`
+    `<span style="font-size:12px; padding:3px 9px; border-radius:6px; background:${byRoom[rn] ? '#E6F1FB' : 'var(--neutral-100)'}; color:${byRoom[rn] ? '#0C447C' : 'var(--text-muted)'}; font-weight:600;">${RH(rn)} ${byRoom[rn]}건</span>`
   ).join('');
 
   // 기간 예약 목록 표
@@ -12841,7 +12842,7 @@ function bkRenderRangeSummary_(start, end) {
       return `
         <tr style="border-top:1px solid var(--border); cursor:pointer;" onclick="editBooking('${b.id}')">
           <td style="padding:8px 10px; color:${chColor}; font-weight:600; white-space:nowrap;">${ch.slice(0,4)}</td>
-          <td style="padding:8px 10px; font-weight:700;">${b.rooms?.room_number || '?'}호</td>
+          <td style="padding:8px 10px; font-weight:700;">${RH(b.rooms?.room_number || '?')}</td>
           <td style="padding:8px 10px; color:var(--text-soft);">${b.checkin_date} ~ ${b.checkout_date}</td>
           <td style="padding:8px 10px; text-align:center; color:var(--text-soft);">${b.num_guests || '?'}명</td>
           <td style="padding:8px 10px; text-align:right; font-weight:600;">₩${fmt(b.gross_amount)}</td>
@@ -13022,7 +13023,7 @@ function renderBookingsMobile_() {
   const card = (b) => `
     <div onclick="editBooking('${b.id}')" style="border:1px solid ${bkChBorderColor_(b)};border-left:4px solid ${bkChColor_(b)};border-radius:8px;padding:9px 11px;cursor:pointer;margin-bottom:6px;">
       <div style="display:flex;justify-content:space-between;align-items:baseline;">
-        <span style="font-size:15px;font-weight:600;min-width:0;">${esc(rn(b) || '?')}호 · ${esc(b.booker_name || b.channel_booking_code || '게스트')}</span>
+        <span style="font-size:15px;font-weight:600;min-width:0;">${RH(esc(rn(b) || '?'))} · ${esc(b.booker_name || b.channel_booking_code || '게스트')}</span>
         <span style="flex-shrink:0;margin-left:8px;">${channelChipInner_(b.channels?.name || '직접')}</span>
       </div>
       <div style="font-size:12px;color:#888;margin-top:3px;">${b.checkin_date} ~ ${b.checkout_date} · ${nights(b)}박 · ${b.num_guests || 1}명</div>
@@ -13104,7 +13105,7 @@ function renderBookingList(bookings) {
       <td style="text-align:center;" onclick="event.stopPropagation()"><input type="checkbox" class="bk-row-check" value="${b.id}" data-code="${b.guest_code}"></td>
       <td><strong>${displayName}</strong>${subCode ? `<div style="font-size:11px; color:var(--text-muted); font-weight:400; margin-top:2px;">${subCode}</div>` : ''}</td>
       <td>${b.channels?.name || '-'}</td>
-      <td>${b.rooms?.room_number || '-'}호</td>
+      <td>${RH(b.rooms?.room_number || '-')}</td>
       <td>${fmtDate(b.checkin_date)}</td>
       <td>${b.nights || 0}박</td>
       <td>${b.num_guests || 1}명</td>
@@ -13554,15 +13555,15 @@ function renderSheet() {
       <p><b>효과</b> · ${ef}</p>
     </div>`;
   let levers = '';
-  if (lowAdrRoom) levers += lever('1순위 · 즉효', '#26324a', `객단가 인상 (${lowAdrRoom.room}호·평일)`, `+${KRW(allEff5)} / 월`,
-    `${lowAdrRoom.room}호 ADR ${KRW(lowAdrRoom.adr)}(최저) · 평일 ADR ${KRW(wdAdr)} (주말 대비 ${wePrem >= 0 ? '−' : '+'}${Math.abs(wePrem).toFixed(0)}%)`,
-    `${lowAdrRoom.room}호 +10%, 평일가 +5% → 전 객실 ADR +5%`,
-    `${lowAdrRoom.room}호 월 <b>+${KRW(lowAdrEff)}</b> · 전 객실 +5% = <b>+${KRW(allEff5)}</b> → 거래액 <b>${KRW(gross + allEff5)}</b>`);
+  if (lowAdrRoom) levers += lever('1순위 · 즉효', '#26324a', `객단가 인상 (${RH(lowAdrRoom.room)}·평일)`, `+${KRW(allEff5)} / 월`,
+    `${RH(lowAdrRoom.room)} ADR ${KRW(lowAdrRoom.adr)}(최저) · 평일 ADR ${KRW(wdAdr)} (주말 대비 ${wePrem >= 0 ? '−' : '+'}${Math.abs(wePrem).toFixed(0)}%)`,
+    `${RH(lowAdrRoom.room)} +10%, 평일가 +5% → 전 객실 ADR +5%`,
+    `${RH(lowAdrRoom.room)} 월 <b>+${KRW(lowAdrEff)}</b> · 전 객실 +5% = <b>+${KRW(allEff5)}</b> → 거래액 <b>${KRW(gross + allEff5)}</b>`);
   if (cancelLost > 0) levers += lever('2순위 · 즉효', '#26324a', '취소 방어', `손실 ${KRW(cancelLost)} 회수`,
     `취소율 ${cancelRate.toFixed(0)}% · 손실 ${KRW(cancelLost)}`, `비환불(선결제) 요금제↑ · 취소 즉시 재판매 알림`,
     `취소분의 30%만 재판매해도 <b>+${KRW(cancelRecover)}</b>`);
-  if (lowOccRoom && fillEff > 0) levers += lever('3순위 · 즉효', '#26324a', `${lowOccRoom.room}호 공실 채우기`, `+${KRW(fillEff)}`,
-    `${lowOccRoom.room}호 점유 ${lowOccRoom.occ.toFixed(0)}%(최저) · 빈 ${emptyN}박 · ADR ${KRW(lowOccRoom.adr)}`,
+  if (lowOccRoom && fillEff > 0) levers += lever('3순위 · 즉효', '#26324a', `${RH(lowOccRoom.room)} 공실 채우기`, `+${KRW(fillEff)}`,
+    `${RH(lowOccRoom.room)} 점유 ${lowOccRoom.occ.toFixed(0)}%(최저) · 빈 ${emptyN}박 · ADR ${KRW(lowOccRoom.adr)}`,
     `막판가·최소박 완화 · 평일 프로모션 (인상보다 채우기 우선)`, `빈 ${emptyN}박 중 ${fillN}박만 채워도 <b>+${KRW(fillEff)}</b>`);
   if (topCh && topCh.share > 55) levers += lever('4순위 · 구조', '#6b7890', '채널 다변화', '',
     `${topCh.n} ${topCh.share.toFixed(0)}% 편중 · 채널 정책 리스크`, `타 채널·직접예약 노출↑ → 의존도 60%대로`,
@@ -13615,9 +13616,9 @@ function renderSheet() {
   // ✦ AI 인사이트 (실데이터 규칙 기반 자동 문장)
   const hiAdrRoom = [...rStats].filter(s => s.adr > 0).sort((a, b) => b.adr - a.adr)[0];
   const ins = [];
-  if (roomBySales[0] && roomBySales[0].rev > 0) ins.push(['🏆', `<b>${roomBySales[0].room}호가 매출 1위</b> — 전체 거래액의 <b>${gross > 0 ? Math.round(roomBySales[0].rev / gross * 100) : 0}%</b>(${KRW(roomBySales[0].rev)}) · 점유 ${roomBySales[0].occ.toFixed(0)}%.`]);
-  if (hiAdrRoom) ins.push(['💎', `<b>${hiAdrRoom.room}호 ADR 최고</b> ${KRW(hiAdrRoom.adr)}/박${hiAdrRoom.occ < occ ? ` — 점유 ${hiAdrRoom.occ.toFixed(0)}%로 평균 이하라 가격 방어 vs 점유 회복 판단 필요.` : '.'}`]);
-  if (lowOccRoom) ins.push(['⚠️', `<b>${lowOccRoom.room}호 점유 ${lowOccRoom.occ.toFixed(0)}%로 최저</b> — 막판가·최소박 완화로 공실 채우기 대상.`]);
+  if (roomBySales[0] && roomBySales[0].rev > 0) ins.push(['🏆', `<b>${RH(roomBySales[0].room)}가 매출 1위</b> — 전체 거래액의 <b>${gross > 0 ? Math.round(roomBySales[0].rev / gross * 100) : 0}%</b>(${KRW(roomBySales[0].rev)}) · 점유 ${roomBySales[0].occ.toFixed(0)}%.`]);
+  if (hiAdrRoom) ins.push(['💎', `<b>${RH(hiAdrRoom.room)} ADR 최고</b> ${KRW(hiAdrRoom.adr)}/박${hiAdrRoom.occ < occ ? ` — 점유 ${hiAdrRoom.occ.toFixed(0)}%로 평균 이하라 가격 방어 vs 점유 회복 판단 필요.` : '.'}`]);
+  if (lowOccRoom) ins.push(['⚠️', `<b>${RH(lowOccRoom.room)} 점유 ${lowOccRoom.occ.toFixed(0)}%로 최저</b> — 막판가·최소박 완화로 공실 채우기 대상.`]);
   if (topCh) ins.push(['🔗', `<b>${topCh.n}</b>이 거래액의 <b>${topCh.share.toFixed(0)}%</b> — ${topCh.share > 55 ? '채널 편중, 타 채널·직접예약 다변화 필요.' : '채널 분산 양호.'}`]);
   if (wdAdr > 0 && weAdr > 0) ins.push(['📈', `주말 ADR이 평일 대비 <b>${wePrem >= 0 ? '+' : ''}${wePrem.toFixed(0)}%</b> — ${wePrem < 8 ? '주말 프리미엄이 약함, 주말가 상향 여력.' : '주말 프리미엄 정상 작동.'}`]);
   ins.push(['📅', `체크인은 <b>${DOWK[busyDow]}요일</b>에 최다(${dowCnt[busyDow]}건) — 가격·청소 인력 배치 참고.`]);
@@ -13631,7 +13632,7 @@ function renderSheet() {
 
   const roomRows = rStats.map(s => {
     const tag = s.adr === minAdr && s.adr > 0 ? ' <span class="as-pill" style="background:#fdecec;color:var(--red);">최저가</span>' : (s.adr === maxAdr && s.adr > 0 ? ' <span class="as-pill" style="background:#eae7fb;color:var(--ago);">최고가</span>' : '');
-    return `<tr><td>${s.room}호${tag}</td><td>${s.occN}</td><td>${s.occ.toFixed(0)}%</td><td>${KRW(s.adr)}</td><td>${KRW(s.rev)}</td><td class="as-pos">+${KRW(s.rev * 0.05)}</td><td class="as-pos">+${KRW(s.rev * 0.10)}</td></tr>`;
+    return `<tr><td>${RH(s.room)}${tag}</td><td>${s.occN}</td><td>${s.occ.toFixed(0)}%</td><td>${KRW(s.adr)}</td><td>${KRW(s.rev)}</td><td class="as-pos">+${KRW(s.rev * 0.05)}</td><td class="as-pos">+${KRW(s.rev * 0.10)}</td></tr>`;
   }).join('');
 
   // 전월 대비 델타 (특정 월 · 월 전체일 때만)
@@ -13656,7 +13657,7 @@ function renderSheet() {
   { const vals = monthly.map(x => x.gross); if (vals.length >= 2) { const mx = Math.max(...vals, 1), mn = Math.min(...vals, 0), W = 150, H = 46; const pts = vals.map((v, i) => { const x = i / (vals.length - 1) * W; const y = H - ((v - mn) / ((mx - mn) || 1)) * (H - 8) - 4; return x.toFixed(0) + ',' + y.toFixed(0); }).join(' '); const ci = __sheetView !== 'all' ? months.indexOf(__sheetView) : vals.length - 1; const cx = ci >= 0 ? ci / (vals.length - 1) * W : 0; const cy = ci >= 0 ? H - ((vals[ci] - mn) / ((mx - mn) || 1)) * (H - 8) - 4 : 0; sparkSvg = `<svg width="150" height="46" viewBox="0 0 150 46"><polyline points="${pts}" fill="none" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="${cx.toFixed(0)}" cy="${cy.toFixed(0)}" r="3.5" fill="#2563eb"/></svg>`; } }
   // 핵심 한 줄 인사이트
   let bannerTxt = '';
-  { const parts = []; if (roomBySales[0] && gross > 0) parts.push(`<b>${roomBySales[0].room}호가 매출을 이끌고</b> 있어요 (전체의 ${Math.round(roomBySales[0].rev / gross * 100)}%)`); if (lowAdrRoom) parts.push(`<b>${lowAdrRoom.room}호 객단가가 최저(${KRW(lowAdrRoom.adr)})</b>라 <b style="color:#2563eb;">+10% 인상 시 월 +${KRW(Math.round(lowAdrRoom.rev * 0.1))}</b> 여력`); bannerTxt = parts.length ? parts.join('. ') + '.' : (ins[0] ? ins[0][1] : ''); }
+  { const parts = []; if (roomBySales[0] && gross > 0) parts.push(`<b>${RH(roomBySales[0].room)}가 매출을 이끌고</b> 있어요 (전체의 ${Math.round(roomBySales[0].rev / gross * 100)}%)`); if (lowAdrRoom) parts.push(`<b>${RH(lowAdrRoom.room)} 객단가가 최저(${KRW(lowAdrRoom.adr)})</b>라 <b style="color:#2563eb;">+10% 인상 시 월 +${KRW(Math.round(lowAdrRoom.rev * 0.1))}</b> 여력`); bannerTxt = parts.length ? parts.join('. ') + '.' : (ins[0] ? ins[0][1] : ''); }
 
   // 💰 프라이싱 전략 (9~12월 목표 월 거래액 ₩28,000,000 · 월별 특수성)
   const PR_ROOMS = [
@@ -13680,7 +13681,7 @@ function renderSheet() {
     const we = _pm ? _rk(p.we * _pm.weM) : p.we;
     const peak = (_pm && _pm.peakM) ? _rk(p.we * _pm.peakM) : null;
     const tagHtml = p.tag ? ` <span class="as-pill" style="background:${p.tag === '최저가' ? '#fdecec' : '#eae7fb'};color:${p.tag === '최저가' ? 'var(--red)' : 'var(--ago)'};">${p.tag}</span>` : '';
-    return `<tr><td>${p.r}호${tagHtml}</td><td>${KRW(wd)}</td><td>${KRW(we)}</td>${(_pm && _pm.peakM) ? `<td style="color:#d9534f;font-weight:800;">${KRW(peak)}</td>` : ''}</tr>`;
+    return `<tr><td>${RH(p.r)}${tagHtml}</td><td>${KRW(wd)}</td><td>${KRW(we)}</td>${(_pm && _pm.peakM) ? `<td style="color:#d9534f;font-weight:800;">${KRW(peak)}</td>` : ''}</tr>`;
   };
   const pricingHtml = `
     <div class="as-sec" style="margin-top:24px;font-size:16px;">💰 프라이싱 전략 <span style="color:var(--mut);font-weight:600;font-size:12px;">· 목표 월 거래액 ₩28,000,000</span></div>
@@ -13700,10 +13701,10 @@ function renderSheet() {
     scope: scopeLabel,
     kpi: [['거래액(GMV)', gross], ['정산액', net], ['예약건수', bookingsN], ['당월숙박', occNights], ['ADR', Math.round(adr)], ['OCC(%)', Math.round(occ)], ['RevPAR', Math.round(revpar)], ['취소건', cancels.length], ['취소손실', cancelLost]],
     channels: chArr.map(c => [c.n, c.rev, c.cnt, Number(c.share.toFixed(1))]),
-    rooms: rStats.map(s => [s.room + '호', s.occN, Math.round(s.occ), Math.round(s.adr), s.rev, Math.round(s.rev * 0.05), Math.round(s.rev * 0.10)]),
+    rooms: rStats.map(s => [RH(s.room), s.occN, Math.round(s.occ), Math.round(s.adr), s.rev, Math.round(s.rev * 0.05), Math.round(s.rev * 0.10)]),
     weekday: [['평일', Math.round(wdAdr), wk.wd.nts, wk.wd.rev], ['주말(금·토)', Math.round(weAdr), wk.we.nts, wk.we.rev]],
     nationality: natArr.map(x => [x.name, x.v]),
-    pricing: PR_ROOMS.map(p => { const wd = _pm ? _rk(p.wd * _pm.wdM) : p.wd; const we = _pm ? _rk(p.we * _pm.weM) : p.we; const pk = (_pm && _pm.peakM) ? _rk(p.we * _pm.peakM) : ''; return [p.r + '호', wd, we, pk]; }),
+    pricing: PR_ROOMS.map(p => { const wd = _pm ? _rk(p.wd * _pm.wdM) : p.wd; const we = _pm ? _rk(p.we * _pm.weM) : p.we; const pk = (_pm && _pm.peakM) ? _rk(p.we * _pm.peakM) : ''; return [RH(p.r), wd, we, pk]; }),
   };
 
   host.innerHTML = `
@@ -13776,7 +13777,7 @@ function renderSheet() {
       <div style="font-size:12px;color:var(--mut);font-weight:700;margin-bottom:9px;">객실별 현재 매출 비교</div>
       ${roomBySales.map((s, i) => `
         <div style="display:flex;align-items:center;gap:10px;margin:7px 0;font-size:12.5px;">
-          <div style="width:48px;flex:none;font-weight:700;">${s.room}호</div>
+          <div style="width:48px;flex:none;font-weight:700;">${RH(s.room)}</div>
           <div style="flex:1;height:16px;background:#f1f3f7;border-radius:5px;overflow:hidden;"><div style="width:${100 * s.rev / maxRoomRev}%;height:100%;background:${i === 0 ? '#1a5fc4' : '#8792a8'};border-radius:5px;"></div></div>
           <div style="width:110px;flex:none;text-align:right;font-weight:800;">${KRW(s.rev)}</div>
           <div style="width:78px;flex:none;text-align:right;color:var(--mut);font-size:11px;">OCC ${s.occ.toFixed(0)}%</div>
@@ -14031,7 +14032,7 @@ function analysisRender() {
     <table class="an-table">
       <thead><tr><th>객실</th><th>점유율</th><th>RevPAR</th><th>평일 기준가</th><th>주말 기준가</th></tr></thead>
       <tbody>${roomStats.map(s => `
-        <tr><td>${s.room}호</td>
+        <tr><td>${RH(s.room)}</td>
           <td class="num">${s.occ.toFixed(0)}%</td>
           <td class="num">${fmtKRW(s.revpar)}</td>
           <td class="num">${s.baseWd > 0 ? fmtKRW(s.baseWd) : '—'}</td>
@@ -14058,7 +14059,7 @@ function analysisRender() {
     <table class="an-table">
       <thead><tr><th>객실</th><th>빈 날(4주)</th><th class="an-bar-cell">공실</th></tr></thead>
       <tbody>${rooms.map(r => `
-        <tr><td>${r.room_number}호</td><td class="num">${vac[r.room_number]}일</td>
+        <tr><td>${RH(r.room_number)}</td><td class="num">${vac[r.room_number]}일</td>
           <td><div class="an-mini"><div style="width:${(vac[r.room_number] / vacMax * 100).toFixed(0)}%; background:#c0451f;"></div></div></td></tr>`).join('')}
       </tbody>
     </table>
@@ -14083,7 +14084,7 @@ function analysisRender() {
     return `
       <div style="border:1px solid var(--border); border-radius:10px; padding:13px 15px;">
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
-          <span style="font-weight:800; font-size:14px; color:var(--text);">${s.room}호</span>
+          <span style="font-weight:800; font-size:14px; color:var(--text);">${RH(s.room)}</span>
           <span class="an-chip" style="background:${bg}; color:${fg};">${tag}</span>
         </div>
         <div style="font-size:12px; color:var(--text-soft); margin-bottom:8px;">평일 ${s.baseWd > 0 ? fmtKRW(s.baseWd) : '—'} · 주말 ${s.baseWe > 0 ? fmtKRW(s.baseWe) : '—'} · 점유 ${s.occ.toFixed(0)}% · 리드 ${s.avgLead}일</div>
@@ -14173,17 +14174,17 @@ function analysisRender() {
   const insights = [];
   if (roomRevArr[0] && roomRevArr[0].rev > 0) {
     const t = roomRevArr[0];
-    insights.push({ ic: '🏆', txt: `<b>${t.room}호가 매출 1위</b> — 전체 매출의 <b>${(t.rev / totalRoomRev * 100).toFixed(0)}%</b>(${fmtKRW(t.rev)})를 책임지는 핵심 객실. 점유율 ${t.occ.toFixed(0)}%.` });
+    insights.push({ ic: '🏆', txt: `<b>${RH(t.room)}가 매출 1위</b> — 전체 매출의 <b>${(t.rev / totalRoomRev * 100).toFixed(0)}%</b>(${fmtKRW(t.rev)})를 책임지는 핵심 객실. 점유율 ${t.occ.toFixed(0)}%.` });
   }
   const byAdr = [...roomRevArr].filter(r => r.adr > 0).sort((a, b) => b.adr - a.adr);
   if (byAdr[0]) {
     const t = byAdr[0];
     const note = t.occ < occAll ? ` 다만 점유율(${t.occ.toFixed(0)}%)이 평균 이하라 <b>가격 방어 vs 점유 회복</b> 판단 필요.` : ` 점유율도 ${t.occ.toFixed(0)}%로 견조.`;
-    insights.push({ ic: '💎', txt: `<b>${t.room}호가 ADR 최고</b> (${fmtKRW(t.adr)}/박).${note}` });
+    insights.push({ ic: '💎', txt: `<b>${RH(t.room)}가 ADR 최고</b> (${fmtKRW(t.adr)}/박).${note}` });
   }
   const byOcc = [...roomRevArr].sort((a, b) => a.occ - b.occ);
   if (byOcc[0] && byOcc[0].occ < 45) {
-    insights.push({ ic: '⚠️', txt: `<b>${byOcc[0].room}호 점유율이 ${byOcc[0].occ.toFixed(0)}%로 최저</b> — 노출 강화·최소박 완화 또는 평일·당일가 인하 검토 대상.` });
+    insights.push({ ic: '⚠️', txt: `<b>${RH(byOcc[0].room)} 점유율이 ${byOcc[0].occ.toFixed(0)}%로 최저</b> — 노출 강화·최소박 완화 또는 평일·당일가 인하 검토 대상.` });
   }
   const earlyN = active.filter(b => { const ld = leadDays_(b); return ld != null && ld >= 8; }).length;
   if (bookingsN > 0) {
@@ -14253,7 +14254,7 @@ function analysisRender() {
   let cum = 0;
   const roomParetoRows = roomRevArr.map(r => {
     const share = r.rev / totalRoomRev * 100; cum += share;
-    return `<tr><td>${r.room}호</td><td class="num">${fmtKRW(r.rev)}</td><td class="num">${share.toFixed(0)}%</td><td class="num">${cum.toFixed(0)}%</td>
+    return `<tr><td>${RH(r.room)}</td><td class="num">${fmtKRW(r.rev)}</td><td class="num">${share.toFixed(0)}%</td><td class="num">${cum.toFixed(0)}%</td>
       <td><div class="an-mini"><div style="width:${share.toFixed(0)}%; background:#639922;"></div></div></td></tr>`;
   }).join('');
   const chParetoRows = chRevArr.map(c => {
@@ -14377,7 +14378,7 @@ function analysisRender() {
         <tbody>${rooms.map(r => {
           const row = matrix[r.room_number] || {};
           const tot = Object.values(row).reduce((s, v) => s + v, 0);
-          return `<tr><td>${r.room_number}호</td>${mChNames.map(n => `<td class="num">${row[n] ? fmtKRW(row[n]) : '—'}</td>`).join('')}<td class="num" style="font-weight:700;">${fmtKRW(tot)}</td></tr>`;
+          return `<tr><td>${RH(r.room_number)}</td>${mChNames.map(n => `<td class="num">${row[n] ? fmtKRW(row[n]) : '—'}</td>`).join('')}<td class="num" style="font-weight:700;">${fmtKRW(tot)}</td></tr>`;
         }).join('')}
         </tbody>
       </table>
@@ -14496,19 +14497,19 @@ function analysisRender() {
       <div style="font-size:12.5px;margin-top:4px;color:var(--text);"><b>효과</b> · ${effect}</div>
     </div>`;
   let _levers = '';
-  if (_lowAdrRoom) _levers += _lever('1순위 · 즉효', '#26324a', `객단가 인상 (${_lowAdrRoom.room}호·평일)`,
+  if (_lowAdrRoom) _levers += _lever('1순위 · 즉효', '#26324a', `객단가 인상 (${RH(_lowAdrRoom.room)}·평일)`,
     `+${fmtKRW(_allEffect5)} / 월`,
-    `${_lowAdrRoom.room}호 ADR ${fmtKRW(_lowAdrRoom.adr)}(최저) · 평일 ADR ${fmtKRW(_wdA)} (주말 대비 ${_wePrem>=0?'−':'+'}${Math.abs(_wePrem).toFixed(0)}%)`,
-    `${_lowAdrRoom.room}호 +10%, 평일가 +5% → 전 객실 ADR +5%`,
-    `${_lowAdrRoom.room}호 월 <b>+${fmtKRW(_lowAdrEffect)}</b> · 전 객실 +5% = <b>+${fmtKRW(_allEffect5)}</b> → 거래액 <b>${fmtKRW(revTotal + _allEffect5)}</b>`);
+    `${RH(_lowAdrRoom.room)} ADR ${fmtKRW(_lowAdrRoom.adr)}(최저) · 평일 ADR ${fmtKRW(_wdA)} (주말 대비 ${_wePrem>=0?'−':'+'}${Math.abs(_wePrem).toFixed(0)}%)`,
+    `${RH(_lowAdrRoom.room)} +10%, 평일가 +5% → 전 객실 ADR +5%`,
+    `${RH(_lowAdrRoom.room)} 월 <b>+${fmtKRW(_lowAdrEffect)}</b> · 전 객실 +5% = <b>+${fmtKRW(_allEffect5)}</b> → 거래액 <b>${fmtKRW(revTotal + _allEffect5)}</b>`);
   if (cancelledRevLost > 0) _levers += _lever('2순위 · 즉효', '#26324a', '취소 방어',
     `손실 ${fmtKRW(cancelledRevLost)} 회수`,
     `취소율 ${cancelRateAll.toFixed(0)}% · 손실 ${fmtKRW(cancelledRevLost)}`,
     `비환불(선결제) 요금제↑ · 취소 즉시 재판매 알림`,
     `취소분의 30%만 재판매해도 <b>+${fmtKRW(_cancelRecover)}</b>`);
-  if (_lowOccRoom && _fillEffect > 0) _levers += _lever('3순위 · 즉효', '#26324a', `${_lowOccRoom.room}호 공실 채우기`,
+  if (_lowOccRoom && _fillEffect > 0) _levers += _lever('3순위 · 즉효', '#26324a', `${RH(_lowOccRoom.room)} 공실 채우기`,
     `+${fmtKRW(_fillEffect)}`,
-    `${_lowOccRoom.room}호 점유 ${_lowOccRoom.occ.toFixed(0)}%(최저) · 빈 ${_emptyNights}박 · ADR ${_lowOccInfo?fmtKRW(_lowOccInfo.adr):'—'}`,
+    `${RH(_lowOccRoom.room)} 점유 ${_lowOccRoom.occ.toFixed(0)}%(최저) · 빈 ${_emptyNights}박 · ADR ${_lowOccInfo?fmtKRW(_lowOccInfo.adr):'—'}`,
     `막판가·최소박 완화 · 평일 프로모션 (인상보다 채우기 우선)`,
     `빈 ${_emptyNights}박 중 ${_fillN}박만 채워도 <b>+${fmtKRW(_fillEffect)}</b>`);
   if (_topCh && _topChShare > 55) _levers += _lever('4순위 · 구조', '#6b7890', '채널 다변화',
@@ -14771,7 +14772,7 @@ async function loadRooms() {
       <div class="room-status-card ${state.code === 'inactive' ? 'inactive' : ''}" onclick="openRoomDetail('${r.id}')" style="cursor: pointer;">
         <div class="room-status-head">
           <div class="room-status-number">
-            ${r.room_number}호
+            ${RH(r.room_number)}
             <span class="room-meta-small">${features.join(' · ')}</span>
           </div>
           <div class="room-status-badge ${state.code}">${state.label}</div>
@@ -14855,7 +14856,7 @@ window.openRoomDetail = async (roomId) => {
   // 빠른 탭 (5개 객실 전환)
   const activeRooms = cachedRooms.filter(r => r.is_active);
   $('#room-quick-tabs').innerHTML = activeRooms.map(r => `
-    <button class="room-quick-tab ${r.id === roomId ? 'active' : ''}" onclick="openRoomDetail('${r.id}')">${r.room_number}호</button>
+    <button class="room-quick-tab ${r.id === roomId ? 'active' : ''}" onclick="openRoomDetail('${r.id}')">${RH(r.room_number)}</button>
   `).join('');
 
   renderRoomDetail(room);
@@ -14873,7 +14874,7 @@ window.cancelRoomDetailEdit = () => {
 };
 
 function renderRoomDetail(room) {
-  $('#room-detail-title').textContent = `${room.room_number}호`;
+  $('#room-detail-title').textContent = `${RH(room.room_number)}`;
   $('#room-detail-subtitle').textContent = room.room_type
     ? `${room.room_type}${room.room_size_pyeong ? ' · ' + room.room_size_pyeong + '평' : ''}${room.bed_config ? ' · ' + room.bed_config : ''}`
     : '객실 상세 정보 · 좌측 정보 수정 후 [저장]';
@@ -15109,7 +15110,7 @@ window.saveRoomDetail = async () => {
   const idx = cachedRooms.findIndex(r => r.id === currentRoomDetailId);
   if (idx >= 0) cachedRooms[idx] = { ...cachedRooms[idx], ...payload };
 
-  logEvent('room_updated', `객실 ${cachedRooms[idx]?.room_number || '?'}호 정보 수정`, {
+  logEvent('room_updated', `객실 ${RH(cachedRooms[idx]?.room_number || '?')} 정보 수정`, {
     targetType: 'room', targetId: currentRoomDetailId,
   });
 
@@ -15128,7 +15129,7 @@ function openBookingModal(booking = null) {
   $('#booking-channel').innerHTML = cachedChannels.map(c =>
     `<option value="${c.id}">${c.name}</option>`).join('');
   $('#booking-room').innerHTML = cachedRooms.map(r =>
-    `<option value="${r.id}">${r.room_number}호</option>`).join('');
+    `<option value="${r.id}">${RH(r.room_number)}</option>`).join('');
 
   if (booking) {
     $('#booking-modal-title').textContent = '예약 수정';
@@ -15208,7 +15209,7 @@ $('#save-booking').addEventListener('click', async () => {
 
       alert(
         `⛔ 오버부킹 차단 — 저장할 수 없습니다\n\n` +
-        `${room?.room_number || '?'}호에 같은 기간 예약이 이미 있어요:\n\n` +
+        `${RH(room?.room_number || '?')}에 같은 기간 예약이 이미 있어요:\n\n` +
         conflictDetails +
         `\n\n날짜·객실을 바꾸거나, 기존 예약을 취소한 뒤 다시 저장해주세요.\n(채널 매니저가 없어 자동 동기화가 안 되므로 더블부킹을 막습니다)`
       );
@@ -15263,12 +15264,12 @@ $('#save-booking').addEventListener('click', async () => {
   const bookingCode = $('#booking-code')?.value || (savedBookingId ? `#${String(savedBookingId).slice(0,6)}` : '예약');
   const roomLabel = cachedRooms.find(r => r.id === payload.room_id)?.room_number || '?';
   if (id) {
-    logEvent('booking_updated', `예약 수정 (${bookingCode} · ${roomLabel}호)`, {
+    logEvent('booking_updated', `예약 수정 (${bookingCode} · ${RH(roomLabel)})`, {
       targetType: 'booking', targetId: id,
       metadata: { checkin: checkinDate, checkout: checkoutDate, amount: payload.gross_amount },
     });
   } else {
-    logEvent('booking_created', `신규 예약 (${bookingCode} · ${roomLabel}호 · ${checkinDate} ~ ${checkoutDate})`, {
+    logEvent('booking_created', `신규 예약 (${bookingCode} · ${RH(roomLabel)} · ${checkinDate} ~ ${checkoutDate})`, {
       targetType: 'booking', targetId: savedBookingId,
       metadata: { checkin: checkinDate, checkout: checkoutDate, amount: payload.gross_amount },
     });
@@ -15292,7 +15293,7 @@ $('#save-booking').addEventListener('click', async () => {
         const { data: roomData } = await db.from('rooms').select('room_number').eq('id', payload.room_id).single();
         const roomNum = roomData?.room_number || '?';
         await createNotification('overbooking',
-          `🚨 오버부킹 위험! ${roomNum}호`,
+          `🚨 오버부킹 위험! ${RH(roomNum)}`,
           `${payload.checkin_date} ~ ${payload.checkout_date} 같은 날짜에 ${overlaps.length}건 예약이 중복돼요. 즉시 확인 필요!`,
           'bookings',
           { room_id: payload.room_id, booking_id: savedBookingId }
@@ -15403,7 +15404,7 @@ async function checkDataConsistency_() {
   const issues = rows.map(r => ({
     type: r.issue,
     bookingId: r.booking_code ? (codeToId[r.booking_code] || null) : null,
-    detail: `${r.room_number || '?'}호 · ${r.scheduled_date || ''}${r.booking_code ? ' · 예약 ' + r.booking_code : ''}${r.detail ? ' — ' + r.detail : ''}`,
+    detail: `${RH(r.room_number || '?')} · ${r.scheduled_date || ''}${r.booking_code ? ' · 예약 ' + r.booking_code : ''}${r.detail ? ' — ' + r.detail : ''}`,
   }));
 
   return { count: issues.length, issues };
@@ -15486,7 +15487,7 @@ function editRoom(id) {
   const r = cachedRooms.find(x => x.id === id);
   if (!r) return;
   $('#room-id').value = r.id;
-  $('#room-number').value = r.room_number + '호';
+  $('#room-number').value = RH(r.room_number);
   $('#room-capacity').value = r.capacity;
   $('#room-price').value = r.base_price || '';
   $('#room-pet').value = String(r.pet_friendly);
@@ -15566,7 +15567,7 @@ function generateCheckinMessage(booking, room, lang, type) {
   if (type === 'reminder') {
     const reminders = {
       ko: `안녕하세요!
-내일 ${checkin} 오후 4시 이후 ${roomNumber}호 체크인 예정이세요.
+내일 ${checkin} 오후 4시 이후 ${RH(roomNumber)} 체크인 예정이세요.
 
 🔑 체크인 자세한 안내(공동현관·도어락·Wi-Fi)는 오늘 저녁에 따로 보내드려요.
 
@@ -15673,7 +15674,7 @@ Hope to see you again 🙏`,
   // ===== 체크인 안내 (기본 — 풀 가이드) =====
 
   const templates = {
-    ko: `🏡 Staybut 성수 ${roomNumber}호 체크인 안내
+    ko: `🏡 Staybut 성수 ${RH(roomNumber)} 체크인 안내
 
 안녕하세요, 게스트님.
 저희 숙소를 선택해 주셔서 진심으로 감사합니다.
@@ -15688,7 +15689,7 @@ Hope to see you again 🙏`,
 사전 신청 필수, 시간당 10,000원 추가 요금
 
 ● 공동현관 비밀번호: ${entranceCode}
-● 객실 번호: ${roomNumber}호
+● 객실 번호: ${RH(roomNumber)}
 ● 도어락 비밀번호: ${doorCode}
 (입력 후 * 버튼 눌러주세요)
 
@@ -15854,7 +15855,7 @@ window.openCheckinSender = async (bookingId) => {
   const channel = booking.channels?.name || '-';
   const country = fmtCountry(booking.guest_country);
   $('#checkin-msg-meta').innerHTML = `
-    <strong>${booking.guest_code || '예약'}</strong> · ${channel} · ${booking.rooms?.room_number || '?'}호<br>
+    <strong>${booking.guest_code || '예약'}</strong> · ${channel} · ${RH(booking.rooms?.room_number || '?')}<br>
     ${checkin} ~ ${checkout} (${nights}박) · ${guests}명 · 국적: ${country}
   `;
 
@@ -15890,7 +15891,7 @@ window.openCheckinSender = async (bookingId) => {
   const warn = $('#checkin-msg-warning');
   if (missing.length > 0) {
     warn.style.display = 'block';
-    warn.innerHTML = `⚠ <strong>${room?.room_number || '?'}호 정보 누락</strong>: ${missing.join(', ')}.
+    warn.innerHTML = `⚠ <strong>${RH(room?.room_number || '?')} 정보 누락</strong>: ${missing.join(', ')}.
       <a href="#" style="color:var(--accent); text-decoration:underline;"
          onclick="document.getElementById('checkin-msg-modal').classList.remove('open'); editRoom('${room?.id}'); return false;">
         👉 객실 수정에서 입력하기
@@ -15932,7 +15933,7 @@ document.addEventListener('click', (e) => {
       if (!room?.wifi_password) missing.push('Wi-Fi 비번');
       if (missing.length > 0 && warn) {
         warn.style.display = 'block';
-        warn.innerHTML = `⚠ <strong>${room?.room_number || '?'}호 정보 누락</strong>: ${missing.join(', ')}. <a href="#" style="color:var(--accent); text-decoration:underline;" onclick="document.getElementById('checkin-msg-modal').classList.remove('open'); editRoom('${room?.id}'); return false;">👉 객실 수정</a>`;
+        warn.innerHTML = `⚠ <strong>${RH(room?.room_number || '?')} 정보 누락</strong>: ${missing.join(', ')}. <a href="#" style="color:var(--accent); text-decoration:underline;" onclick="document.getElementById('checkin-msg-modal').classList.remove('open'); editRoom('${room?.id}'); return false;">👉 객실 수정</a>`;
       }
     }
 
@@ -16629,7 +16630,7 @@ function showImportPreview(parsed) {
         <div class="import-row-cell">
           <select data-field="room_number">
             <option value="">선택…</option>
-            ${cachedRooms.map(r => `<option value="${r.room_number}" ${b.room_number === r.room_number ? 'selected' : ''}>${r.room_number}호</option>`).join('')}
+            ${cachedRooms.map(r => `<option value="${r.room_number}" ${b.room_number === r.room_number ? 'selected' : ''}>${RH(r.room_number)}</option>`).join('')}
           </select>
         </div>
         <div class="import-row-cell"><input type="date" data-field="checkin_date" value="${b.checkin_date || ''}" /></div>
@@ -16819,7 +16820,7 @@ $('#import-save-btn').addEventListener('click', async () => {
         const withWho = dbHit
           ? `기존 ${dbHit.channels?.name || '예약'} ${dbHit.checkin_date}~${dbHit.checkout_date}${dbHit.channel_booking_code ? ` (${dbHit.channel_booking_code})` : ''}`
           : `같은 파일 ${fileHit.checkin_date}~${fileHit.checkout_date}${fileHit.channel_booking_code ? ` (${fileHit.channel_booking_code})` : ''}`;
-        overbookBlocked.push(`${roomNumOf(d.room_id)}호 ${d.checkin_date}~${d.checkout_date}${d.channel_booking_code ? ` (${d.channel_booking_code})` : ''} ↔ ${withWho}`);
+        overbookBlocked.push(`${RH(roomNumOf(d.room_id))} ${d.checkin_date}~${d.checkout_date}${d.channel_booking_code ? ` (${d.channel_booking_code})` : ''} ↔ ${withWho}`);
         continue;  // 저장 안 함
       }
       acceptedRows.push(d);
@@ -16852,7 +16853,7 @@ $('#import-save-btn').addEventListener('click', async () => {
   const _lineOf = (d) => {
     const nm = d.booker_name || d.channel_booking_code || '이름없음';
     const code = d.channel_booking_code ? ` (${d.channel_booking_code})` : '';
-    return `• ${_roomNumOf(d.room_id)}호 · ${nm} · ${d.checkin_date}~${d.checkout_date}${code}`;
+    return `• ${RH(_roomNumOf(d.room_id))} · ${nm} · ${d.checkin_date}~${d.checkout_date}${code}`;
   };
   const _normal = toInsert.filter(d => d.booking_status !== 'cancelled');
   const _cancelled = toInsert.filter(d => d.booking_status === 'cancelled');
@@ -16864,7 +16865,7 @@ $('#import-save-btn').addEventListener('click', async () => {
   if (_cancelled.length) confirmMsg += `\n\n▼ 취소 예약 ${_cancelled.length}건 ('취소' 상태로 기록됨):\n${_cap(_cancelled)}`;
 
   if (cancelTargets.length) {
-    const _cl = cancelTargets.slice(0, 12).map(t => `• ${_roomNumOf(t.room_id)}호 · ${t.booker_name || t.channel_booking_code || '이름없음'} · ${t.checkin_date}~${t.checkout_date} [${t.reason}]`).join('\n');
+    const _cl = cancelTargets.slice(0, 12).map(t => `• ${RH(_roomNumOf(t.room_id))} · ${t.booker_name || t.channel_booking_code || '이름없음'} · ${t.checkin_date}~${t.checkout_date} [${t.reason}]`).join('\n');
     confirmMsg += `\n\n▼ 취소 처리될 기존 예약 ${cancelTargets.length}건 (최신 데이터 기준):\n${cancelTargets.length > 12 ? _cl + `\n…외 ${cancelTargets.length - 12}건` : _cl}`;
   }
   if (overbookBlocked.length > 0) confirmMsg += `\n\n⚠️ 오버부킹으로 제외된 예약:\n• ` + overbookBlocked.join('\n• ');
@@ -17124,7 +17125,7 @@ window.downloadWeekCleaningExcel_ = function () {
 window.openCleaningAddModal_ = function () {
   const roomOpts = (cachedRooms || []).filter(r => r.is_active !== false)
     .sort((a,b) => (a.room_number||'').localeCompare(b.room_number||''))
-    .map(r => `<option value="${r.id}">${r.room_number}호</option>`).join('');
+    .map(r => `<option value="${r.id}">${RH(r.room_number)}</option>`).join('');
   const staffOpts = (cachedStaff || []).map(s => `<option value="${s.id}">${s.name}${!s.is_resident ? ' (비상주)' : ''}</option>`).join('');
   const today = new Date().toISOString().slice(0,10);
   const body = document.getElementById('cleaning-add-modal-body');
@@ -17212,7 +17213,7 @@ function renderCompactCleaningCard_(t) {
   return `
     <div class="wk-clean-card" onclick="openCleaningTaskModal_('${t.id}')" style="background:var(--surface); border:0.5px solid var(--border); border-radius:9px; padding:9px 10px; cursor:pointer; ${isExtra ? 'border-left:3px solid var(--text-warning);' : ''}">
       <div style="display:flex; align-items:center; justify-content:space-between;">
-        <span style="font-size:13px; font-weight:700;">${room}호${isExtra ? ' <span style="font-size:10px; font-weight:700; color:var(--text-warning); background:var(--bg-warning); padding:1px 6px; border-radius:10px; vertical-align:1px;">추가</span>' : ''}</span>
+        <span style="font-size:13px; font-weight:700;">${RH(room)}${isExtra ? ' <span style="font-size:10px; font-weight:700; color:var(--text-warning); background:var(--bg-warning); padding:1px 6px; border-radius:10px; vertical-align:1px;">추가</span>' : ''}</span>
         <span style="width:8px; height:8px; border-radius:50%; background:${dot.c}; flex-shrink:0;"></span>
       </div>
       <div style="font-size:11px; color:var(--text-soft); margin-top:3px;">${isExtra ? (extraReason || '추가 청소') : (prevGuest + '인 · ' + dot.label)}</div>
@@ -17231,7 +17232,7 @@ function renderExtraCleaningDetail_(t) {
   return `
     <div class="cleaning-card ${t.assigned_to ? t.status : 'unassigned'}">
       <div class="cleaning-card-top">
-        <div class="cleaning-card-room">${room}호 <span style="font-size:11px; font-weight:700; color:var(--text-warning); background:var(--bg-warning); padding:2px 8px; border-radius:10px; margin-left:4px;">추가 청소</span></div>
+        <div class="cleaning-card-room">${RH(room)} <span style="font-size:11px; font-weight:700; color:var(--text-warning); background:var(--bg-warning); padding:2px 8px; border-radius:10px; margin-left:4px;">추가 청소</span></div>
         <div class="cleaning-card-time">${t.scheduled_date || ''}</div>
       </div>
       <div class="cleaning-card-context">
@@ -17309,7 +17310,7 @@ window.deleteCleaningTask_ = async function (taskId) {
   const t = window.__cleaningTaskById && window.__cleaningTaskById[taskId];
   const room = t?.rooms?.room_number || '?';
   const date = t?.scheduled_date || '';
-  const ok = await showConfirm(`${room}호 · ${date} 청소 작업을 삭제할까요?\n\n청소 일정에서 제거됩니다. 이 작업은 되돌릴 수 없습니다.`);
+  const ok = await showConfirm(`${RH(room)} · ${date} 청소 작업을 삭제할까요?\n\n청소 일정에서 제거됩니다. 이 작업은 되돌릴 수 없습니다.`);
   if (!ok) return;
   const { error } = await db.from('cleaning_tasks').delete().eq('id', taskId);
   if (error) { alert('삭제 실패: ' + error.message + '\n\n정산 등에서 참조 중일 수 있어요.'); return; }
@@ -17398,7 +17399,7 @@ function renderCleaningMobile_() {
       const fee = t.status === 'not_needed' ? null : (t.payout_amount ?? roomCleaningFee(room));
       const sub = t.assigned_to ? `${esc(who || '')} · ${st.tag}` : '담당 미정 · 탭해서 배정';
       html += `<div onclick="openCleaningTaskModal_('${t.id}')" style="border:1px solid ${st.bd};border-left:4px solid ${st.bar};border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
-        <div style="min-width:0;"><div style="font-size:15px;font-weight:600;">${room}호 <span style="font-size:13px;color:#888;font-weight:400;">· ${guests}인</span></div><div style="font-size:12px;color:${st.tc};margin-top:2px;">${sub}</div></div>
+        <div style="min-width:0;"><div style="font-size:15px;font-weight:600;">${RH(room)} <span style="font-size:13px;color:#888;font-weight:400;">· ${guests}인</span></div><div style="font-size:12px;color:${st.tc};margin-top:2px;">${sub}</div></div>
         ${fee != null ? `<div style="font-size:14px;font-weight:600;white-space:nowrap;">₩${fee.toLocaleString('ko-KR')}</div>` : `<div style="font-size:12px;color:#aaa;">불필요</div>`}
       </div>`;
     });
@@ -17531,7 +17532,7 @@ function renderCalendar() {
       return `
         <div class="cal-task-line${isDone ? ' done' : ''}">
           ${checkBadge}
-          <span class="cal-task-roomchip" style="background:${chipBg}; color:${chipFg};">${t.rooms?.room_number || '?'}호</span>
+          <span class="cal-task-roomchip" style="background:${chipBg}; color:${chipFg};">${RH(t.rooms?.room_number || '?')}</span>
           ${timeText}
           ${name}
         </div>
@@ -17659,7 +17660,7 @@ function renderCleaningCard(t, slot, opts) {
   return `
     <div class="cleaning-card ${statusClass}">
       <div class="cleaning-card-top">
-        <div class="cleaning-card-room">${room}호</div>
+        <div class="cleaning-card-room">${RH(room)}</div>
         <div class="cleaning-card-time">${timeStart} ~ ${timeEnd}</div>
       </div>
       <div class="cleaning-card-context">
@@ -17834,7 +17835,7 @@ function renderCleanerCalendar() {
       return `
         <div class="cal-task-line">
           <div class="cal-task-dot ${dotClass}"></div>
-          <span class="cal-task-room">${task.rooms?.room_number || '?'}호</span>
+          <span class="cal-task-room">${RH(task.rooms?.room_number || '?')}</span>
           ${timeText}
         </div>
       `;
@@ -17929,7 +17930,7 @@ function renderCleanerCard(task, slot) {
     actionsHtml = `<div style="font-size:12px; color: var(--danger); padding-top: 6px;">${t('issueReported')}</div>`;
   }
 
-  const roomLabel = currentLang === 'en' ? `Room ${room}` : `${room}${t('roomSuffix')}`;
+  const roomLabel = currentLang === 'en' ? `Room ${room}` : `${RH(room)}`;
 
   // 🕐 시간 — slot이 있으면 자동 계산값
   const timeStart = slot?.start || task.scheduled_start?.slice(0, 5) || '12:00';
@@ -17994,7 +17995,7 @@ window.viewCompletionPhotos = async (taskId) => {
 
   body.innerHTML = `
     <div style="margin-bottom: 16px; padding: 12px; background: var(--accent-soft); border-radius: 8px;">
-      <div style="font-weight: 600; font-size: 16px;">${roomNumber}호 청소 완료</div>
+      <div style="font-weight: 600; font-size: 16px;">${RH(roomNumber)} 청소 완료</div>
       <div style="font-size: 12px; color: var(--text-soft); margin-top: 4px;">${dateStr} · 완료 시각 ${completedAt}</div>
     </div>
     ${photos.length === 0
@@ -18078,7 +18079,7 @@ window.viewSupplyOrderDetail = async (orderId) => {
         <div class="detail-summary-box">
           <div class="detail-summary-title">${order.supplies?.name || '?'} <span style="font-size:13px; color:var(--text-soft); font-weight:400;">(${order.supplies?.unit || ''})</span></div>
           <div class="detail-summary-meta">
-            <span>🏠 ${roomNumber}호</span>
+            <span>🏠 ${RH(roomNumber)}</span>
             ${dateStr ? `<span>📅 ${dateStr}</span>` : ''}
             <span>👤 ${staffName}</span>
             <span class="detail-status-badge ${order.status}">${statusLabel}</span>
@@ -18138,7 +18139,7 @@ window.viewDamageDetail = async (damageId) => {
     body.innerHTML = `
       <div class="detail-section">
         <div class="detail-summary-box">
-          <div class="detail-summary-title">${damage.rooms?.room_number || '?'}호 파손</div>
+          <div class="detail-summary-title">${RH(damage.rooms?.room_number || '?')} 파손</div>
           <div class="detail-summary-meta">
             ${dateStr ? `<span>📅 ${dateStr}</span>` : ''}
             <span>👤 ${staffName}</span>
@@ -18212,7 +18213,7 @@ window.viewIssueDetail = async (taskId) => {
 
   body.innerHTML = `
     <div style="margin-bottom: 16px; padding: 12px; background: var(--surface-soft); border-radius: 8px;">
-      <div style="font-weight: 600; font-size: 16px;">${roomNumber}호 청소 특이사항</div>
+      <div style="font-weight: 600; font-size: 16px;">${RH(roomNumber)} 청소 특이사항</div>
       <div style="font-size: 12px; color: var(--text-soft); margin-top: 4px;">${dateStr}</div>
     </div>
     ${issues.map(issue => `
@@ -18302,7 +18303,7 @@ Fee ₩${fee.toLocaleString()}${ex !== '-' ? ` (Extra ${ex})` : ''}`;
   }
 
   return `🧹 ${md(date)}(${weekdays[date.getDay()]}) 청소 안내
-[${room}호] 담당 ${mgr}
+[${RH(room)}] 담당 ${mgr}
 투숙 ${stay} · ${s.basis==='default'?`기본세팅 ${s.guests}명 기준(공실 여유)`:`다음 ${s.guests}명/${s.nights}박`}
 수건 ${s.towels} · 생수 ${s.water}
 청소비 ₩${fee.toLocaleString()}${ex !== '-' ? ` (추가 ${ex})` : ''}`;
@@ -18332,7 +18333,7 @@ window.openCleaningShare = function(taskId) {
   if (!task) { alert('작업 정보를 찾을 수 없어요. 새로고침 후 다시 시도해주세요.'); return; }
   const room = task.rooms?.room_number || '?';
   $('#cleaning-share-task-id').value = taskId;
-  $('#cleaning-share-title').textContent = `${room}호 카톡 공유`;
+  $('#cleaning-share-title').textContent = `${RH(room)} 카톡 공유`;
   // 카드에서 이미 배정한 담당 실장님을 그대로 가져옴 (미배정이면 비움 → 칩/직접입력으로 선택)
   $('#cleaning-share-manager').value = task.assigned_staff?.name || '';
   $('#cleaning-share-extra').value = '';
@@ -18484,7 +18485,7 @@ function cleaningImgFilename_() {
   const task = (window.__cleaningTaskById || {})[taskId] || {};
   const room = task.rooms?.room_number || '방';
   const date = (task.scheduled_date || '').replace(/-/g, '');
-  return `청소_${room}호_${date}.png`;
+  return `청소_${RH(room)}_${date}.png`;
 }
 
 // 🖼 이미지 저장 (다운로드 — 데스크톱)
@@ -18695,11 +18696,11 @@ window.setCleaningSettle = async (taskId, status) => {
       .select('rooms(room_number), payout_amount, staff(name)')
       .eq('id', taskId).single();
     if (status === 'paid') {
-      logEvent('settlement_paid', `정산 완료 (${tk?.rooms?.room_number || '?'}호 · ${fmtKRW(tk?.payout_amount || 0)})`, {
+      logEvent('settlement_paid', `정산 완료 (${RH(tk?.rooms?.room_number || '?')} · ${fmtKRW(tk?.payout_amount || 0)})`, {
         targetType: 'cleaning_task', targetId: taskId, metadata: { amount: tk?.payout_amount || 0 },
       });
     } else {
-      logEvent('settlement_pending', `정산 취소 (${tk?.rooms?.room_number || '?'}호)`, {
+      logEvent('settlement_pending', `정산 취소 (${RH(tk?.rooms?.room_number || '?')})`, {
         targetType: 'cleaning_task', targetId: taskId,
       });
     }
@@ -18727,7 +18728,7 @@ window.startCleaning = async (taskId) => {
     const { data: task } = await db.from('cleaning_tasks')
       .select('rooms(room_number), scheduled_date, staff(name)')
       .eq('id', taskId).single();
-    logEvent('cleaning_started', `청소 시작 (${task?.rooms?.room_number || '?'}호 · ${task?.scheduled_date || '?'})`, {
+    logEvent('cleaning_started', `청소 시작 (${RH(task?.rooms?.room_number || '?')} · ${task?.scheduled_date || '?'})`, {
       targetType: 'cleaning_task', targetId: taskId,
       actor: task?.staff?.name,
     });
@@ -18856,14 +18857,14 @@ $('#complete-submit').addEventListener('click', async () => {
       const roomNumber = tinfo?.rooms?.room_number || '?';
       const staffName = tinfo?.assigned_staff?.name || '담당';
       await createNotification('cleaning_completed',
-        `🧹 ${roomNumber}호 청소 완료`,
+        `🧹 ${RH(roomNumber)} 청소 완료`,
         `${staffName} · ${fmtKRW(payoutAmount)} 정산 필요`,
         'payout',
         { task_id: currentCompletionTaskId }
       );
 
       // 운영 일지
-      logEvent('cleaning_completed', `청소 완료 (${roomNumber}호 · ${staffName})`, {
+      logEvent('cleaning_completed', `청소 완료 (${RH(roomNumber)} · ${staffName})`, {
         targetType: 'cleaning_task', targetId: currentCompletionTaskId,
         actor: staffName,
         metadata: { payout_amount: payoutAmount, photo_count: photoUrls.length },
@@ -19070,7 +19071,7 @@ $('#save-issue').addEventListener('click', async () => {
         : category === 'missing_item' ? '비품 부족'
         : category === 'cleaning_difficulty' ? '청소 어려움'
         : '기타';
-      logEvent('cleaning_issue', `특이사항 보고 — ${categoryLabel} (${room?.room_number || '?'}호)`, {
+      logEvent('cleaning_issue', `특이사항 보고 — ${categoryLabel} (${RH(room?.room_number || '?')})`, {
         targetType: 'cleaning_issue', targetId: insertedIssue?.id,
         description: description?.slice(0, 200),
         metadata: { category, photo_count: photoUrls.length },
@@ -19122,7 +19123,7 @@ $('#save-issue').addEventListener('click', async () => {
       const roomNumber = (await db.from('rooms').select('room_number').eq('id', roomId).single())?.data?.room_number || '?';
       if (category === 'damage') {
         await createNotification('damage_reported',
-          `🔨 ${roomNumber}호 파손 신고`,
+          `🔨 ${RH(roomNumber)} 파손 신고`,
           (description || '내용 없음').slice(0, 80),
           'supplies', { room_id: roomId });
       } else if (category === 'missing_item') {
@@ -19137,12 +19138,12 @@ $('#save-issue').addEventListener('click', async () => {
           } catch (e) {}
         }
         await createNotification('issue_reported',
-          `📦 ${roomNumber}호 비품 부족 — ${supplyName}`,
+          `📦 ${RH(roomNumber)} 비품 부족 — ${supplyName}`,
           (description || '').slice(0, 80),
           'supplies', { room_id: roomId });
       } else {
         await createNotification('issue_reported',
-          `⚠️ ${roomNumber}호 특이사항`,
+          `⚠️ ${RH(roomNumber)} 특이사항`,
           (description || '').slice(0, 80),
           'cleaning', { room_id: roomId });
       }
@@ -19872,7 +19873,7 @@ async function loadDamageReports() {
     <div class="damage-card clickable" onclick="viewDamageDetail('${r.id}')">
       <div class="damage-row">
         <div class="damage-info">
-          <div class="damage-room">${r.rooms?.room_number || '?'}호</div>
+          <div class="damage-room">${RH(r.rooms?.room_number || '?')}</div>
           <div class="damage-desc">${r.description || '(설명 없음)'}</div>
           <div class="damage-time">${new Date(r.created_at).toLocaleString('ko-KR', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'})}</div>
         </div>
@@ -20045,7 +20046,7 @@ function renderPayoutPending() {
   const rowOf = (t) => `
     <tr style="border-bottom:1px solid var(--border);">
       <td style="padding:8px 10px; text-align:center;"><input type="checkbox" class="payout-pending-check" value="${t.id}" style="width:16px; height:16px;"></td>
-      <td style="padding:8px 10px; font-weight:600;">${t.rooms?.room_number || '?'}호</td>
+      <td style="padding:8px 10px; font-weight:600;">${RH(t.rooms?.room_number || '?')}</td>
       <td style="padding:8px 10px;">${t.assigned_staff?.name || '<span style=\"color:var(--text-muted);\">미지정</span>'}</td>
       <td style="padding:8px 10px; font-size:12px; color:var(--text-soft);">${acctOf(t)}</td>
       <td style="padding:8px 10px; text-align:right; font-weight:600;">${fmtKRW(t.payout_amount)}</td>
@@ -20323,7 +20324,7 @@ async function renderPayoutTable(staffMap) {
         ${paid.map(t => `
           <tr>
             <td>${t.scheduled_date}</td>
-            <td>${t.rooms?.room_number || '?'}호</td>
+            <td>${RH(t.rooms?.room_number || '?')}</td>
             <td>${t.assigned_staff?.name || '미지정'}</td>
             <td style="text-align:right;" class="amount">${fmtKRW(t.payout_amount)}</td>
             <td>${t.paid_at ? new Date(t.paid_at).toLocaleDateString('ko-KR') : '-'}</td>
@@ -20345,7 +20346,7 @@ function exportPayoutCSV() {
   const header = ['청소일', '객실', '청소사', '금액', '입금일'];
   const rows = data.map(t => [
     t.scheduled_date,
-    `${t.rooms?.room_number || '?'}호`,
+    `${RH(t.rooms?.room_number || '?')}`,
     t.assigned_staff?.name || '미지정',
     t.payout_amount || 0,
     t.paid_at ? new Date(t.paid_at).toLocaleDateString('ko-KR') : '-',
@@ -20558,7 +20559,7 @@ window.markPayoutPaid = async (taskId) => {
     const { data: t } = await db.from('cleaning_tasks')
       .select('rooms(room_number), payout_amount, staff(name)')
       .eq('id', taskId).single();
-    logEvent('settlement_paid', `정산 완료 (${t?.rooms?.room_number || '?'}호 · ${t?.staff?.name || '?'} · ${fmtKRW(t?.payout_amount || 0)})`, {
+    logEvent('settlement_paid', `정산 완료 (${RH(t?.rooms?.room_number || '?')} · ${t?.staff?.name || '?'} · ${fmtKRW(t?.payout_amount || 0)})`, {
       targetType: 'cleaning_task', targetId: taskId,
       metadata: { amount: t?.payout_amount || 0 },
     });
@@ -20680,7 +20681,7 @@ async function loadOurReviews() {
               ${byWeek[wk].map(r => `
                 <div class="review-item" onclick="this.classList.toggle('expanded')">
                   <div class="review-item-header">
-                    <span><strong>${r.review_date}</strong> · ${channelLabel(r.channel_code)} · ${r.rooms?.room_number || '?'}호 · ${fmtCountry(r.guest_country)}</span>
+                    <span><strong>${r.review_date}</strong> · ${channelLabel(r.channel_code)} · ${RH(r.rooms?.room_number || '?')} · ${fmtCountry(r.guest_country)}</span>
                     <span>${ratingDisplay(r.rating, r.rating_scale)}</span>
                   </div>
                   <div class="review-item-text">${(r.review_text || '').replace(/</g, '&lt;')}</div>
@@ -21568,7 +21569,7 @@ document.addEventListener('click', (e) => {
     $('#r-text').value = '';
     $('#r-tags').value = '';
     // 객실 옵션 채우기
-    $('#r-room').innerHTML = cachedRooms.map(r => `<option value="${r.id}">${r.room_number}호</option>`).join('');
+    $('#r-room').innerHTML = cachedRooms.map(r => `<option value="${r.id}">${RH(r.room_number)}</option>`).join('');
     $('#review-add-modal').classList.add('open');
   }
 });
@@ -21929,7 +21930,7 @@ async function runDailyChecks() {
       const rooms = tomorrowUnassigned.map(t => t.rooms?.room_number || '?').join(', ');
       await createNotification('unassigned',
         `❗ 내일 미배정 청소 ${tomorrowUnassigned.length}건`,
-        `${rooms}호 — 청소사 배정이 필요해요.`,
+        `${RH(rooms)} — 청소사 배정이 필요해요.`,
         'cleaning'
       );
     }
@@ -21945,7 +21946,7 @@ async function runDailyChecks() {
       const rooms = [...new Set(tomorrowUnsentCheckins.map(b => b.rooms?.room_number).filter(Boolean))].sort().join(', ');
       await createNotification('checkin_unsent',
         `❗ 내일 체크인 ${tomorrowUnsentCheckins.length}건 안내 미발송`,
-        `${rooms}호 — 예약 목록에서 [📤] 눌러 안내 메시지를 게스트한테 보내세요.`,
+        `${RH(rooms)} — 예약 목록에서 [📤] 눌러 안내 메시지를 게스트한테 보내세요.`,
         'bookings'
       );
     }
@@ -21973,7 +21974,7 @@ async function runDailyChecks() {
       const rooms = [...new Set((checkinList || []).map(b => b.rooms?.room_number).filter(Boolean))].sort().join(', ');
       await createNotification('checkin_today',
         `🏠 오늘 체크인 ${checkins}팀`,
-        `${rooms}호 — 게스트한테 체크인 안내 발송 확인하세요 (예약 목록 📤 버튼)`,
+        `${RH(rooms)} — 게스트한테 체크인 안내 발송 확인하세요 (예약 목록 📤 버튼)`,
         'bookings'
       );
     }
@@ -22227,7 +22228,7 @@ checkAuth();
           (b.booker_name || b.guest_code || ''),
           (b.channel_booking_code || b.guest_code || ''),
           (b.channels && b.channels.name) || '',
-          ((b.rooms && b.rooms.room_number) ? b.rooms.room_number + '호' : ''),
+          ((b.rooms && b.rooms.room_number) ? RH(b.rooms.room_number) : ''),
           b.checkin_date || '', b.checkout_date || '',
           b.nights || 0, b.num_guests || '',
           b.gross_amount || 0, b.channel_commission || 0,
