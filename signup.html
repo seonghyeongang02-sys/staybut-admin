@@ -1,0 +1,68 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>StayBUT 무료 신청</title>
+<style>
+:root{--bg:#f5f5f7;--line:#e5e5e7;--line2:#d2d2d7;--text:#1d1d1f;--muted:#6e6e73;--ink:#16161b;--ok:#16a34a;--danger:#e0485c;}
+*{box-sizing:border-box;}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',Roboto,sans-serif;}
+.wrap{max-width:520px;margin:0 auto;padding:40px 20px 70px;}
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px 24px;box-shadow:0 2px 10px rgba(20,30,50,.05);}
+h1{font-size:22px;font-weight:800;margin:0 0 4px;letter-spacing:-.01em;}
+.sub{font-size:13.5px;color:var(--muted);margin:0 0 22px;line-height:1.6;}
+label{display:block;font-size:12.5px;font-weight:700;margin:14px 0 5px;}
+.req{color:var(--danger);}
+input,textarea{width:100%;border:1px solid var(--line2);border-radius:10px;padding:11px 12px;font-size:14px;font-family:inherit;background:var(--bg);}
+input:focus,textarea:focus{outline:none;border-color:var(--ink);background:#fff;}
+textarea{min-height:64px;resize:vertical;}
+.hint{font-size:11.5px;color:var(--muted);margin-top:4px;}
+button{width:100%;border:0;background:var(--ink);color:#fff;border-radius:11px;padding:14px;font-size:15px;font-weight:800;cursor:pointer;margin-top:22px;}
+button:disabled{opacity:.5;}
+.msg{margin-top:14px;font-size:13px;text-align:center;min-height:18px;}
+.done{text-align:center;padding:20px 0;}
+.done .big{font-size:44px;}
+.lock{font-size:12px;color:var(--muted);margin-top:16px;text-align:center;line-height:1.6;}
+.lock a{color:var(--muted);}
+</style></head>
+<body><div class="wrap"><div class="card" id="card">
+  <h1>StayBUT 무료로 시작하기</h1>
+  <div class="sub">게스트하우스 예약·청소·문의를 한 곳에서. 예약 사이트 iCal만 연결하면 자동으로 채워져요. 아래 신청하시면 검토 후 계정을 만들어 드려요. <b>지금은 무료 시범</b>이에요.</div>
+  <div id="form">
+    <label>업체명 <span class="req">*</span></label>
+    <input id="biz" placeholder="예: 강릉 오션뷰 스테이" />
+    <label>이메일 <span class="req">*</span></label>
+    <input id="email" type="email" placeholder="로그인에 쓸 이메일" />
+    <label>연락처</label>
+    <input id="phone" placeholder="선택 · 휴대폰 번호" />
+    <label>숙소(객실) 이름</label>
+    <textarea id="rooms" placeholder="한 줄에 하나씩&#10;예)&#10;오션뷰 원룸&#10;마운틴 스튜디오"></textarea>
+    <div class="hint">나중에 직접 추가·수정할 수 있어요.</div>
+    <label>사용 중인 예약 채널</label>
+    <input id="channels" placeholder="예: 부킹닷컴, 에어비앤비, 아고다" />
+    <label>남기실 말</label>
+    <textarea id="memo" placeholder="선택 · 궁금한 점이나 요청사항"></textarea>
+    <button id="submitBtn">무료 신청하기</button>
+    <div class="msg" id="msg"></div>
+    <div class="lock">🔒 손님 개인정보는 저장하지 않아요 · <a href="/privacy.html">개인정보처리방침</a> · <a href="/terms.html">이용약관</a></div>
+  </div>
+  <div class="done" id="doneBox" style="display:none;">
+    <div class="big">✅</div>
+    <h1 style="text-align:center;">신청이 접수됐어요</h1>
+    <div class="sub" style="text-align:center;">검토 후 입력하신 이메일로 <b>로그인 안내</b>를 보내드릴게요. 보통 하루 안에 연락드려요.</div>
+  </div>
+</div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const db=supabase.createClient('https://ijvfwajtotbqfxpdlcal.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqdmZ3YWp0b3RicWZ4cGRsY2FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODE1NDYsImV4cCI6MjA5NDA1NzU0Nn0.39TLrxZyfYthQggvef_RIQQ0YtR2DCu79KmEfEZwGZM');
+const $=s=>document.querySelector(s);
+$('#submitBtn').addEventListener('click',async()=>{
+  const biz=$('#biz').value.trim(), email=$('#email').value.trim();
+  const msg=$('#msg');
+  if(!biz||!email){ msg.style.color='var(--danger)'; msg.textContent='업체명과 이메일은 필수예요.'; return; }
+  $('#submitBtn').disabled=true; msg.style.color='var(--muted)'; msg.textContent='접수 중…';
+  const {data,error}=await db.rpc('submit_signup_request',{
+    p_biz:biz, p_email:email, p_phone:$('#phone').value, p_rooms:$('#rooms').value, p_channels:$('#channels').value, p_memo:$('#memo').value
+  });
+  if(error||(typeof data==='string'&&data.startsWith('error'))){
+    msg.style.color='var(--danger)'; msg.textContent=(error&&error.message)||data||'접수 실패'; $('#submitBtn').disabled=false; return;
+  }
+  $('#form').style.display='none'; $('#doneBox').style.display='block';
+});
+</script></body></html>
