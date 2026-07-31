@@ -1,0 +1,131 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>StayBUT 운영자 콘솔</title>
+<style>
+:root{--bg:#f5f5f7;--panel:#fff;--line:#e5e5e7;--line2:#d2d2d7;--text:#1d1d1f;--muted:#6e6e73;--dim:#a1a1a6;--ink:#16161b;--ok:#16a34a;--danger:#e0485c;--amber:#a9700a;--accent:#2f6fed;}
+*{box-sizing:border-box;}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',Roboto,sans-serif;}
+#login{min-height:100dvh;display:flex;align-items:center;justify-content:center;}
+#login .card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:30px 26px;width:330px;max-width:90%;}
+#login h1{font-size:18px;margin:0 0 14px;text-align:center;}
+#login input{width:100%;border:1px solid var(--line2);border-radius:10px;padding:11px 12px;font-size:14px;margin-bottom:9px;font-family:inherit;background:var(--bg);}
+#login button{width:100%;border:0;background:var(--ink);color:#fff;border-radius:10px;padding:12px;font-size:15px;font-weight:700;cursor:pointer;}
+#login .err{color:var(--danger);font-size:12px;min-height:16px;margin-top:6px;text-align:center;}
+#app{display:none;}
+.bar{background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:space-between;padding:13px 24px;}
+.bar .brand{font-size:16px;font-weight:800;} .bar .brand span{font-weight:500;color:#a9adb5;font-size:13px;margin-left:8px;}
+.bar .who{font-size:12px;color:#cfd2d8;} .bar .who button{margin-left:10px;border:1px solid #3a3a40;background:transparent;color:#fff;border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;}
+.wrap{max-width:960px;margin:0 auto;padding:22px 22px 70px;}
+.tabs{display:flex;gap:8px;margin-bottom:18px;}
+.tab{border:1px solid var(--line2);background:#fff;border-radius:9px;padding:9px 16px;font-size:13.5px;font-weight:700;cursor:pointer;color:var(--muted);}
+.tab.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+.view{display:none;} .view.on{display:block;}
+.sub{display:flex;gap:8px;margin-bottom:14px;}
+.sub .s{border:1px solid var(--line2);background:#fff;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:700;cursor:pointer;color:var(--muted);}
+.sub .s.on{background:#eef4fb;color:#2e5891;border-color:#c7d8ef;}
+.req{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 16px;margin-bottom:12px;box-shadow:0 1px 2px rgba(20,30,50,.04);}
+.req .rh{display:flex;justify-content:space-between;align-items:center;} .req .biz{font-size:16px;font-weight:800;}
+.badge{font-size:11px;font-weight:700;border-radius:20px;padding:3px 10px;}
+.b-pending{background:#fdf3e3;color:var(--amber);} .b-approved{background:#e9f7ef;color:#0f7a52;} .b-rejected{background:#f2f2f4;color:#8a8a8e;}
+.req .meta{font-size:12.5px;color:var(--muted);line-height:1.8;margin-top:8px;} .req .meta b{color:var(--text);}
+.acts{display:flex;gap:8px;margin-top:12px;}
+.acts .ap{border:0;background:var(--ink);color:#fff;border-radius:8px;padding:9px 16px;font-size:12.5px;font-weight:700;cursor:pointer;}
+.acts .rj{border:1px solid var(--line2);background:#fff;color:var(--danger);border-radius:8px;padding:9px 14px;font-size:12.5px;font-weight:700;cursor:pointer;}
+.result{margin-top:10px;background:#f5f7fb;border:1px solid #dbe4f0;border-radius:10px;padding:11px 13px;font-size:12.5px;line-height:1.7;}
+.result .lnk{word-break:break-all;color:var(--accent);font-size:11.5px;} .result .copy{margin-left:8px;border:1px solid var(--line2);background:#fff;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;}
+table.t{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:13px;}
+table.t th{background:#fafafa;color:var(--muted);font-weight:700;font-size:12px;text-align:left;padding:11px 13px;border-bottom:1px solid var(--line);}
+table.t td{padding:12px 13px;border-bottom:1px solid #f0f0f2;vertical-align:top;} table.t tr:last-child td{border-bottom:0;}
+.tname{font-weight:800;} .src{font-size:11px;font-weight:700;border-radius:5px;padding:1px 7px;background:#eef1f5;color:#516;}
+.dim{color:var(--dim);} .ok{color:var(--ok);font-weight:700;} .warn{color:var(--amber);font-weight:700;}
+.empty{padding:30px;text-align:center;color:var(--dim);font-size:13px;}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;}
+.kpi{background:#fff;border-radius:14px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.kpi .k{font-size:12px;color:var(--muted);} .kpi .v{font-size:28px;font-weight:800;margin-top:6px;letter-spacing:-.5px;}
+</style></head>
+<body>
+<div id="login"><div class="card">
+  <h1>StayBUT 운영자 콘솔</h1>
+  <input id="email" type="email" placeholder="운영자 이메일" autocomplete="username"/>
+  <input id="pw" type="password" placeholder="비밀번호" autocomplete="current-password"/>
+  <button id="loginBtn">로그인</button>
+  <div class="err" id="loginErr"></div>
+</div></div>
+<div id="app">
+  <div class="bar"><div class="brand">StayBUT <span>운영자 콘솔</span></div><div class="who"><span id="whoami"></span><button id="logoutBtn">로그아웃</button></div></div>
+  <div class="wrap">
+    <div class="tabs"><button class="tab on" data-tab="signups">가입 신청</button><button class="tab" data-tab="tenants">업체 목록</button></div>
+
+    <div id="v-signups" class="view on">
+      <div class="sub"><button class="s on" data-f="pending">대기중</button><button class="s" data-f="approved">승인됨</button><button class="s" data-f="rejected">거절</button></div>
+      <div id="reqList"><div class="empty">불러오는 중…</div></div>
+    </div>
+
+    <div id="v-tenants" class="view">
+      <div class="kpis" id="kpis"></div>
+      <table class="t"><thead><tr><th>업체</th><th>객실</th><th>진행 예약</th><th>채널 연결</th><th>마지막 동기화</th><th>관리자</th></tr></thead><tbody id="tenantRows"><tr><td colspan="6" class="empty">불러오는 중…</td></tr></tbody></table>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const db=supabase.createClient('https://ijvfwajtotbqfxpdlcal.supabase.co','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqdmZ3YWp0b3RicWZ4cGRsY2FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODE1NDYsImV4cCI6MjA5NDA1NzU0Nn0.39TLrxZyfYthQggvef_RIQQ0YtR2DCu79KmEfEZwGZM');
+const $=s=>document.querySelector(s);
+let SF='pending';
+function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+async function start(){
+  const {data:{session}}=await db.auth.getSession();
+  if(!session){ show(false); return; }
+  const {data:op}=await db.rpc('is_operator');
+  if(!op){ await db.auth.signOut(); $('#loginErr').textContent='운영자 계정이 아니에요.'; show(false); return; }
+  show(true); $('#whoami').textContent=(session.user.email||''); loadReqs(); loadTenants();
+}
+function show(app){ $('#login').style.display=app?'none':'flex'; $('#app').style.display=app?'block':'none'; }
+$('#loginBtn').addEventListener('click',async()=>{
+  const {error}=await db.auth.signInWithPassword({email:$('#email').value.trim(),password:$('#pw').value});
+  if(error){ $('#loginErr').textContent='로그인 실패'; return; } start();
+});
+$('#pw').addEventListener('keydown',e=>{if(e.key==='Enter')$('#loginBtn').click();});
+$('#logoutBtn').addEventListener('click',async()=>{await db.auth.signOut();location.reload();});
+document.querySelectorAll('.tab').forEach(t=>t.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));t.classList.add('on');document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));$('#v-'+t.dataset.tab).classList.add('on');}));
+document.querySelectorAll('.sub .s').forEach(s=>s.addEventListener('click',()=>{document.querySelectorAll('.sub .s').forEach(x=>x.classList.remove('on'));s.classList.add('on');SF=s.dataset.f;loadReqs();}));
+
+async function loadReqs(){
+  const box=$('#reqList');
+  const {data:reqs,error}=await db.from('signup_requests').select('*').eq('status',SF).order('created_at',{ascending:false});
+  if(error){ box.innerHTML='<div class="empty">불러오지 못했어요: '+esc(error.message)+'</div>'; return; }
+  if(!reqs||!reqs.length){ box.innerHTML='<div class="empty">해당 신청이 없어요.</div>'; return; }
+  box.innerHTML=reqs.map(r=>{
+    const badge=SF==='pending'?'<span class="badge b-pending">대기중</span>':SF==='approved'?'<span class="badge b-approved">승인됨</span>':'<span class="badge b-rejected">거절</span>';
+    let extra=''; if(r.status==='approved'&&r.setup_link){ extra='<div class="result"><b>계정·숙소 생성 완료.</b> 아래 링크를 업체에 보내 비밀번호를 설정하게 하세요:<br><span class="lnk">'+esc(r.setup_link)+'</span><button class="copy" onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent)">복사</button></div>'; }
+    let acts=''; if(r.status==='pending'){ acts='<div class="acts"><button class="ap" onclick="approve(\''+r.id+'\',this)">승인 → 자동 세팅</button><button class="rj" onclick="reject(\''+r.id+'\')">거절</button></div>'; }
+    return '<div class="req"><div class="rh"><span class="biz">'+esc(r.biz_name)+'</span>'+badge+'</div><div class="meta"><b>'+esc(r.contact_email)+'</b>'+(r.contact_phone?' · '+esc(r.contact_phone):'')+(r.rooms?'<br>숙소: '+esc(r.rooms).replace(/\n/g,', '):'')+(r.channels?'<br>채널: '+esc(r.channels):'')+(r.memo?'<br>메모: '+esc(r.memo):'')+'<br><span class="dim">신청: '+esc((r.created_at||'').slice(0,10))+'</span></div>'+extra+acts+'</div>';
+  }).join('');
+}
+async function approve(id,btn){
+  if(!confirm('승인하고 계정·숙소를 자동 생성할까요?')) return;
+  btn.disabled=true; btn.textContent='생성 중…';
+  const {data,error}=await db.functions.invoke('provision-signup',{body:{request_id:id}});
+  if(error||!data||!data.ok){ alert('승인 실패: '+((data&&data.error)||(error&&error.message)||'')); btn.disabled=false; btn.textContent='승인 → 자동 세팅'; return; }
+  alert('완료! 업체가 생성됐어요. 승인됨 탭에서 비밀번호 설정 링크를 복사해 업체에 보내세요.');
+  document.querySelector('.sub .s[data-f="approved"]').click(); loadTenants();
+}
+async function reject(id){
+  if(!confirm('이 신청을 거절할까요?')) return;
+  const {error}=await db.from('signup_requests').update({status:'rejected',reviewed_at:new Date().toISOString()}).eq('id',id);
+  if(error){ alert('실패: '+error.message); return; } loadReqs();
+}
+async function loadTenants(){
+  const {data,error}=await db.rpc('operator_tenants');
+  const rows=$('#tenantRows');
+  if(error){ rows.innerHTML='<tr><td colspan="6" class="empty">'+esc(error.message)+'</td></tr>'; return; }
+  const list=data||[];
+  const totB=list.reduce((a,x)=>a+Number(x.active_bookings||0),0);
+  const totF=list.reduce((a,x)=>a+Number(x.feeds||0),0);
+  $('#kpis').innerHTML='<div class="kpi"><div class="k">전체 업체</div><div class="v">'+list.length+'</div></div><div class="kpi"><div class="k">진행 예약(합)</div><div class="v">'+totB+'</div></div><div class="kpi"><div class="k">연결된 채널(합)</div><div class="v">'+totF+'</div></div>';
+  if(!list.length){ rows.innerHTML='<tr><td colspan="6" class="empty">업체가 없어요.</td></tr>'; return; }
+  rows.innerHTML=list.map(t=>{
+    const sync=t.last_sync?('<span class="ok">'+esc(String(t.last_sync).slice(0,16).replace('T',' '))+'</span>'):'<span class="dim">—</span>';
+    return '<tr><td><span class="tname">'+esc(t.name)+'</span> <span class="src">'+esc(t.source||'')+'</span></td><td>'+t.rooms+'</td><td>'+t.active_bookings+'</td><td>'+(Number(t.feeds)>0?'<span class="ok">'+t.feeds+'</span>':'<span class="warn">0</span>')+'</td><td>'+sync+'</td><td class="dim">'+esc(t.admins||'—')+'</td></tr>';
+  }).join('');
+}
+start();
+</script></body></html>
