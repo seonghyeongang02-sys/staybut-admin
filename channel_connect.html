@@ -6,7 +6,7 @@
 <title>숙소 · 채널 연결 · StayBUT</title>
 <style>
   :root{--bg:#f5f5f7;--panel:#fff;--line:#e5e5e7;--line2:#d2d2d7;--text:#1d1d1f;--muted:#6e6e73;--dim:#a1a1a6;
-    --booking:#3f6ea6;--airbnb:#d96a83;--agoda:#7d6bd0;--ok:#16a34a;--danger:#e0485c;--ink:#16161b;}
+    --booking:#3f6ea6;--airbnb:#d96a83;--agoda:#7d6bd0;--ok:#16a34a;--danger:#e0485c;--ink:#16161b;--accent:#2f6fed;}
   *{box-sizing:border-box;}
   body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',Roboto,sans-serif;}
   .wrap{max-width:760px;margin:0 auto;padding:28px 18px 70px;}
@@ -24,24 +24,24 @@
   .top .who button{margin-left:8px;border:1px solid var(--line2);background:#fff;border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;}
   h1.ph{font-size:22px;font-weight:700;margin:0 0 4px;letter-spacing:-.01em;}
   .ps{font-size:13px;color:var(--muted);margin:0 0 6px;}
-  .note{font-size:12px;color:var(--dim);margin:0 0 16px;}
-  .help{border:1px solid var(--line);border-radius:12px;background:#fff;margin:0 0 18px;overflow:hidden;}
-  .help summary{cursor:pointer;list-style:none;padding:12px 15px;font-size:13px;font-weight:700;}
-  .help summary::-webkit-details-marker{display:none;}
-  .help .body{padding:0 15px 14px;font-size:12.5px;color:var(--muted);line-height:1.7;}
-  .help .body b{color:var(--text);}
+  .note{font-size:12px;color:var(--dim);margin:0 0 14px;}
+  .guide{background:#eef4ff;border:1px solid #cfe0fa;border-radius:12px;padding:13px 15px;margin:0 0 18px;}
+  .guide b{color:#0c447c;font-weight:700;}
+  .guide .gt{font-size:13px;font-weight:800;color:#0c447c;margin-bottom:7px;}
+  .guide .gl{font-size:12.5px;color:#1f3a66;line-height:1.9;}
   .rc{background:#fff;border:1px solid var(--line);border-radius:14px;padding:15px 16px;margin-bottom:12px;box-shadow:0 1px 2px rgba(20,30,50,.04);}
-  .rc .rh{display:flex;align-items:center;gap:8px;margin-bottom:12px;}
+  .rc .rh{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
   .rc .rh input.nm{flex:1;min-width:0;font-size:15px;font-weight:700;border:1px solid transparent;border-radius:8px;padding:6px 8px;font-family:inherit;background:#fafafa;}
   .rc .rh input.nm:focus{outline:none;border-color:var(--ink);background:#fff;}
   .rc .rh .del{border:1px solid var(--line2);background:#fff;color:var(--danger);border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;flex:none;}
-  .row{display:flex;align-items:center;gap:10px;margin:8px 0;}
+  .row{display:flex;align-items:center;gap:10px;margin:8px 0 2px;}
   .tag{width:84px;flex:none;font-size:11px;font-weight:700;padding:5px 8px;border-radius:6px;color:#fff;text-align:center;}
   .inp{flex:1;min-width:0;height:34px;border:1px solid var(--line2);border-radius:8px;padding:0 11px;font-size:12.5px;font-family:inherit;outline:none;}
   .inp:focus{border-color:var(--ink);}
-  .st{flex:none;width:70px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px;}
+  .st{flex:none;width:66px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:5px;}
   .dot{width:8px;height:8px;border-radius:50%;flex:none;}
-  .rc .bottom{display:flex;align-items:center;gap:10px;margin-top:10px;}
+  .phint{font-size:11.5px;margin:0 0 8px 94px;color:var(--dim);min-height:15px;}
+  .rc .bottom{display:flex;align-items:center;gap:10px;margin-top:8px;}
   .rc .save{border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:8px;padding:8px 16px;font-size:12.5px;font-weight:700;cursor:pointer;}
   .rc .saved{color:var(--ok);font-size:12px;font-weight:700;}
   .addbtn{width:100%;border:1.5px dashed var(--line2);background:#fff;color:var(--text);border-radius:12px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;}
@@ -64,23 +64,20 @@
 </div>
 
 <div id="app"><div class="wrap">
-  <div class="top">
-    <div></div>
-    <div class="who"><span id="whoami"></span><button id="logoutBtn">로그아웃</button></div>
-  </div>
+  <div class="top"><div></div><div class="who"><span id="whoami"></span><button id="logoutBtn">로그아웃</button></div></div>
   <h1 class="ph">숙소 · 채널 연결</h1>
   <div class="ps">숙소를 추가하고, 각 예약 사이트의 <b>iCal(캘린더 내보내기) 주소</b>를 붙여넣으면 예약 날짜가 자동으로 채워져요.</div>
   <div class="note">🔒 손님 이름·연락처 등 개인정보는 가져오지 않아요. 날짜·숙소만 동기화됩니다.</div>
 
-  <details class="help">
-    <summary>iCal 주소는 어디서 찾나요? (사이트별)</summary>
-    <div class="body">
-      <b>부킹닷컴</b> — 익스트라넷 → 객실/요금 → 캘린더 → “캘린더 동기화(Export)” → iCal 링크 복사<br>
-      <b>에어비앤비</b> — 리스팅 → 예약 가능 여부 → 캘린더 연결 → “캘린더 내보내기(.ics)” 복사<br>
-      <b>아고다</b> — YCS(익스트라넷) → 캘린더/동기화 → 내보내기 링크 복사<br>
-      <span style="color:var(--dim);">※ 한 숙소를 여러 사이트에 올렸다면, 사이트마다 링크를 각각 넣으면 돼요.</span>
+  <div class="guide">
+    <div class="gt">어떤 iCal 링크를 넣나요?</div>
+    <div class="gl">
+      · <b>파는 채널만</b> — 그 숙소를 올린 채널 칸에만 링크를 넣고, 안 올린 채널은 비워두세요.<br>
+      · <b>채널마다 링크가 따로</b> — 부킹은 부킹에서, 에어는 에어에서 받은 iCal 주소예요.<br>
+      · <b>여러 채널에 올렸다면</b> 각각 넣어도 돼요. 겹치는 예약은 자동으로 한 건으로 정리돼요.<br>
+      · 붙여넣으면 <b>"예약 N건 감지"</b>로 맞는 링크인지 바로 확인돼요.
     </div>
-  </details>
+  </div>
 
   <div id="units"><div class="empty">불러오는 중…</div></div>
   <button class="addbtn" id="addBtn">+ 숙소 추가</button>
@@ -98,6 +95,9 @@ const db=supabase.createClient(SB_URL,SB_KEY);
 const $=s=>document.querySelector(s);
 const CHANNELS=[['booking','부킹닷컴','var(--booking)'],['airbnb','에어비앤비','var(--airbnb)'],['agoda','아고다','var(--agoda)']];
 function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function unfold(t){return t.replace(/\r\n/g,'\n').replace(/\n[ \t]/g,'');}
+function toDate(v){const m=v.match(/(\d{4})(\d{2})(\d{2})/);return m?`${m[1]}-${m[2]}-${m[3]}`:null;}
+function parseICS(ics){const text=unfold(ics);const out=[];const blocks=text.split('BEGIN:VEVENT').slice(1);for(const b of blocks){const body=b.split('END:VEVENT')[0];const ev={};for(const line of body.split('\n')){const i=line.indexOf(':');if(i<0)continue;const name=line.slice(0,i).split(';')[0].toUpperCase();const val=line.slice(i+1).trim();if(name==='UID')ev.uid=val;else if(name==='DTSTART')ev.start=val;else if(name==='DTEND')ev.end=val;}if(ev.uid&&ev.start)out.push(ev);}return out;}
 
 async function start(){
   const {data:{session}}=await db.auth.getSession();
@@ -109,8 +109,7 @@ async function start(){
   loadUnits();
 }
 $('#loginBtn').addEventListener('click',async()=>{
-  const email=$('#email').value.trim(), pw=$('#pw').value;
-  $('#loginErr').textContent='';
+  const email=$('#email').value.trim(), pw=$('#pw').value; $('#loginErr').textContent='';
   const {error}=await db.auth.signInWithPassword({email,password:pw});
   if(error){ $('#loginErr').textContent='로그인 실패: 이메일/비밀번호 확인'; return; }
   start();
@@ -136,17 +135,14 @@ async function loadUnits(){
   const fmap={}; (feeds||[]).forEach(f=>{ fmap[f.room_id+'|'+f.channel]=f.url; });
   box.innerHTML=active.map(r=>`
     <div class="rc" data-room="${r.id}">
-      <div class="rh">
-        <input class="nm" value="${esc(r.room_number)}" />
-        <button class="del">삭제</button>
-      </div>
+      <div class="rh"><input class="nm" value="${esc(r.room_number)}" /><button class="del">삭제</button></div>
       ${CHANNELS.map(([k,label,color])=>{
         const url=fmap[r.id+'|'+k]||''; const on=!!url;
         return `<div class="row">
           <span class="tag" style="background:${color};">${label}</span>
           <input class="inp" data-ch="${k}" value="${esc(url)}" placeholder="iCal 주소 붙여넣기…" />
           <span class="st" data-stfor="${k}" style="color:${on?'var(--ok)':'var(--dim)'};"><span class="dot" style="background:${on?'#22c55e':'#cfd5df'};"></span>${on?'연결됨':'미연결'}</span>
-        </div>`;
+        </div><div class="phint" data-phfor="${k}"></div>`;
       }).join('')}
       <div class="bottom"><button class="save">저장</button><span class="saved" style="display:none;">✓ 저장됨</span></div>
     </div>`).join('');
@@ -156,13 +152,36 @@ async function loadUnits(){
     const nm=card.querySelector('.nm');
     nm.addEventListener('blur',()=>renameUnit(card,nm.value));
     nm.addEventListener('keydown',e=>{ if(e.key==='Enter') nm.blur(); });
+    card.querySelectorAll('.inp').forEach(inp=>{
+      inp.addEventListener('blur',()=>preview(inp));
+      preview(inp);
+    });
   });
 }
 
-async function renameUnit(card,name){
-  name=(name||'').trim(); if(!name) return;
-  await db.from('rooms').update({room_number:name}).eq('id',card.dataset.room);
+async function preview(inp){
+  const card=inp.closest('.rc'); const ch=inp.dataset.ch;
+  const hint=card.querySelector(`.phint[data-phfor="${ch}"]`);
+  const url=inp.value.trim();
+  if(!url){ hint.textContent='이 채널엔 안 올렸다면 비워두세요'; hint.style.color='var(--dim)'; return; }
+  hint.textContent='확인 중…'; hint.style.color='var(--dim)';
+  try{
+    let count=0, latest=null;
+    if(url.startsWith('data:')){
+      const txt=await (await fetch(url)).text();
+      const ev=parseICS(txt); count=ev.length;
+      latest=ev.map(e=>toDate(e.end||e.start)).filter(Boolean).sort().pop()||null;
+    }else{
+      const {data,error}=await db.functions.invoke('ical-preview',{body:{url}});
+      if(error||!data||!data.ok) throw new Error((data&&data.error)||'read');
+      count=data.count; latest=data.latest;
+    }
+    if(count>0){ hint.textContent=`✓ 예약 ${count}건 감지${latest?' · 최근 '+latest:''}`; hint.style.color='var(--ok)'; }
+    else{ hint.textContent='읽었지만 예약이 없어요 (빈 캘린더일 수 있어요)'; hint.style.color='var(--dim)'; }
+  }catch(e){ hint.textContent='⚠ 링크를 확인해 주세요 (읽기 실패)'; hint.style.color='var(--danger)'; }
 }
+
+async function renameUnit(card,name){ name=(name||'').trim(); if(!name) return; await db.from('rooms').update({room_number:name}).eq('id',card.dataset.room); }
 async function delUnit(card){
   if(!confirm('이 숙소를 삭제할까요? (예약이 있으면 삭제되지 않아요)')) return;
   const {error}=await db.from('rooms').delete().eq('id',card.dataset.room);
@@ -170,8 +189,7 @@ async function delUnit(card){
   loadUnits();
 }
 async function saveFeeds(card){
-  const roomId=card.dataset.room;
-  const btn=card.querySelector('.save'), savedTag=card.querySelector('.saved');
+  const roomId=card.dataset.room; const btn=card.querySelector('.save'), savedTag=card.querySelector('.saved');
   btn.disabled=true; btn.textContent='저장 중…';
   try{
     for(const inp of card.querySelectorAll('.inp')){
