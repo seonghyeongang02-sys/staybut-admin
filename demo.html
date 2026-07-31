@@ -1,0 +1,298 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>StayBUT 데모 · 호스트 시연</title>
+<style>
+:root{--ink:#16161b;--bg:#f5f5f7;--panel:#fff;--line:#e5e5e7;--line2:#d2d2d7;--text:#1d1d1f;--muted:#6e6e73;--dim:#a1a1a6;--ok:#16a34a;}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Malgun Gothic','Apple SD Gothic Neo',Roboto,sans-serif;}
+.screen{display:none;} .screen.on{display:block;}
+/* 로그인 / 연결 공통 센터 */
+.center{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:24px;}
+.stepbar{position:fixed;top:0;left:0;right:0;display:flex;gap:6px;justify-content:center;padding:12px;background:transparent;z-index:20;}
+.stepbar i{width:34px;height:4px;border-radius:3px;background:#d2d2d7;}
+.stepbar i.on{background:var(--ink);}
+/* 로그인 */
+.card{background:#fff;border:1px solid var(--line);border-radius:18px;padding:32px 28px;width:340px;max-width:92%;box-shadow:0 2px 10px rgba(20,30,50,.05);}
+.brandc{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:18px;}
+.brandc img{width:52px;height:52px;border-radius:13px;background:#fff;object-fit:contain;}
+.brandc b{font-size:19px;font-weight:800;}
+.card h1{font-size:15px;font-weight:700;text-align:center;margin:0 0 16px;color:var(--muted);}
+.card input{width:100%;border:1px solid var(--line2);border-radius:11px;padding:12px 13px;font-size:14px;margin-bottom:10px;font-family:inherit;background:var(--bg);}
+.card input:focus{outline:none;border-color:var(--ink);background:#fff;}
+.btn{width:100%;border:0;background:var(--ink);color:#fff;border-radius:11px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;}
+.btn:hover{opacity:.92;}
+/* 연결 */
+.cwrap{width:560px;max-width:94%;}
+.cwrap .h1{font-size:22px;font-weight:800;letter-spacing:-.01em;margin:0 0 4px;}
+.cwrap .sub{font-size:13px;color:var(--muted);margin:0 0 4px;}
+.cwrap .lock{font-size:12px;color:var(--dim);margin:0 0 18px;}
+.ucard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 15px;margin-bottom:12px;box-shadow:0 1px 2px rgba(20,30,50,.04);}
+.uname{font-size:15px;font-weight:800;margin-bottom:10px;}
+.crow{display:flex;align-items:center;gap:9px;margin:7px 0;}
+.ctag{width:78px;flex:none;font-size:11px;font-weight:700;color:#fff;text-align:center;padding:5px 6px;border-radius:6px;}
+.cinp{flex:1;min-width:0;height:32px;border:1px solid var(--line2);border-radius:8px;padding:0 10px;font-size:11.5px;font-family:inherit;color:#48484a;outline:none;}
+.cinp.filled{background:#f2f6ff;border-color:#c7d8f0;}
+.cst{flex:none;width:52px;font-size:11px;font-weight:700;color:var(--dim);}
+.cst.connected{color:var(--ok);}
+.addu{width:100%;border:1.5px dashed var(--line2);background:#fff;border-radius:12px;padding:12px;font-size:13px;font-weight:700;color:var(--muted);cursor:pointer;margin-bottom:16px;}
+.go{width:100%;border:0;background:var(--ink);color:#fff;border-radius:12px;padding:15px;font-size:15px;font-weight:800;cursor:pointer;}
+/* 로딩 */
+#loading{position:fixed;inset:0;background:rgba(245,245,247,.96);display:none;align-items:center;justify-content:center;flex-direction:column;gap:16px;z-index:40;}
+.spin{width:38px;height:38px;border:3px solid #e5e5e7;border-top-color:var(--ink);border-radius:50%;animation:sp 0.8s linear infinite;}
+@keyframes sp{to{transform:rotate(360deg);}}
+#loading .lt{font-size:14px;font-weight:700;} #loading .ls{font-size:12.5px;color:var(--muted);}
+/* 어드민 */
+.admin{display:flex;min-height:100dvh;}
+.side{width:210px;flex:none;background:var(--ink);color:#fff;display:flex;flex-direction:column;padding:16px 12px;}
+.side .brand{display:flex;align-items:center;gap:10px;padding:6px 8px 18px;}
+.side .brand img{width:32px;height:32px;border-radius:9px;background:#fff;object-fit:contain;}
+.side .brand b{font-size:16px;font-weight:800;}
+.navl{font-size:10px;letter-spacing:.16em;color:#7f838c;font-weight:700;margin:8px 10px;}
+.nav a{display:block;padding:10px 12px;border-radius:9px;color:#cfd2d8;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:2px;}
+.nav a:hover{background:rgba(255,255,255,.06);} .nav a.on{background:#fff;color:var(--ink);}
+.side .foot{margin-top:auto;font-size:11px;color:#7f838c;padding:10px 8px;}
+.badge{background:rgba(255,255,255,.12);border-radius:6px;padding:3px 8px;font-size:10.5px;font-weight:700;}
+.main{flex:1;min-width:0;padding:24px 30px 56px;overflow:auto;}
+.ph{font-size:22px;font-weight:700;letter-spacing:-.01em;margin:0;}
+.psub{font-size:13px;color:var(--muted);margin:4px 0 20px;}
+.synced{display:inline-flex;align-items:center;gap:6px;background:#e9f7ef;color:#0f7a52;border-radius:20px;padding:4px 11px;font-size:12px;font-weight:700;margin-left:10px;}
+.view{display:none;} .view.on{display:block;}
+.sl{font-size:13px;font-weight:600;color:#6e6e73;margin:26px 0 12px;} .sl:first-of-type{margin-top:0;}
+.todo{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.tc{background:#fff;border-radius:18px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.tc .k{font-size:13px;color:#86868b;font-weight:500;} .tc .v{font-size:32px;font-weight:600;letter-spacing:-.02em;margin-top:8px;color:#1d1d1f;font-variant-numeric:tabular-nums;} .tc .h{font-size:12px;color:#86868b;margin-top:8px;}
+.tlscroll{overflow-x:auto;}
+.tl{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;}
+.tlrow{display:flex;border-bottom:1px solid var(--line);} .tlrow:last-child{border-bottom:0;}
+.tlrow.head{background:#fafafa;}
+.lab{width:50px;flex:none;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12.5px;border-right:1px solid var(--line);}
+.days{flex:1;min-width:0;display:grid;}
+.head .dcell{padding:7px 0;text-align:center;font-size:11px;border-left:1px solid var(--line);} .head .dcell:first-child{border-left:0;}
+.head .dcell small{display:block;color:#a1a1a6;font-size:9.5px;} .head .dcell b{font-size:12px;font-weight:700;}
+.seg{margin:7px 3px;border-radius:7px;height:30px;display:flex;align-items:center;padding:0 9px;font-size:11px;font-weight:600;white-space:nowrap;overflow:hidden;}
+.lg{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--muted);margin-top:10px;} .lg span{display:inline-flex;align-items:center;gap:6px;} .sw{width:12px;height:12px;border-radius:3px;}
+table.bk{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:13px;}
+table.bk th{background:#fafafa;color:var(--muted);font-weight:600;font-size:12px;text-align:left;padding:11px 13px;border-bottom:1px solid var(--line);}
+table.bk td{padding:12px 13px;border-bottom:1px solid #f0f0f2;} table.bk tr:last-child td{border-bottom:0;}
+.chip{font-size:11px;font-weight:700;border-radius:6px;padding:2px 9px;color:#fff;}
+.stt{font-size:11px;font-weight:700;border-radius:20px;padding:3px 11px;}
+.st-in{background:#eef4fb;color:#2e5891;} .st-stay{background:#e9f7ef;color:#0f7a52;} .st-out{background:#f7ede8;color:#9a4a32;} .st-plan{background:#f2f2f4;color:#8a8a8e;}
+.clean-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
+.cl{background:#fff;border-radius:16px;padding:16px 17px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
+.cl .r1{display:flex;justify-content:space-between;align-items:center;} .cl .rmn{font-size:15px;font-weight:800;} .cl .dt{font-size:12px;color:var(--muted);}
+.cl .meta{font-size:12px;color:var(--muted);line-height:1.75;margin-top:6px;}
+.cl .act{margin-top:12px;border:1px solid var(--ink);background:var(--ink);color:#fff;border-radius:9px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;}
+.cl .act.done{background:#fff;color:var(--ink);}
+.inbox{display:flex;height:500px;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff;}
+.ib-list{width:240px;flex:none;border-right:1px solid var(--line);background:#fafafa;}
+.ib-search{margin:11px;height:32px;border:1px solid var(--line2);border-radius:8px;display:flex;align-items:center;padding:0 11px;color:#a1a1a6;font-size:12.5px;}
+.conv{display:flex;gap:9px;padding:11px 12px;border-bottom:1px solid #f0f0f2;cursor:pointer;} .conv.on{background:#fff;box-shadow:inset 3px 0 0 var(--ink);}
+.conv .av{width:34px;height:34px;flex:none;border-radius:9px;color:#fff;font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center;}
+.conv .rmn{font-size:14px;font-weight:800;} .conv .last{font-size:12px;color:var(--muted);margin-top:2px;} .conv .sum{font-size:10.5px;color:var(--dim);margin-top:3px;}
+.ib-thread{flex:1;display:flex;flex-direction:column;} .ib-hd{padding:12px 15px;border-bottom:1px solid var(--line);font-weight:800;font-size:14px;} .ib-hd small{display:block;font-weight:600;font-size:11px;color:var(--muted);}
+.msgs{flex:1;padding:16px;background:#fbfbfc;display:flex;flex-direction:column;gap:9px;} .msg{max-width:78%;padding:9px 13px;border-radius:15px;font-size:13.5px;line-height:1.5;}
+.msg.g{align-self:flex-start;background:#ececee;} .msg.s{align-self:flex-end;background:#1d1d1f;color:#fff;}
+.msg .tr{display:block;font-size:12px;color:#8a8a8e;margin-top:5px;border-top:1px dashed rgba(0,0,0,.14);padding-top:5px;}
+.ib-input{border-top:1px solid var(--line);padding:10px 12px;display:flex;gap:8px;} .ib-input .box{flex:1;height:32px;border:1px solid var(--line2);border-radius:16px;padding:0 12px;display:flex;align-items:center;color:#a1a1a6;font-size:12.5px;} .ib-input .snd{border:0;background:#1d1d1f;color:#fff;border-radius:16px;padding:0 15px;font-size:12.5px;font-weight:700;}
+#cshare-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);align-items:center;justify-content:center;z-index:60;}
+@media(max-width:820px){.side{display:none;}.todo{grid-template-columns:repeat(2,1fr);}.main{padding:16px;}}
+
+.clhead{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;}
+.clbtns{display:flex;gap:8px;}
+.clbtns button{border:1px solid var(--line2);background:#fff;border-radius:9px;padding:8px 12px;font-size:12.5px;font-weight:700;cursor:pointer;}
+.clbtns button.dark{background:var(--ink);color:#fff;border-color:var(--ink);}
+.clfilter{display:flex;align-items:center;gap:8px;margin:16px 0 0;flex-wrap:wrap;}
+.clfilter .fl{font-size:12px;color:var(--muted);}
+.fchip{border:1px solid var(--line2);background:#fff;border-radius:7px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;color:var(--muted);}
+.fchip.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+.fchip.booking{color:#3f6ea6;} .fchip.agoda{color:#7d6bd0;} .fchip.airbnb{color:#d96a83;}
+.clnav{display:flex;align-items:center;gap:10px;margin:16px 0;flex-wrap:wrap;}
+.clnav .arw{border:1px solid var(--line2);background:#fff;border-radius:7px;width:28px;height:28px;cursor:pointer;font-size:13px;}
+.clnav .range{font-size:14px;font-weight:700;}
+.clnav .tw{border:1px solid var(--line2);background:#fff;border-radius:7px;padding:6px 11px;font-size:12px;font-weight:700;cursor:pointer;}
+.scount{font-size:12px;color:var(--muted);background:#f2f2f4;border-radius:16px;padding:4px 11px;font-weight:600;}
+.scount b{color:var(--text);} .scount.ok{background:#e9f7ef;color:#0f7a52;} .scount.ok b{color:#0f7a52;}
+.scount.amber{background:#fdf3e3;color:#a9700a;} .scount.amber b{color:#a9700a;}
+.settle{background:#fafafa;border:1px solid var(--line);border-radius:12px;padding:11px 14px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12.5px;margin-bottom:14px;}
+.settle-total b{font-weight:800;} .settle-by{display:flex;gap:14px;flex-wrap:wrap;color:var(--muted);}
+.clweek{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;overflow-x:auto;}
+.clday{border:1px solid var(--line);border-radius:12px;background:#fff;min-width:150px;display:flex;flex-direction:column;}
+.clday.today{border-color:#3f6ea6;box-shadow:0 0 0 2px rgba(63,110,166,.15);}
+.cldh{display:flex;justify-content:space-between;align-items:center;padding:9px 11px;border-bottom:1px solid var(--line);font-size:12.5px;font-weight:700;}
+.cldh.today{background:#eef4fb;color:#2e5891;}
+.cldh .cnt{font-size:11px;color:var(--dim);font-weight:700;}
+.clcards{padding:8px;display:flex;flex-direction:column;gap:7px;flex:1;}
+.clcard{border:1px solid var(--line);border-radius:9px;padding:9px 10px;cursor:pointer;}
+.clcard:hover{border-color:var(--ink);}
+.ccr{display:flex;justify-content:space-between;align-items:center;} .ccr b{font-size:13px;font-weight:800;}
+.cdot{width:9px;height:9px;border-radius:50%;flex:none;} .cdot.done{background:#22c55e;} .cdot.plan{background:#cfd5df;} .cdot.un{background:#e0a52b;}
+.ccm{font-size:11px;color:var(--muted);margin-top:3px;} .ccp{font-size:11.5px;font-weight:700;margin-top:3px;}
+.cltot{padding:8px 11px;border-top:1px solid var(--line);text-align:right;font-size:11.5px;font-weight:700;color:var(--muted);}
+
+</style></head><body>
+
+<div class="stepbar" id="stepbar" style="display:none;"><i id="sb1"></i><i id="sb2"></i><i id="sb3"></i><i id="sb4"></i></div>
+
+<!-- 1) 로그인 -->
+<div class="screen on" id="s-signup"><div class="center"><div style="width:410px;max-width:92%;background:#fff;border:1px solid var(--line);border-radius:18px;padding:28px 24px;box-shadow:0 2px 10px rgba(20,30,50,.05);">
+  <div id="signupForm">
+    <div style="font-size:19px;font-weight:800;margin-bottom:3px;">StayBUT 무료로 시작하기</div>
+    <div style="font-size:12.5px;color:var(--muted);line-height:1.6;margin-bottom:16px;">업체가 이 폼으로 신청해요. 예약 사이트 iCal만 연결하면 자동으로 채워져요. 지금은 무료 시범이에요.</div>
+    <label style="display:block;font-size:12px;font-weight:700;margin:10px 0 5px;">업체명</label>
+    <input value="Desert" style="width:100%;border:1px solid var(--line2);border-radius:10px;padding:11px 12px;font-size:14px;font-family:inherit;background:var(--bg);"/>
+    <label style="display:block;font-size:12px;font-weight:700;margin:12px 0 5px;">이메일</label>
+    <input value="demo@desert.kr" style="width:100%;border:1px solid var(--line2);border-radius:10px;padding:11px 12px;font-size:14px;font-family:inherit;background:var(--bg);"/>
+    <label style="display:block;font-size:12px;font-weight:700;margin:12px 0 5px;">숙소(객실) 이름</label>
+    <textarea style="width:100%;border:1px solid var(--line2);border-radius:10px;padding:11px 12px;font-size:14px;font-family:inherit;background:var(--bg);min-height:64px;resize:vertical;">101호
+102호
+201호</textarea>
+    <label style="display:block;font-size:12px;font-weight:700;margin:12px 0 5px;">사용 채널</label>
+    <input value="부킹닷컴, 에어비앤비, 아고다" style="width:100%;border:1px solid var(--line2);border-radius:10px;padding:11px 12px;font-size:14px;font-family:inherit;background:var(--bg);"/>
+    <button class="go" onclick="demoSubmit()">무료 신청하기</button>
+  </div>
+  <div id="approvedBox" style="display:none;text-align:center;padding:6px 0;">
+    <div style="font-size:44px;">✅</div>
+    <div style="font-size:17px;font-weight:800;margin-top:4px;">운영자 승인 완료</div>
+    <div style="font-size:12.5px;color:var(--muted);line-height:1.65;margin:8px 4px 16px;">신청이 승인돼 <b>계정과 숙소(101·102·201)가 자동 생성</b>됐어요. 이메일로 받은 링크에서 비밀번호를 설정하고 로그인하세요.</div>
+    <button class="go" onclick="show('s-login');setStep(2)">로그인하러 가기 →</button>
+  </div>
+</div></div></div>
+<div class="screen" id="s-login"><div class="center"><div class="card">
+  <div class="brandc"><img src="data:image/png;base64,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"/><b>Desert</b></div>
+  <h1>호스트 로그인</h1>
+  <input value="demo@desert.kr" />
+  <input type="password" value="demo1234" />
+  <button class="btn" onclick="show('s-connect');setStep(3)">로그인</button>
+</div></div></div>
+
+<!-- 2) 채널 연결 -->
+<div class="screen" id="s-connect"><div class="center"><div class="cwrap">
+  <div class="h1">채널 캘린더 연결</div>
+  <div class="sub">숙소마다 예약 사이트의 <b>iCal 주소</b>를 붙여넣으면, 예약이 자동으로 채워져요.</div>
+  <div class="lock">🔒 손님 이름·연락처는 가져오지 않아요. 날짜·숙소만 동기화됩니다.</div>
+  <div class="ucard"><div class="uname">101호</div><div class="crow"><span class="ctag" style="background:#3f6ea6;">부킹닷컴</span><input class="cinp filled" value="https://ical.booking.com/v1/export?t=xxx" placeholder="iCal 주소 붙여넣기…"/><span class="cst connected">연결됨</span></div><div class="crow"><span class="ctag" style="background:#d96a83;">에어비앤비</span><input class="cinp filled" value="https://airbnb.com/calendar/ical/xxx.ics" placeholder="iCal 주소 붙여넣기…"/><span class="cst connected">연결됨</span></div><div class="crow"><span class="ctag" style="background:#7d6bd0;">아고다</span><input class="cinp " value="" placeholder="iCal 주소 붙여넣기…"/><span class="cst ">미연결</span></div></div><div class="ucard"><div class="uname">102호</div><div class="crow"><span class="ctag" style="background:#3f6ea6;">부킹닷컴</span><input class="cinp filled" value="https://ical.booking.com/v1/export?t=xxx" placeholder="iCal 주소 붙여넣기…"/><span class="cst connected">연결됨</span></div><div class="crow"><span class="ctag" style="background:#d96a83;">에어비앤비</span><input class="cinp " value="" placeholder="iCal 주소 붙여넣기…"/><span class="cst ">미연결</span></div><div class="crow"><span class="ctag" style="background:#7d6bd0;">아고다</span><input class="cinp filled" value="https://ycs.agoda.com/ical/xxx" placeholder="iCal 주소 붙여넣기…"/><span class="cst connected">연결됨</span></div></div><div class="ucard"><div class="uname">201호</div><div class="crow"><span class="ctag" style="background:#3f6ea6;">부킹닷컴</span><input class="cinp filled" value="https://ical.booking.com/v1/export?t=xxx" placeholder="iCal 주소 붙여넣기…"/><span class="cst connected">연결됨</span></div><div class="crow"><span class="ctag" style="background:#d96a83;">에어비앤비</span><input class="cinp filled" value="https://airbnb.com/calendar/ical/yyy.ics" placeholder="iCal 주소 붙여넣기…"/><span class="cst connected">연결됨</span></div><div class="crow"><span class="ctag" style="background:#7d6bd0;">아고다</span><input class="cinp " value="" placeholder="iCal 주소 붙여넣기…"/><span class="cst ">미연결</span></div></div>
+  <button class="addu">+ 숙소 추가</button>
+  <button class="go" onclick="sync()">연동하고 어드민 시작하기 →</button>
+</div></div></div>
+
+<!-- 로딩 -->
+<div id="loading"><div class="spin"></div><div class="lt">채널 동기화 중…</div><div class="ls" id="loadmsg">예약 10건 · 청소 10건 불러오는 중</div></div>
+
+<!-- 3) 어드민 -->
+<div class="screen" id="s-admin"><div class="admin">
+  <div class="side">
+    <div class="brand"><img src="data:image/png;base64,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"/><b>Desert</b></div>
+    <div class="navl">메인</div>
+    <div class="nav">
+      <a class="on" data-tab="dash">운영 현황</a>
+      <a data-tab="bk">예약 관리</a>
+      <a data-tab="cl">청소 관리</a>
+      <a data-tab="cs">상담</a>
+    </div>
+    <div class="foot"><span class="badge">DEMO</span><div style="margin-top:8px;">StayBUT 호스트 콘솔</div></div>
+  </div>
+  <div class="main">
+    <div id="v-dash" class="view on">
+      <div class="ph">운영 현황 <span class="synced">✓ iCal 연동됨</span></div>
+      <div class="psub">Desert 호스트님, 반갑습니다 · 2026년 7월 30일 (목)</div>
+      <div class="sl">오늘 할 일</div>
+      <div class="todo">
+        <div class="tc"><div class="k">오늘 체크인</div><div class="v">2</div><div class="h">101 · 201호</div></div>
+        <div class="tc"><div class="k">오늘 체크아웃</div><div class="v">1</div><div class="h">102호 · 청소 대상</div></div>
+        <div class="tc"><div class="k">청소 미배정</div><div class="v">3</div><div class="h">이번 주</div></div>
+        <div class="tc"><div class="k">이번 달 매출</div><div class="v">327만</div><div class="h">iCal 10건</div></div>
+      </div>
+      <div class="sl">예약 현황 · 숙소별 · 1주일</div><div class="tl"><div class="tlrow head"><div class="lab">숙소</div><div class="days head" style="grid-template-columns:repeat(7,1fr);"><div class="dcell"><small>목</small><b>30</b></div><div class="dcell"><small>금</small><b>31</b></div><div class="dcell"><small>토</small><b>1</b></div><div class="dcell"><small>일</small><b>2</b></div><div class="dcell"><small>월</small><b>3</b></div><div class="dcell"><small>화</small><b>4</b></div><div class="dcell"><small>수</small><b>5</b></div></div></div><div class="tlrow"><div class="lab">101</div><div class="days" style="grid-template-columns:repeat(7,1fr);"><div class="seg" style="grid-column:1 / span 3;background:#3f6ea6;color:#fff;">부킹닷컴</div><div class="seg" style="grid-column:5 / span 3;background:#d96a83;color:#fff;">에어비앤비</div></div></div><div class="tlrow"><div class="lab">102</div><div class="days" style="grid-template-columns:repeat(7,1fr);"><div class="seg" style="grid-column:1 / span 1;background:#7d6bd0;color:#fff;">아고다</div><div class="seg" style="grid-column:2 / span 3;background:#3f6ea6;color:#fff;">부킹닷컴 · 숙박중</div></div></div><div class="tlrow"><div class="lab">201</div><div class="days" style="grid-template-columns:repeat(7,1fr);"><div class="seg" style="grid-column:1 / span 3;background:#3f6ea6;color:#fff;">부킹닷컴 · 숙박중</div><div class="seg" style="grid-column:4 / span 2;background:#d96a83;color:#fff;">에어</div></div></div></div> <div class="lg"><span><span class="sw" style="background:#3f6ea6;"></span>부킹닷컴</span><span><span class="sw" style="background:#d96a83;"></span>에어비앤비</span><span><span class="sw" style="background:#7d6bd0;"></span>아고다</span></div>
+    </div>
+    <div id="v-bk" class="view">
+      <div class="ph">예약 관리</div><div class="psub">iCal로 자동 수집된 예약 · 3개 채널 통합</div>
+      <div class="sl">예약 현황 · 숙소별 · 2주</div><div class="tlscroll"><div class="tl" style="min-width:760px;"><div class="tlrow head"><div class="lab">숙소</div><div class="days head" style="grid-template-columns:repeat(14,1fr);"><div class="dcell"><small>목</small><b>30</b></div><div class="dcell"><small>금</small><b>31</b></div><div class="dcell"><small>토</small><b>1</b></div><div class="dcell"><small>일</small><b>2</b></div><div class="dcell"><small>월</small><b>3</b></div><div class="dcell"><small>화</small><b>4</b></div><div class="dcell"><small>수</small><b>5</b></div><div class="dcell"><small>목</small><b>6</b></div><div class="dcell"><small>금</small><b>7</b></div><div class="dcell"><small>토</small><b>8</b></div><div class="dcell"><small>일</small><b>9</b></div><div class="dcell"><small>월</small><b>10</b></div><div class="dcell"><small>화</small><b>11</b></div><div class="dcell"><small>수</small><b>12</b></div></div></div><div class="tlrow"><div class="lab">101</div><div class="days" style="grid-template-columns:repeat(14,1fr);"><div class="seg" style="grid-column:1 / span 4;background:#3f6ea6;color:#fff;">부킹닷컴</div><div class="seg" style="grid-column:5 / span 2;background:#d96a83;color:#fff;">에어</div><div class="seg" style="grid-column:8 / span 5;background:#3f6ea6;color:#fff;">부킹닷컴</div></div></div><div class="tlrow"><div class="lab">102</div><div class="days" style="grid-template-columns:repeat(14,1fr);"><div class="seg" style="grid-column:1 / span 2;background:#7d6bd0;color:#fff;">아고다</div><div class="seg" style="grid-column:5 / span 3;background:#3f6ea6;color:#fff;">부킹닷컴</div><div class="seg" style="grid-column:9 / span 4;background:#7d6bd0;color:#fff;">아고다</div></div></div><div class="tlrow"><div class="lab">201</div><div class="days" style="grid-template-columns:repeat(14,1fr);"><div class="seg" style="grid-column:1 / span 3;background:#3f6ea6;color:#fff;">부킹닷컴</div><div class="seg" style="grid-column:5 / span 3;background:#d96a83;color:#fff;">에어비앤비</div><div class="seg" style="grid-column:11 / span 3;background:#3f6ea6;color:#fff;">부킹닷컴</div></div></div></div></div> <div class="lg"><span><span class="sw" style="background:#3f6ea6;"></span>부킹닷컴</span><span><span class="sw" style="background:#d96a83;"></span>에어비앤비</span><span><span class="sw" style="background:#7d6bd0;"></span>아고다</span></div>
+      <div class="sl">예약 목록 (자동 수집)</div>
+      <table class="bk"><thead><tr><th>숙소</th><th>채널</th><th>체크인</th><th>체크아웃</th><th>인원</th><th>상태</th></tr></thead><tbody>
+        <tr><td>101호</td><td><span class="chip" style="background:#3f6ea6;">부킹닷컴</span></td><td>7/25</td><td>7/28</td><td>2</td><td><span class="stt st-out">퇴실</span></td></tr>
+        <tr><td>102호</td><td><span class="chip" style="background:#7d6bd0;">아고다</span></td><td>7/26</td><td>7/30</td><td>3</td><td><span class="stt st-out">오늘 퇴실</span></td></tr>
+        <tr><td>201호</td><td><span class="chip" style="background:#3f6ea6;">부킹닷컴</span></td><td>7/28</td><td>8/1</td><td>2</td><td><span class="stt st-stay">숙박중</span></td></tr>
+        <tr><td>101호</td><td><span class="chip" style="background:#d96a83;">에어비앤비</span></td><td>7/29</td><td>8/1</td><td>4</td><td><span class="stt st-stay">숙박중</span></td></tr>
+        <tr><td>102호</td><td><span class="chip" style="background:#3f6ea6;">부킹닷컴</span></td><td>7/31</td><td>8/3</td><td>2</td><td><span class="stt st-in">오늘 입실</span></td></tr>
+        <tr><td>201호</td><td><span class="chip" style="background:#d96a83;">에어비앤비</span></td><td>8/2</td><td>8/4</td><td>4</td><td><span class="stt st-plan">예정</span></td></tr>
+      </tbody></table>
+    </div>
+    <div id="v-cl" class="view">
+      <div class="clhead">
+        <div><div class="ph">청소 관리</div><div class="psub">예약 저장 시 자동 생성됩니다. 캘린더에서 날짜를 클릭하면 상세가 보여요.</div></div>
+        <div class="clbtns"><button>주간 엑셀</button><button class="dark">+ 청소 추가</button><button>새로고침</button></div>
+      </div>
+      <div class="clfilter"><span class="fl">채널:</span>
+        <button class="fchip on">전체</button>
+        <button class="fchip booking">Booking.com</button>
+        <button class="fchip agoda">agoda</button>
+        <button class="fchip airbnb">airbnb</button>
+      </div>
+      <div class="clnav">
+        <button class="arw">‹</button><span class="range">2026.7.27 – 8.2</span><button class="arw">›</button>
+        <button class="tw">이번 주</button>
+        <span class="scount amber">담당 미정 <b>1</b></span>
+        <span class="scount">진행중 <b>0</b></span>
+        <span class="scount ok">완료 <b>7</b></span>
+      </div>
+      <div class="settle">
+        <div class="settle-total">이번 주 정산 <b>총 12건 · ₩300,000</b></div>
+        <div class="settle-by"><span>모두룸(청소업체) 5건 ₩115,000</span><span>김실장님 4건 ₩105,000</span><span>이실장님 2건 ₩50,000</span><span>미배정 1건 ₩30,000</span></div>
+      </div>
+      <div class="clweek"><div class="clday"><div class="cldh">월 7/27 <span class="cnt">2</span></div><div class="clcards"><div class="clcard" onclick="openShare(0)"><div class="ccr"><b>101호</b><span class="cdot done"></span></div><div class="ccm">2인 · 모두룸(청소업체)</div><div class="ccp">₩25,000</div></div><div class="clcard" onclick="openShare(0)"><div class="ccr"><b>201호</b><span class="cdot done"></span></div><div class="ccm">3인 · 김실장님</div><div class="ccp">₩30,000</div></div></div><div class="cltot">₩55,000</div></div><div class="clday"><div class="cldh">화 7/28 <span class="cnt">2</span></div><div class="clcards"><div class="clcard" onclick="openShare(0)"><div class="ccr"><b>102호</b><span class="cdot done"></span></div><div class="ccm">2인 · 모두룸(청소업체)</div><div class="ccp">₩20,000</div></div><div class="clcard" onclick="openShare(0)"><div class="ccr"><b>101호</b><span class="cdot done"></span></div><div class="ccm">2인 · 이실장님</div><div class="ccp">₩25,000</div></div></div><div class="cltot">₩45,000</div></div><div class="clday"><div class="cldh">수 7/29 <span class="cnt">1</span></div><div class="clcards"><div class="clcard" onclick="openShare(0)"><div class="ccr"><b>201호</b><span class="cdot done"></span></div><div class="ccm">2인 · 김실장님</div><div class="ccp">₩25,000</div></div></div><div class="cltot">₩25,000</div></div><div class="clday"><div class="cldh">목 7/30 <span class="cnt">2</span></div><div class="clcards"><div class="clcard" onclick="openShare(0)"><div class="ccr"><b>101호</b><span class="cdot done"></span></div><div class="ccm">3인 · 모두룸(청소업체)</div><div class="ccp">₩25,000</div></div><div class="clcard" onclick="openShare(0)"><div class="ccr"><b>102호</b><span class="cdot done"></span></div><div class="ccm">2인 · 김실장님</div><div class="ccp">₩20,000</div></div></div><div class="cltot">₩45,000</div></div><div class="clday today"><div class="cldh today">금 7/31 <span class="cnt">2</span></div><div class="clcards"><div class="clcard" onclick="openShare(0)"><div class="ccr"><b>102호</b><span class="cdot plan"></span></div><div class="ccm">2인 · 모두룸(청소업체)</div><div class="ccp">₩20,000</div></div><div class="clcard" onclick="openShare(0)"><div class="ccr"><b>201호</b><span class="cdot plan"></span></div><div class="ccm">2인 · 모두룸(청소업체)</div><div class="ccp">₩25,000</div></div></div><div class="cltot">₩45,000</div></div><div class="clday"><div class="cldh">토 8/1 <span class="cnt">2</span></div><div class="clcards"><div class="clcard" onclick="openShare(0)"><div class="ccr"><b>101호</b><span class="cdot plan"></span></div><div class="ccm">2인 · 이실장님</div><div class="ccp">₩25,000</div></div><div class="clcard" onclick="openShare(0)"><div class="ccr"><b>201호</b><span class="cdot un"></span></div><div class="ccm">4인 · 담당 미정</div><div class="ccp">₩30,000</div></div></div><div class="cltot">₩55,000</div></div><div class="clday"><div class="cldh">일 8/2 <span class="cnt">1</span></div><div class="clcards"><div class="clcard" onclick="openShare(0)"><div class="ccr"><b>102호</b><span class="cdot plan"></span></div><div class="ccm">3인 · 김실장님</div><div class="ccp">₩30,000</div></div></div><div class="cltot">₩30,000</div></div></div>
+    </div>
+    <div id="v-cs" class="view">
+      <div class="ph">상담</div><div class="psub">숙소 단위 실시간 문의 · 손님은 QR + 접속코드로 입장</div>
+      <div class="inbox">
+        <div class="ib-list">
+          <div class="ib-search">숙소·예약번호 검색</div>
+          <div class="conv on"><div class="av" style="background:#3f6ea6;">201</div><div><div class="rmn">201호</div><div class="last">체크인 몇 시부터 가능할까요?</div><div class="sum">7/28~8/1 · 부킹닷컴 · 숙박중</div></div></div>
+          <div class="conv"><div class="av" style="background:#d96a83;">101</div><div><div class="rmn">101호</div><div class="last">감사합니다 :)</div><div class="sum">7/29~8/1 · 에어비앤비</div></div></div>
+          <div class="conv"><div class="av" style="background:#7d6bd0;">102</div><div><div class="rmn">102호</div><div class="last">새 대화</div><div class="sum">7/31~8/3 · 부킹닷컴</div></div></div>
+        </div>
+        <div class="ib-thread">
+          <div class="ib-hd">201호<small>숙박중 · 7/28~8/1 · 부킹닷컴</small></div>
+          <div class="msgs">
+            <div class="msg g">Is early check-in possible?<span class="tr">번역: 얼리 체크인 가능할까요?</span></div>
+            <div class="msg s">네 안녕하세요, 15시부터 가능하세요 :)</div>
+          </div>
+          <div class="ib-input"><div class="box">답장 입력…</div><button class="snd">보내기</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div></div>
+
+<div id="cshare-bg">
+  <div style="background:#fff;border-radius:16px;padding:20px;width:340px;max-width:92%;">
+    <div style="font-weight:800;font-size:15px;margin-bottom:11px;">청소 브리핑</div>
+    <pre id="cshare-txt" style="white-space:pre-wrap;background:#f5f5f7;border:1px solid var(--line);border-radius:11px;padding:13px;font-size:12.5px;line-height:1.8;font-family:inherit;margin:0 0 13px;"></pre>
+    <div style="display:flex;gap:8px;">
+      <button onclick="copyShare()" style="flex:1;border:0;background:#1d1d1f;color:#fff;border-radius:10px;padding:11px;font-weight:700;cursor:pointer;">텍스트 복사</button>
+      <button onclick="closeShare()" style="border:1px solid var(--line2);background:#fff;border-radius:10px;padding:11px 15px;cursor:pointer;">닫기</button>
+    </div>
+    <div id="cshare-ok" style="display:none;color:#16a34a;font-size:12px;font-weight:700;margin-top:10px;">복사됐어요. 카톡에 붙여넣으세요.</div>
+  </div>
+</div>
+
+<script>
+function setStep(n){document.getElementById('stepbar').style.display=n?'flex':'none';['sb1','sb2','sb3','sb4'].forEach((id,i)=>document.getElementById(id).classList.toggle('on',i<n));}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');window.scrollTo(0,0);}
+function demoSubmit(){document.getElementById('signupForm').style.display='none';document.getElementById('approvedBox').style.display='block';}
+function sync(){
+  const L=document.getElementById('loading'); L.style.display='flex';
+  const msgs=['예약 10건 불러오는 중','청소 일정 자동 생성 중','채널별 색상 정리 중'];let i=0;
+  const t=setInterval(()=>{document.getElementById('loadmsg').textContent=msgs[i%msgs.length];i++;},500);
+  setTimeout(()=>{clearInterval(t);L.style.display='none';show('s-admin');setStep(4);},1700);
+}
+setStep(1);
+document.querySelectorAll('.nav a').forEach(a=>a.addEventListener('click',()=>{document.querySelectorAll('.nav a').forEach(x=>x.classList.remove('on'));a.classList.add('on');document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));document.getElementById('v-'+a.dataset.tab).classList.add('on');}));
+document.querySelectorAll('.conv').forEach(c=>c.addEventListener('click',()=>{document.querySelectorAll('.conv').forEach(x=>x.classList.remove('on'));c.classList.add('on');}));
+const SHARE=[
+"7월 30일 청소 안내\n─────────────\n숙소: 102호\n투숙: 7/26~7/30 (직전 손님)\n다음 입실: 3명\n수건 6장 · 생수 3병 · 칫솔 3개\n담당: 실장님\n청소비: 25,000원",
+"8월 1일 청소 안내\n─────────────\n숙소: 201호\n투숙: 7/28~8/1 (직전 손님)\n다음 입실: 4명\n수건 8장 · 생수 4병 · 칫솔 4개\n담당: 미정\n청소비: 30,000원"];
+function openShare(i){document.getElementById('cshare-txt').textContent=SHARE[i];document.getElementById('cshare-ok').style.display='none';document.getElementById('cshare-bg').style.display='flex';}
+function closeShare(){document.getElementById('cshare-bg').style.display='none';}
+function copyShare(){navigator.clipboard.writeText(document.getElementById('cshare-txt').textContent).then(()=>{document.getElementById('cshare-ok').style.display='block';});}
+window.addEventListener('click',e=>{if(e.target&&e.target.id==='cshare-bg')closeShare();});
+</script></body></html>
