@@ -7036,7 +7036,8 @@
             <div id="weekly-summary"></div>
           </div>
 
-          <!-- 📅 예약 타임라인 (방별 · 한 달) -->
+          <!-- 📅 예약 타임라인 → 예약관리 탭으로 이동, 운영현황에서는 숨김 -->
+          <div id="dash-booking-timeline" style="display:none;">
           <div class="section-label" style="margin-top:22px;">예약 현황 <span style="font-weight:600;text-transform:none;letter-spacing:-0.005em;color:var(--text-muted);margin-left:6px;">방별 · 1주일</span></div>
           <div style="display:flex; align-items:center; justify-content:space-between; margin: 4px 0 10px; flex-wrap:wrap; gap:8px;">
             <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
@@ -7051,6 +7052,8 @@
             <div id="timeline-inner" style="min-width:600px;"><div class="empty-state"><span class="sb-spinner"></span><div class="empty-hint">불러오는 중…</div></div></div>
           </div>
           <div id="timeline-legend" style="display:flex; gap:14px; margin:8px 0 18px; font-size:11.5px; color:var(--text-muted); flex-wrap:wrap;"></div>
+
+          </div><!-- /dash-booking-timeline (예약관리로 이동) -->
 
           <!-- 아래 분석 섹션들은 '매출 분석' 시트로 이동 → 대시보드에서는 숨김 -->
           <div style="display:none;">
