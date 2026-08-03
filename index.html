@@ -6831,6 +6831,23 @@
     @media (max-width: 600px) {
       .insight-2col { grid-template-columns: 1fr !important; }
     }
+    /* === 📱 모바일 하단 탭바 표준화 — 탭만 균등, 나머지 숨김 === */
+    @media (max-width: 600px) {
+      .sidebar .nav-section-label,
+      .sidebar .sidebar-search,
+      .sidebar .sidebar-footer .user-info,
+      .sidebar .sidebar-footer #deepl-usage { display: none !important; }
+      .sidebar .sidebar-footer {
+        flex: 0 0 auto !important; display: flex !important; align-items: center !important;
+        padding: 0 !important; margin: 0 !important; background: transparent !important; border: 0 !important; box-shadow: none !important;
+      }
+      .sidebar #logout-btn {
+        flex: 0 0 auto !important; font-size: 11px !important; font-weight: 700 !important;
+        padding: 13px 8px !important; border: 1px solid var(--border) !important; border-radius: 12px !important;
+        background: var(--surface) !important; color: var(--text-muted) !important; line-height: 1.2 !important;
+      }
+      .sidebar .nav-item[data-view] { min-width: 0 !important; }
+    }
   </style>
 </head>
 <body>
