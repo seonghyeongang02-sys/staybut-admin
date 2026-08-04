@@ -186,7 +186,24 @@ document.querySelectorAll('.nav a').forEach(a=>a.addEventListener('click',()=>{
 }));
 
 async function loadAll(){
-  const {data:tn}=await db.from('tenants').select('name,display_name,logo_url').limit(1).maybeSingle();
+  const {data:tn}=await db.from('tenants').select('name,display_name,logo_url,plan_type').limit(1).maybeSingle();
+  const PLAN=(tn&&tn.plan_type)||'full';
+  if(PLAN==='chat'){
+    // 문의 플랜: 상담 · QR · 채널연결(숙소등록) 만 사용
+    ['dash','bk','cl'].forEach(function(t){
+      var a=document.querySelector('.nav a[data-tab="'+t+'"]'); if(a) a.style.display='none';
+    });
+    var csTab=document.querySelector('.nav a[data-tab="cs"]');
+    if(csTab){
+      document.querySelectorAll('.nav a').forEach(function(x){x.classList.remove('on');});
+      csTab.classList.add('on');
+      document.querySelectorAll('.view').forEach(function(v){v.classList.remove('on');});
+      var v=document.getElementById('v-cs'); if(v) v.classList.add('on');
+      var f=document.getElementById('fCs'); if(f && f.src==='about:blank') f.src='console.html';
+    }
+    var chTab=document.querySelector('.nav a[data-tab="ch"]');
+    if(chTab) chTab.textContent='숙소 관리';
+  }
   const nm=(tn&&(tn.display_name||tn.name))||'우리 숙소';
   $('#brandName').textContent=nm;
   if(tn&&tn.logo_url){
@@ -285,7 +302,7 @@ function chatUrlFor(name){
   return location.origin + '/chat.html?room=' + encodeURIComponent(name);
 }
 function qrImgUrl(text,size){
-  return 'https://api.qrserver.com/v1/create-qr-code/?size='+size+'x'+size+'&margin=0&data='+encodeURIComponent(text);
+  return 'https://api.qrserver.com/v1/create-qr-code/?size='+size+'x'+size+'&margin=8&data='+encodeURIComponent(text);
 }
 async function renderQR(){
   const grid=$('#qrGrid'); if(!grid) return;
@@ -319,7 +336,7 @@ async function renderQR(){
 }
 function dlQR(name){
   const a=document.createElement('a');
-  a.href=qrImgUrl(chatUrlFor(name),800);
+  a.href=qrImgUrl(chatUrlFor(name),400);
   a.download='QR_'+name+'.png'; a.target='_blank';
   document.body.appendChild(a); a.click(); a.remove();
 }

@@ -40,6 +40,12 @@ table.t td{padding:12px 13px;border-bottom:1px solid #f0f0f2;vertical-align:top;
 .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px;}
 .kpi{background:#fff;border-radius:14px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.05);}
 .kpi .k{font-size:12px;color:var(--muted);} .kpi .v{font-size:28px;font-weight:800;margin-top:6px;letter-spacing:-.5px;}
+
+.plan{font-size:11px;font-weight:800;border-radius:6px;padding:2px 8px;}
+.plan.chat{background:#eef4fb;color:#2e5891;}
+.plan.full{background:#e9f7ef;color:#0f7a52;}
+.planbtn{border:1px solid var(--line2);background:#fff;border-radius:7px;padding:3px 8px;font-size:11px;font-weight:700;cursor:pointer;margin-left:4px;}
+.planbtn:hover{border-color:var(--ink);}
 </style></head>
 <body>
 <div id="login"><div class="card">
@@ -61,7 +67,7 @@ table.t td{padding:12px 13px;border-bottom:1px solid #f0f0f2;vertical-align:top;
 
     <div id="v-tenants" class="view">
       <div class="kpis" id="kpis"></div>
-      <table class="t"><thead><tr><th>업체</th><th>객실</th><th>진행 예약</th><th>채널 연결</th><th>마지막 동기화</th><th>관리자</th></tr></thead><tbody id="tenantRows"><tr><td colspan="6" class="empty">불러오는 중…</td></tr></tbody></table>
+      <table class="t"><thead><tr><th>업체</th><th>플랜</th><th>객실</th><th>진행 예약</th><th>채널 연결</th><th>마지막 동기화</th><th>관리자</th></tr></thead><tbody id="tenantRows"><tr><td colspan="7" class="empty">불러오는 중…</td></tr></tbody></table>
     </div>
   </div>
 </div>
@@ -113,18 +119,33 @@ async function reject(id){
   const {error}=await db.from('signup_requests').update({status:'rejected',reviewed_at:new Date().toISOString()}).eq('id',id);
   if(error){ alert('실패: '+error.message); return; } loadReqs();
 }
+
+async function togglePlan(id, plan){
+  var label = plan==='chat' ? '문의 플랜(채팅만)' : '통합 플랜(예약·청소·문의)';
+  if(!confirm('이 업체를 '+label+'으로 바꿀까요?')) return;
+  var r = await db.rpc('set_tenant_plan',{p_tenant:id,p_plan:plan});
+  if(r.error || (r.data && r.data!=='ok')){ alert('변경 실패: '+((r.data)||(r.error&&r.error.message)||'')); return; }
+  loadTenants();
+}
 async function loadTenants(){
   const {data,error}=await db.rpc('operator_tenants');
   const rows=$('#tenantRows');
-  if(error){ rows.innerHTML='<tr><td colspan="6" class="empty">'+esc(error.message)+'</td></tr>'; return; }
+  if(error){ rows.innerHTML='<tr><td colspan="7" class="empty">'+esc(error.message)+'</td></tr>'; return; }
   const list=data||[];
   const totB=list.reduce((a,x)=>a+Number(x.active_bookings||0),0);
   const totF=list.reduce((a,x)=>a+Number(x.feeds||0),0);
   $('#kpis').innerHTML='<div class="kpi"><div class="k">전체 업체</div><div class="v">'+list.length+'</div></div><div class="kpi"><div class="k">진행 예약(합)</div><div class="v">'+totB+'</div></div><div class="kpi"><div class="k">연결된 채널(합)</div><div class="v">'+totF+'</div></div>';
-  if(!list.length){ rows.innerHTML='<tr><td colspan="6" class="empty">업체가 없어요.</td></tr>'; return; }
+  if(!list.length){ rows.innerHTML='<tr><td colspan="7" class="empty">업체가 없어요.</td></tr>'; return; }
   rows.innerHTML=list.map(t=>{
     const sync=t.last_sync?('<span class="ok">'+esc(String(t.last_sync).slice(0,16).replace('T',' '))+'</span>'):'<span class="dim">—</span>';
-    return '<tr><td><span class="tname">'+esc(t.name)+'</span> <span class="src">'+esc(t.source||'')+'</span></td><td>'+t.rooms+'</td><td>'+t.active_bookings+'</td><td>'+(Number(t.feeds)>0?'<span class="ok">'+t.feeds+'</span>':'<span class="warn">0</span>')+'</td><td>'+sync+'</td><td class="dim">'+esc(t.admins||'—')+'</td></tr>';
+    var isChat = t.plan_type==='chat';
+    var planChip = isChat
+      ? '<span class="plan chat">문의</span>'
+      : '<span class="plan full">통합</span>';
+    var planBtn = '<button class="planbtn" onclick="togglePlan(\''+t.tenant_id+'\',\''+(isChat?'full':'chat')+'\')">'+(isChat?'통합으로':'문의로')+'</button>';
+    return '<tr><td><span class="tname">'+esc(t.name)+'</span> <span class="src">'+esc(t.source||'')+'</span></td>'+
+      '<td>'+planChip+' '+planBtn+'</td>'+
+      '<td>'+t.rooms+'</td><td>'+t.active_bookings+'</td><td>'+(Number(t.feeds)>0?'<span class="ok">'+t.feeds+'</span>':'<span class="warn">0</span>')+'</td><td>'+sync+'</td><td class="dim">'+esc(t.admins||'—')+'</td></tr>';
   }).join('');
 }
 start();
