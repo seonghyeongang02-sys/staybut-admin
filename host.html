@@ -212,7 +212,7 @@ async function loadAll(){
   } else {
     $('#brandLg').textContent=(nm[0]||'S');
   }
-  const {data:rms}=await db.from('rooms').select('id,room_number,is_active').order('room_number');
+  const {data:rms}=await db.from('rooms').select('id,room_number,is_active,public_key').order('room_number');
   ROOMS=(rms||[]).filter(r=>r.is_active!==false); RMAP={}; ROOMS.forEach(r=>RMAP[r.id]=r.room_number);
   const {data:chs}=await db.from('channels').select('id,code,name'); CHAN={}; (chs||[]).forEach(c=>CHAN[c.id]=c);
   const {data:bks}=await db.from('bookings').select('id,room_id,channel_id,checkin_date,checkout_date,num_guests,gross_amount,booking_status').neq('booking_status','cancelled').order('checkin_date');
@@ -298,8 +298,8 @@ function renderCleaning(){
 function statusK(s){return ({pending:'예정',assigned:'배정됨',completed:'완료',issue:'특이사항',not_needed:'생략'})[s]||s;}
 
 // === QR 코드 (숙소별) ===
-function chatUrlFor(name){
-  return location.origin + '/chat.html?room=' + encodeURIComponent(name);
+function chatUrlFor(keyOrName){
+  return location.origin + '/stay.html?k=' + encodeURIComponent(keyOrName);
 }
 function qrImgUrl(text,size){
   return 'https://api.qrserver.com/v1/create-qr-code/?size='+size+'x'+size+'&margin=8&data='+encodeURIComponent(text);
@@ -316,7 +316,7 @@ async function renderQR(){
     (data||[]).forEach(b=>{ if(b.chat_code && !codeByRoom[b.room_id]) codeByRoom[b.room_id]=b.chat_code; });
   }catch(e){}
   grid.innerHTML = ROOMS.map(r=>{
-    const url=chatUrlFor(r.room_number);
+    const url=chatUrlFor(r.public_key||r.room_number);
     const code=codeByRoom[r.id];
     return `<div class="qrcard">
       <div class="qname">${esc(r.room_number)}</div>
@@ -324,7 +324,7 @@ async function renderQR(){
       <div class="qrbox"><img src="${qrImgUrl(url,320)}" alt="QR" loading="lazy" /></div>
       <div class="qrcode-txt">${code?`접속코드<b>${esc(code)}</b>`:'<span style="color:var(--dim)">예약이 들어오면 접속코드가 표시돼요</span>'}</div>
       <div class="qracts">
-        <button class="dark" onclick="dlQR('${esc(r.room_number).replace(/'/g,"\\'")}')">이미지 저장</button>
+        <button class="dark" onclick="dlQR('${esc(r.public_key||'')}','${esc(r.room_number).replace(/'/g,"\\'")}')">이미지 저장</button>
         <button onclick="copyTxt('${url.replace(/'/g,"\\'")}',this)">링크 복사</button>
       </div>
     </div>`;
@@ -334,10 +334,10 @@ async function renderQR(){
       <div class="qracts"><button class="dark" onclick="window.print()">인쇄하기</button></div>
     </div>`;
 }
-function dlQR(name){
+function dlQR(key,name){
   const a=document.createElement('a');
-  a.href=qrImgUrl(chatUrlFor(name),400);
-  a.download='QR_'+name+'.png'; a.target='_blank';
+  a.href=qrImgUrl(chatUrlFor(key),400);
+  a.download='QR_'+(name||key)+'.png'; a.target='_blank';
   document.body.appendChild(a); a.click(); a.remove();
 }
 function copyTxt(t,btn){
