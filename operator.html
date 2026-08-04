@@ -103,7 +103,8 @@ async function loadReqs(){
     const badge=SF==='pending'?'<span class="badge b-pending">대기중</span>':SF==='approved'?'<span class="badge b-approved">승인됨</span>':'<span class="badge b-rejected">거절</span>';
     let extra=''; if(r.status==='approved'&&r.setup_link){ extra='<div class="result"><b>계정·숙소 생성 완료.</b> 아래 링크를 업체에 보내 비밀번호를 설정하게 하세요:<br><span class="lnk">'+esc(r.setup_link)+'</span><button class="copy" onclick="navigator.clipboard.writeText(this.previousElementSibling.textContent)">복사</button></div>'; }
     let acts=''; if(r.status==='pending'){ acts='<div class="acts"><button class="ap" onclick="approve(\''+r.id+'\',this)">승인 → 자동 세팅</button><button class="rj" onclick="reject(\''+r.id+'\')">거절</button></div>'; }
-    return '<div class="req"><div class="rh"><span class="biz">'+esc(r.biz_name)+'</span>'+badge+'</div><div class="meta"><b>'+esc(r.contact_email)+'</b>'+(r.contact_phone?' · '+esc(r.contact_phone):'')+(r.rooms?'<br>숙소: '+esc(r.rooms).replace(/\n/g,', '):'')+(r.channels?'<br>채널: '+esc(r.channels):'')+(r.memo?'<br>메모: '+esc(r.memo):'')+'<br><span class="dim">신청: '+esc((r.created_at||'').slice(0,10))+'</span></div>'+extra+acts+'</div>';
+    var pchip = (r.plan_type==='full') ? '<span class="plan full">전체</span>' : '<span class="plan chat">문의만</span>';
+    return '<div class="req"><div class="rh"><span class="biz">'+esc(r.biz_name)+' '+pchip+'</span>'+badge+'</div><div class="meta"><b>'+esc(r.contact_email)+'</b>'+(r.contact_phone?' · '+esc(r.contact_phone):'')+(r.rooms?'<br>숙소: '+esc(r.rooms).replace(/\n/g,', '):'')+(r.channels?'<br>채널: '+esc(r.channels):'')+(r.memo?'<br>메모: '+esc(r.memo):'')+'<br><span class="dim">신청: '+esc((r.created_at||'').slice(0,10))+'</span></div>'+extra+acts+'</div>';
   }).join('');
 }
 async function approve(id,btn){
