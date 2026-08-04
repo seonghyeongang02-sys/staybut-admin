@@ -322,7 +322,7 @@ async function renderQR(){
       <div class="qname">${esc(r.room_number)}</div>
       <div class="qsub">손님 문의 QR</div>
       <div class="qrbox"><img src="${qrImgUrl(url,320)}" alt="QR" loading="lazy" /></div>
-      <div class="qrcode-txt">${code?`접속코드<b>${esc(code)}</b>`:'<span style="color:var(--dim)">예약이 들어오면 접속코드가 표시돼요</span>'}</div>
+      <div class="qrcode-txt"><span style="color:var(--dim)">QR을 찍으면 바로 문의·안내 화면이 열려요</span></div>
       <div class="qracts">
         <button class="dark" onclick="dlQR('${esc(r.public_key||'')}','${esc(r.room_number).replace(/'/g,"\\'")}')">이미지 저장</button>
         <button onclick="copyTxt('${url.replace(/'/g,"\\'")}',this)">링크 복사</button>
