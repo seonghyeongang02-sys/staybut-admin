@@ -412,6 +412,33 @@ async function translateText(text,target){
   if(data&&data.ok&&data.text) return data.text;
   throw new Error('translate_failed');
 }
+// === 자동 번역 ===
+// 손님 메시지가 한국어가 아니면 → 한국어로 자동 번역해 아래에 표시
+const _trCache = {};              // 같은 문장 재번역 방지
+function _needsTranslate(text){
+  const t=(text||'').trim();
+  if(t.length<2) return false;
+  if(/[가-힣]/.test(t)) return false;          // 한국어면 번역 불필요
+  if(!/[A-Za-z぀-ヿ一-鿿]/.test(t)) return false; // 글자 없으면(숫자·기호) 제외
+  return true;
+}
+async function autoTranslateMsgs(box){
+  const rows=[...box.querySelectorAll('.m.g[data-tx]')];
+  for(const row of rows){
+    if(row.dataset.trDone) continue;
+    const text=decodeURIComponent(row.dataset.tx||'');
+    if(!_needsTranslate(text)){ row.dataset.trDone='1'; continue; }
+    row.dataset.trDone='1';
+    try{
+      let t=_trCache[text];
+      if(!t){ t=await translateText(text,'KO'); _trCache[text]=t; }
+      if(!t || t.trim()===text.trim()) continue;
+      const tr=document.createElement('div'); tr.className='m g trrow';
+      tr.innerHTML='<div class="mav" style="background:transparent"></div><div class="bubble" style="background:#f2f0ea;color:#4b463e;font-size:13px;border:1px dashed #d9d4c8;">번역 · '+esc(t)+'</div>';
+      row.after(tr);
+    }catch(e){}
+  }
+}
 function renderMsgs(msgs, first){
   const box=$('#msgs'); if(!box) return;
   const stick = first || (box.scrollHeight-box.scrollTop-box.clientHeight<120);
@@ -430,9 +457,11 @@ function renderMsgs(msgs, first){
     if(isS){ const isLastStaff = !msgs.slice(idx+1).some(x=>x.sender==='staff'); if(isLastStaff && seenTs>new Date(m.created_at).getTime()) read='읽음'; }
     const meta=`<span class="meta">${read?read+' · ':''}${fmt(m.created_at)}</span>`;
     const trb=(!isImg && m.body && m.body.trim())?`<button class="trbtn" data-tx="${encodeURIComponent(m.body)}" title="번역">🌐</button>`:'';
-    html+=`<div class="m ${isS?'s':'g'}">${av}${inner}${meta}${trb}</div>`;
+    const txAttr=(!isImg && m.body && m.body.trim())?` data-tx="${encodeURIComponent(m.body)}"`:'';
+    html+=`<div class="m ${isS?'s':'g'}"${txAttr}>${av}${inner}${meta}${trb}</div>`;
   });
   box.innerHTML=html;
+  autoTranslateMsgs(box);
   box.querySelectorAll('.trbtn').forEach(b=>b.addEventListener('click',async()=>{
     if(b.dataset.done) return;
     const text=decodeURIComponent(b.dataset.tx||''); if(!text) return;

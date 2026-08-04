@@ -193,6 +193,33 @@ async function translateText(text,target){
   const j=await r.json(); if(j&&j.ok&&j.text){ _transCache[key]=j.text; return j.text; }
   throw new Error((j&&j.error)||'translate_failed');
 }
+// === 자동 번역 (손님 화면) ===
+// 손님이 고른 언어와 메시지 언어가 다르면 자동으로 번역해 아래에 붙임.
+const _grTrCache={};
+const TR_LABEL={EN:'Translation',JA:'翻訳',ZH:'翻译',KO:'번역'};
+async function autoTranslateRow(row,text,target,guestL){
+  const t=(text||'').trim(); if(t.length<2) return;
+  const isKo=/[가-힣]/.test(t);
+  const gl=(guestL||'KO').toUpperCase();
+  // 손님 언어가 한국어면: 외국어 메시지만 번역
+  // 손님 언어가 외국어면: 한국어 메시지를 그 언어로 번역
+  if(gl==='KO'){ if(isKo) return; }
+  else { if(!isKo) return; }
+  try{
+    const key=target+'|'+t;
+    let out=_grTrCache[key];
+    if(!out){ out=await translateText(t,target); _grTrCache[key]=out; }
+    if(!out || out.trim()===t) return;
+    const side=row.classList.contains('g')?'g':'s';
+    const w=document.createElement('div'); w.className='row '+side; w.style.marginTop='-2px';
+    const d=document.createElement('div'); d.className='b';
+    d.style.cssText='background:#eef1f4;color:#3a3f45;border:1px dashed #d5dae0;font-size:13.5px;line-height:1.55;';
+    d.textContent=(TR_LABEL[target]||'번역')+' · '+out;
+    w.appendChild(d);
+    row.parentNode.insertBefore(w,row.nextSibling);
+    if(atBottom()) scrollDown();
+  }catch(e){}
+}
 function attachTranslate(row,text,target){
   if(!text||!text.trim()) return;
   const side=row.classList.contains('g')?'g':'s';
@@ -248,7 +275,7 @@ function addMsg(m){
   row.innerHTML = m.sender==='guest' ? `<span class="time">${fmt(m.created_at)}</span>${bubble}` : `${bubble}<span class="time">${fmt(m.created_at)}</span>`;
   msgsEl.appendChild(row);
   if(isImg){ const img=row.querySelector('img[data-path]'); signGuest(m.image_path).then(u=>{ if(u){ img.src=u; img.addEventListener('click',()=>openLb(u)); } }); }
-  if(!isImg && m.body && m.body.trim()){ const gl=guestLang(); const tgt = /[가-힣]/.test(m.body) ? (gl==='KO'?'EN':gl) : 'KO'; attachTranslate(row,m.body,tgt); }
+  if(!isImg && m.body && m.body.trim()){ const gl=guestLang(); const tgt = /[가-힣]/.test(m.body) ? (gl==='KO'?'EN':gl) : 'KO'; autoTranslateRow(row,m.body,tgt,gl); }
   if(m.created_at>lastTs) lastTs=m.created_at;
   lastMsgSender=m.sender; if(m.sender==='guest'){ const gts=new Date(m.created_at).getTime(); if(gts>lastGuestTs) lastGuestTs=gts; }
   updateRead(); if(stick) scrollDown();
