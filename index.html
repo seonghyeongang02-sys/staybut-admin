@@ -450,9 +450,9 @@
 
     /* === 어드민 콘텐츠 === */
     main { position: relative; }
-    /* 화면 배율 100% 고정 (전체) */
+    /* 화면 배율 80% 고정 (PC) — 한 화면에 더 많이 보이게 */
     @media (min-width: 761px) {
-      main { zoom: 1; }
+      main { zoom: 0.8; }
     }
     main > * { position: relative; z-index: 1; }
 
@@ -7036,6 +7036,18 @@
             <div id="weekly-summary"></div>
           </div>
 
+          <!-- 🧹 이번 주 청소 -->
+          <div class="section-label" style="margin-top:22px;">이번 주 청소</div>
+          <div id="dash-cleaning-week" class="data-card" style="padding:14px 16px; margin-bottom:6px;">
+            <div class="empty-state" style="padding:14px 0;"><span class="sb-spinner"></span><div class="empty-hint">불러오는 중…</div></div>
+          </div>
+
+          <!-- 📊 이번 달 요약 -->
+          <div class="section-label" style="margin-top:22px;">이번 달 요약 <span id="dash-month-label" style="font-weight:600;text-transform:none;letter-spacing:-0.005em;color:var(--text-muted);margin-left:6px;"></span></div>
+          <div id="dash-month-summary" class="today-metrics" style="margin-bottom:6px;">
+            <div class="empty-state" style="padding:14px 0;"><span class="sb-spinner"></span><div class="empty-hint">불러오는 중…</div></div>
+          </div>
+
           <!-- 📅 예약 타임라인 → 예약관리 탭으로 이동, 운영현황에서는 숨김 -->
           <div id="dash-booking-timeline" style="display:none;">
           <div class="section-label" style="margin-top:22px;">예약 현황 <span style="font-weight:600;text-transform:none;letter-spacing:-0.005em;color:var(--text-muted);margin-left:6px;">방별 · 1주일</span></div>
@@ -7178,6 +7190,12 @@
 
           <!-- 📅 예약 타임라인 (방별 · 한 달) -->
           <div class="section-label" style="margin-top:22px;">예약 현황 <span style="font-weight:600;text-transform:none;letter-spacing:-0.005em;color:var(--text-muted);margin-left:6px;">방별 · 한 달</span></div>
+          <div style="display:flex; align-items:center; gap:8px; margin:4px 0 10px; flex-wrap:wrap;">
+            <button class="btn btn-secondary" onclick="tlBkShift(-30)" style="padding:5px 9px;" title="이전 30일">‹</button>
+            <span id="tlbk-range" style="font-size:18px; font-weight:700; letter-spacing:-0.01em;">—</span>
+            <button class="btn btn-secondary" onclick="tlBkShift(30)" style="padding:5px 9px;" title="다음 30일">›</button>
+            <button class="btn btn-secondary" onclick="tlBkToday()" style="padding:5px 10px; font-size:12px;">오늘</button>
+          </div>
           <div id="timeline-wrap-bk" style="overflow-x:auto; border:1px solid var(--border); border-radius:12px; background:var(--surface);">
             <div id="timeline-inner-bk" style="min-width:600px;"><div class="empty-state"><span class="sb-spinner"></span><div class="empty-hint">불러오는 중…</div></div></div>
           </div>
@@ -11071,8 +11089,26 @@ function _tlResolveCfg(cfg) {
     start: cfg.start || tlStart,
   };
 }
-function loadTimelineBk() {
+// 예약관리 타임라인 — 시작일 이동 가능 (이전/다음/오늘)
+var tlBkStart = null;
+function tlBkInit() {
+  if (!tlBkStart) { const s = new Date(); s.setHours(0, 0, 0, 0); tlBkStart = s; }
+  return tlBkStart;
+}
+function tlBkShift(days) {
+  tlBkInit();
+  const d = new Date(tlBkStart); d.setDate(d.getDate() + days); d.setHours(0, 0, 0, 0);
+  tlBkStart = d; loadTimelineBk();
+}
+function tlBkToday() {
   const s = new Date(); s.setHours(0, 0, 0, 0);
+  tlBkStart = s; loadTimelineBk();
+}
+function loadTimelineBk() {
+  const s = tlBkInit();
+  const endD = new Date(s); endD.setDate(endD.getDate() + 29);
+  const lbl = document.getElementById('tlbk-range');
+  if (lbl) lbl.innerHTML = `${tlYmd_(s)} <span style="font-size:12px;color:#9aa0a8;font-weight:500;">~ ${tlYmd_(endD)}</span>`;
   return loadTimeline({ innerId: 'timeline-inner-bk', wrapId: 'timeline-wrap-bk', legendId: 'timeline-legend-bk', rangeId: null, days: 30, start: s });
 }
 
@@ -11516,6 +11552,10 @@ async function loadDashboard() {
   // ===== 이번 주 현황 =====
   renderWeeklySummary();
 
+  // ===== 이번 주 청소 · 이번 달 요약 =====
+  renderDashCleaningWeek();
+  renderDashMonthSummary();
+
   // (점유율 캘린더 제거됨)
 }
 
@@ -11740,6 +11780,97 @@ function renderRoomMiniCards(bookings, periodDays) {
 }
 
 // 오늘의 현황 (오늘 체크인·체크아웃·빈 방)
+// === 🧹 이번 주 청소 (운영현황) — 실데이터 ===
+async function renderDashCleaningWeek() {
+  const box = document.getElementById('dash-cleaning-week');
+  if (!box) return;
+  try {
+    const t = new Date(); t.setHours(0,0,0,0);
+    const mon = new Date(t); mon.setDate(t.getDate() - ((t.getDay() + 6) % 7));
+    const sun = new Date(mon); sun.setDate(mon.getDate() + 6);
+    const s = tlYmd_(mon), e = tlYmd_(sun);
+    const { data, error } = await db.from('cleaning_tasks')
+      .select('id, status, assigned_to, payout_amount, extra_pay, scheduled_date, staff:assigned_to(name)')
+      .gte('scheduled_date', s).lte('scheduled_date', e).neq('status', 'not_needed');
+    if (error) throw error;
+    const rows = data || [];
+    const done = rows.filter(r => r.status === 'completed').length;
+    const unassigned = rows.filter(r => !r.assigned_to).length;
+    const planned = rows.length - done - unassigned;
+    const total = rows.reduce((a, r) => a + Number(r.payout_amount || 0) + Number(r.extra_pay || 0), 0);
+    const byStaff = {};
+    rows.forEach(r => {
+      const nm = r.staff?.name || '미배정';
+      if (!byStaff[nm]) byStaff[nm] = { n: 0, amt: 0 };
+      byStaff[nm].n++; byStaff[nm].amt += Number(r.payout_amount || 0) + Number(r.extra_pay || 0);
+    });
+    const staffTxt = Object.keys(byStaff).sort().map(nm =>
+      `<span>${escapeHtml_(nm)} ${byStaff[nm].n}건 ${fmtKRW(byStaff[nm].amt)}</span>`).join('');
+    const pill = (label, n, bg, col) =>
+      `<span style="font-size:12px;background:${bg};color:${col};border-radius:16px;padding:4px 11px;font-weight:700;">${label} ${n}</span>`;
+    box.innerHTML = `
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        ${unassigned ? pill('담당 미정', unassigned, '#fdf3e3', '#a9700a') : ''}
+        ${pill('예정', planned, 'var(--surface-soft)', 'var(--text-muted)')}
+        ${pill('완료', done, '#e9f7ef', '#0f7a52')}
+        <span style="margin-left:auto;font-size:13px;">정산 예상 <b>${fmtKRW(total)}</b></span>
+      </div>
+      ${staffTxt ? `<div style="border-top:1px solid var(--border);margin-top:11px;padding-top:10px;display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--text-muted);">${staffTxt}</div>` : ''}
+      <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">${s} ~ ${e} · 총 ${rows.length}건</div>`;
+  } catch (err) {
+    box.innerHTML = `<div class="empty-hint" style="padding:10px 0;">청소 정보를 불러오지 못했어요</div>`;
+  }
+}
+
+// === 📊 이번 달 요약 (운영현황) — 실데이터 ===
+async function renderDashMonthSummary() {
+  const box = document.getElementById('dash-month-summary');
+  if (!box) return;
+  try {
+    const today = new Date();
+    const cur = monthRange(today);
+    const lmD = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const lm = monthRange(lmD);
+    const lbl = document.getElementById('dash-month-label');
+    if (lbl) lbl.textContent = `${today.getMonth() + 1}월`;
+    const q = (r) => db.from('bookings')
+      .select('gross_amount, nights, checkin_date, checkout_date')
+      .gte('checkin_date', r.start).lte('checkin_date', r.end).neq('booking_status', 'cancelled');
+    const [curRes, lmRes] = await Promise.all([q(cur), q(lm)]);
+    const calc = (arr, r) => {
+      const rows = arr || [];
+      const rev = rows.reduce((a, b) => a + Number(b.gross_amount || 0), 0);
+      const nights = rows.reduce((a, b) => a + Number(b.nights || 0), 0);
+      const activeRooms = (cachedRooms || []).filter(x => x.is_active !== false).length || 1;
+      const days = Math.round((new Date(r.end) - new Date(r.start)) / 86400000) + 1;
+      const occ = Math.min(100, Math.round(nights / (activeRooms * days) * 100));
+      const adr = nights ? Math.round(rev / nights) : 0;
+      return { n: rows.length, rev, occ, adr };
+    };
+    const c = calc(curRes.data, cur), p = calc(lmRes.data, lm);
+    const delta = (now, before, unit) => {
+      if (!before) return '<span style="font-size:11.5px;color:var(--text-muted);">비교 없음</span>';
+      const d = now - before;
+      const pct = Math.round(d / before * 100);
+      const col = d > 0 ? '#0f7a52' : (d < 0 ? '#b3261e' : 'var(--text-muted)');
+      const sign = d > 0 ? '+' : '';
+      const val = unit === '%' ? `${sign}${pct}%` : `${sign}${d}`;
+      return `<span style="font-size:11.5px;color:${col};">지난달 대비 ${val}</span>`;
+    };
+    const card = (label, value, sub) =>
+      `<div class="today-metric"><div class="today-metric-label" style="margin-bottom:4px;">${label}</div>
+        <div class="today-metric-num" style="font-size:23px;">${value}</div>
+        <div class="today-metric-rooms">${sub}</div></div>`;
+    box.innerHTML =
+      card('예약', `${c.n}<span class="unit">건</span>`, delta(c.n, p.n)) +
+      card('매출', fmtKRW(c.rev), delta(c.rev, p.rev, '%')) +
+      card('점유율', `${c.occ}<span class="unit">%</span>`, `지난달 ${p.occ}%`) +
+      card('평균 객단가', fmtKRW(c.adr), '박당');
+  } catch (err) {
+    box.innerHTML = `<div class="empty-hint" style="padding:10px 0;">월 요약을 불러오지 못했어요</div>`;
+  }
+}
+
 async function renderTodaySummary() {
   const box = $('#today-summary');
   if (!box) return;
