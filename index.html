@@ -6848,6 +6848,33 @@
       }
       .sidebar .nav-item[data-view] { min-width: 0 !important; }
     }
+
+    /* === 📱 모바일 탭 라벨 축약 — 탭이 화면 밖으로 밀려 안 보이는 문제 방지 === */
+    .nl-short { display: none; }
+    @media (max-width: 600px) {
+      .nl-full { display: none !important; }
+      .nl-short { display: inline !important; }
+      .sidebar {
+        gap: 6px !important;
+        flex-wrap: nowrap !important;
+        overflow: hidden !important;
+      }
+      .sidebar .nav-item[data-view] {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        overflow: hidden !important;
+        white-space: nowrap !important;
+        font-size: 14.5px !important;
+        padding: 13px 4px !important;
+        letter-spacing: -0.02em !important;
+      }
+      .sidebar #logout-btn {
+        flex: 0 0 auto !important;
+        white-space: nowrap !important;
+        padding: 13px 7px !important;
+        font-size: 10.5px !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -6944,10 +6971,10 @@
         </div>
 
         <div class="nav-section-label">메인</div>
-        <div class="nav-item active" data-view="dashboard">운영 현황</div>
-        <div class="nav-item" data-view="bookings">예약 관리</div>
-        <div class="nav-item" data-view="analysis">매출 분석</div>
-        <div class="nav-item" data-view="cleaning">청소 관리</div>
+        <div class="nav-item active" data-view="dashboard"><span class="nl-full">운영 현황</span><span class="nl-short">운영</span></div>
+        <div class="nav-item" data-view="bookings"><span class="nl-full">예약 관리</span><span class="nl-short">예약</span></div>
+        <div class="nav-item" data-view="analysis"><span class="nl-full">매출 분석</span><span class="nl-short">매출</span></div>
+        <div class="nav-item" data-view="cleaning"><span class="nl-full">청소 관리</span><span class="nl-short">청소</span></div>
         <div class="nav-item" data-view="payout" style="display:none;">청소업체 정산</div>
         <div class="nav-item" data-view="supplies">비품</div>
         <div class="nav-item" data-view="audit">운영 일지</div>
