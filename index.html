@@ -6785,11 +6785,18 @@
     @media (max-width: 600px) {
       #bk-mobile { display: block !important; }
       #view-bookings #timeline-wrap,
-      #view-bookings #timeline-wrap-bk,
       #view-bookings #timeline-legend,
-      #view-bookings #timeline-legend-bk,
       #bk-list-card { display: none !important; }
+      /* 📅 부킹닷컴 재고 플래너 스타일 타임라인 — 모바일에서도 표시 (가로 스크롤) */
+      #view-bookings #timeline-wrap-bk {
+        display: block !important;
+        -webkit-overflow-scrolling: touch;
+        overflow-x: auto !important;
+      }
+      #view-bookings #timeline-legend-bk { display: flex !important; }
     }
+    /* 타임라인 객실 라벨 열 — 가로 스크롤해도 왼쪽에 고정 */
+    .tl-lab { position: sticky; left: 0; z-index: 4; }
     @media (max-width: 600px) {
       #cl-mobile { display: block !important; }
       #cleaning-week-board { display: none !important; }
@@ -11122,9 +11129,12 @@ function tlBkInit() {
   if (!tlBkStart) { const s = new Date(); s.setHours(0, 0, 0, 0); tlBkStart = s; }
   return tlBkStart;
 }
+// 모바일에서는 화면이 좁아 30일이 너무 촘촘 → 14일 단위로 보여주고 가로 스크롤
+function tlBkDays() { return (window.innerWidth <= 600) ? 14 : 30; }
 function tlBkShift(days) {
   tlBkInit();
-  const d = new Date(tlBkStart); d.setDate(d.getDate() + days); d.setHours(0, 0, 0, 0);
+  const step = (days < 0 ? -1 : 1) * tlBkDays();
+  const d = new Date(tlBkStart); d.setDate(d.getDate() + step); d.setHours(0, 0, 0, 0);
   tlBkStart = d; loadTimelineBk();
 }
 function tlBkToday() {
@@ -11133,11 +11143,27 @@ function tlBkToday() {
 }
 function loadTimelineBk() {
   const s = tlBkInit();
-  const endD = new Date(s); endD.setDate(endD.getDate() + 29);
+  const D = tlBkDays();
+  const endD = new Date(s); endD.setDate(endD.getDate() + D - 1);
   const lbl = document.getElementById('tlbk-range');
   if (lbl) lbl.innerHTML = `${tlYmd_(s)} <span style="font-size:12px;color:#9aa0a8;font-weight:500;">~ ${tlYmd_(endD)}</span>`;
-  return loadTimeline({ innerId: 'timeline-inner-bk', wrapId: 'timeline-wrap-bk', legendId: 'timeline-legend-bk', rangeId: null, days: 30, start: s });
+  return loadTimeline({ innerId: 'timeline-inner-bk', wrapId: 'timeline-wrap-bk', legendId: 'timeline-legend-bk', rangeId: null, days: D, start: s });
 }
+// 화면 회전·리사이즈 시 타임라인 다시 그리기 (일수·칸 폭 재계산)
+(function(){
+  let _tlRz = null, _lastW = window.innerWidth;
+  window.addEventListener('resize', () => {
+    if (Math.abs(window.innerWidth - _lastW) < 40) return;
+    _lastW = window.innerWidth;
+    clearTimeout(_tlRz);
+    _tlRz = setTimeout(() => {
+      if (document.getElementById('timeline-inner-bk') &&
+          document.getElementById('view-bookings')?.style.display !== 'none') {
+        try { loadTimelineBk(); } catch (_) {}
+      }
+    }, 250);
+  });
+})();
 
 async function loadTimeline(cfg) {
   cfg = _tlResolveCfg(cfg);
@@ -11184,7 +11210,7 @@ function renderTimeline(cfg) {
   const wrapW = (_wrapEl && _wrapEl.clientWidth) ? _wrapEl.clientWidth : 900;
   const DAYW = Math.min(132, Math.max(26, Math.floor((wrapW - LABW - 2) / _days)));
 
-  let hdr = `<div style="display:flex; border-bottom:1px solid ${TL_BD}; background:${TL_HEAD};"><div style="width:${LABW}px;flex-shrink:0;font-size:11px;color:${TL_MUT};padding:8px 6px;">객실</div><div style="display:flex;">`;
+  let hdr = `<div style="display:flex; border-bottom:1px solid ${TL_BD}; background:${TL_HEAD};"><div class="tl-lab" style="width:${LABW}px;flex-shrink:0;font-size:11px;color:${TL_MUT};padding:8px 6px;background:${TL_HEAD};border-right:1px solid ${TL_BD};">객실</div><div style="display:flex;">`;
   for (let i = 0; i < _days; i++) {
     const d = new Date(_start); d.setDate(d.getDate() + i);
     const we = (d.getDay() === 0 || d.getDay() === 6);
@@ -11221,13 +11247,13 @@ function renderTimeline(cfg) {
       });
     }
     track += `</div>`;
-    rows += `<div style="display:flex;border-bottom:1px solid ${TL_BD};background:${TL_BG};"><div style="width:${LABW}px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:${TL_TXT};">${rm.room_number}</div>${track}</div>`;
+    rows += `<div style="display:flex;border-bottom:1px solid ${TL_BD};background:${TL_BG};"><div class="tl-lab" style="width:${LABW}px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:${TL_TXT};background:${TL_BG};border-right:1px solid ${TL_BD};">${rm.room_number}</div>${track}</div>`;
   });
 
   const loadedN = tlMode === 'booking' ? (window._tlBookings || []).length : (window._tlTasks || []).length;
   try { console.log(`[타임라인] 모드:${tlMode} / 로드:${loadedN}건 / 표시:${_rendered}건 / 객실:${rooms.length}개 / 오류:${window._tlErr || '없음'}`); if ((window._tlBookings||[])[0]) console.log('[타임라인] 예약샘플 room_id:', window._tlBookings[0].room_id, '/ 객실 id들:', rooms.map(r=>r.id)); } catch(_){}
 
-  let monthBand = `<div style="display:flex; border-bottom:1px solid ${TL_BD}; background:${TL_HEAD};"><div style="width:${LABW}px;flex-shrink:0;"></div><div style="display:flex;">`;
+  let monthBand = `<div style="display:flex; border-bottom:1px solid ${TL_BD}; background:${TL_HEAD};"><div class="tl-lab" style="width:${LABW}px;flex-shrink:0;background:${TL_HEAD};border-right:1px solid ${TL_BD};"></div><div style="display:flex;">`;
   let _gi = 0;
   while (_gi < _days) {
     const d0 = new Date(_start); d0.setDate(d0.getDate() + _gi);
