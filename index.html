@@ -6787,13 +6787,17 @@
       #view-bookings #timeline-wrap,
       #view-bookings #timeline-legend,
       #bk-list-card { display: none !important; }
-      /* 📅 부킹닷컴 재고 플래너 스타일 타임라인 — 모바일에서도 표시 (가로 스크롤) */
+      /* 📅 부킹닷컴 재고 플래너 스타일 타임라인 — 모바일에서도 표시 (1주일이 화면에 딱 맞음) */
       #view-bookings #timeline-wrap-bk {
         display: block !important;
         -webkit-overflow-scrolling: touch;
         overflow-x: auto !important;
+        overscroll-behavior-x: contain;   /* 타임라인 스와이프가 페이지를 끌고 가지 않게 */
+        max-width: 100%;
       }
       #view-bookings #timeline-legend-bk { display: flex !important; }
+      /* 어떤 요소도 화면을 밀어내지 못하게 하드 가드 (비율 깨짐·가로 밀림 방지) */
+      html, body { overflow-x: hidden !important; max-width: 100% !important; }
     }
     /* 타임라인 객실 라벨 열 — 가로 스크롤해도 왼쪽에 고정 */
     .tl-lab { position: sticky; left: 0; z-index: 4; }
@@ -11086,16 +11090,17 @@ function tlChColor_(b) {
   const k = (typeof channelBadge_ === 'function') ? channelBadge_(b.channels?.name).key : 'other';
   return k === 'airbnb' ? '#FF385C' : k === 'booking' ? '#1B4480' : k === 'agoda' ? '#6C4BD8' : '#6B7280';
 }
-function tlBrandBadge_(b) {
+function tlBrandBadge_(b, px) {
   const k = (typeof channelBadge_ === 'function') ? channelBadge_(b.channels?.name).key : 'other';
-  const base = 'color:#ffffff;font-weight:700;font-size:11.5px;flex-shrink:0;line-height:1.5;';
-  if (k === 'booking') return `<span style="${base}">부킹닷컴</span>`;
-  if (k === 'airbnb') return `<span style="${base}">에어비앤비</span>`;
-  if (k === 'agoda') return `<span style="${base}">아고다</span>`;
+  const narrow = (typeof px === 'number') && px < 74;   // 칸이 좁으면 줄임말
+  const base = `color:#ffffff;font-weight:700;font-size:${narrow ? '10.5px' : '11.5px'};flex-shrink:0;line-height:1.5;`;
+  if (k === 'booking') return `<span style="${base}">${narrow ? '부킹' : '부킹닷컴'}</span>`;
+  if (k === 'airbnb') return `<span style="${base}">${narrow ? '에어' : '에어비앤비'}</span>`;
+  if (k === 'agoda') return `<span style="${base}">${narrow ? '아고' : '아고다'}</span>`;
   return `<span style="${base}">직접</span>`;
 }
-function tlBarLabel_(b) {
-  return tlBrandBadge_(b);
+function tlBarLabel_(b, px) {
+  return tlBrandBadge_(b, px);
 }
 function tlBookingStatus(b) {
   const now = new Date();
@@ -11131,8 +11136,8 @@ function tlBkInit() {
   if (!tlBkStart) { const s = new Date(); s.setHours(0, 0, 0, 0); tlBkStart = s; }
   return tlBkStart;
 }
-// 모바일에서는 화면이 좁아 30일이 너무 촘촘 → 14일 단위로 보여주고 가로 스크롤
-function tlBkDays() { return (window.innerWidth <= 600) ? 14 : 30; }
+// 모바일은 화면 폭에 딱 맞게 7일(1주)만 → 가로 스크롤 없이 비율 정상
+function tlBkDays() { return (window.innerWidth <= 600) ? 7 : 30; }
 function tlBkShift(days) {
   tlBkInit();
   const step = (days < 0 ? -1 : 1) * tlBkDays();
@@ -11148,7 +11153,7 @@ function loadTimelineBk() {
   const D = tlBkDays();
   const endD = new Date(s); endD.setDate(endD.getDate() + D - 1);
   const spanLbl = document.getElementById('tlbk-span-label');
-  if (spanLbl) spanLbl.textContent = (D <= 14) ? `방별 · ${D}일 (좌우로 넘겨 보기)` : '방별 · 한 달';
+  if (spanLbl) spanLbl.textContent = (D <= 14) ? `방별 · ${D}일 (‹ › 로 이동)` : '방별 · 한 달';
   const lbl = document.getElementById('tlbk-range');
   if (lbl) lbl.innerHTML = `${tlYmd_(s)} <span style="font-size:12px;color:#9aa0a8;font-weight:500;">~ ${tlYmd_(endD)}</span>`;
   return loadTimeline({ innerId: 'timeline-inner-bk', wrapId: 'timeline-wrap-bk', legendId: 'timeline-legend-bk', rangeId: null, days: D, start: s });
@@ -11237,7 +11242,7 @@ function renderTimeline(cfg) {
         const st = tlBookingStatus(b);
         const label = guestLabel_(b);
         _rendered++;
-        track += `<div onclick="editBooking('${b.id}')" onmouseenter="tlShowTip(event,'${b.id}')" onmousemove="tlShowTip(event,'${b.id}')" onmouseleave="tlHideTip()" style="position:absolute;top:8px;height:32px;left:${s*DAYW+2}px;width:${(e-s)*DAYW-4}px;background:${st.key==='staying'?'#3aa981':tlChTheme_(b).bg};color:#ffffff;border-radius:6px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;padding:0 9px;white-space:nowrap;overflow:hidden;cursor:pointer;">${tlBarLabel_(b)}</div>`;
+        track += `<div onclick="editBooking('${b.id}')" onmouseenter="tlShowTip(event,'${b.id}')" onmousemove="tlShowTip(event,'${b.id}')" onmouseleave="tlHideTip()" style="position:absolute;top:8px;height:32px;left:${s*DAYW+2}px;width:${(e-s)*DAYW-4}px;background:${st.key==='staying'?'#3aa981':tlChTheme_(b).bg};color:#ffffff;border-radius:6px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;padding:0 9px;white-space:nowrap;overflow:hidden;cursor:pointer;">${tlBarLabel_(b, (e-s)*DAYW-4)}</div>`;
       });
     } else {
       (window._tlTasks || []).filter(t => String(t.room_id) === String(rm.id)).forEach(t => {
