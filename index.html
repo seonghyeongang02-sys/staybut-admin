@@ -15773,8 +15773,11 @@ function generateCheckinMessage(booking, room, lang, type) {
   const checkin = booking?.checkin_date || '';
   const checkout = booking?.checkout_date || '';
   const chatCode = booking?.chat_code || '';
-  const chatLine = chatCode ? `\n💬 실시간 문의: https://admin.staybut.kr/chat.html?room=${roomNumber}  (접속코드: ${chatCode})\n` : '';
-  const chatLineEn = chatCode ? `\n💬 Live chat: https://admin.staybut.kr/chat.html?room=${roomNumber}  (Access code: ${chatCode})\n` : '';
+  // 안내·문의 페이지 링크 — 객실별 고유키(public_key) 기반. 접속코드는 폐지됨.
+  // 예전 chat.html?room=301 방식은 방번호가 업체 간 겹칠 수 있어 사용 중지.
+  const stayKey = room?.public_key || '';
+  const chatLine = stayKey ? `\n💬 숙소 안내·문의: https://admin.staybut.kr/stay.html?k=${stayKey}\n` : '';
+  const chatLineEn = stayKey ? `\n💬 Guide & chat: https://admin.staybut.kr/stay.html?k=${stayKey}\n` : '';
 
   // ===== D-1 리마인더 (체크인 전날 보내는 짧은 안내) =====
   if (type === 'reminder') {
@@ -20365,10 +20368,11 @@ async function loadPayoutProcess() {
   const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().slice(0, 10);
 
   // 청소사 계좌 정보 미리 가져오기 (한 번에)
-  const { data: staffData } = await db.from('staff').select('id, name, bank_name, account_number, role').order('name');
+  // staffMap은 과거 기록의 이름 표시에 쓰이므로 전원 유지, 선택 목록만 활성자로 필터
+  const { data: staffData } = await db.from('staff').select('id, name, bank_name, account_number, role, is_active').order('name');
   const staffMap = {};
   (staffData || []).forEach(s => { staffMap[s.id] = s; });
-  const cleaners = (staffData || []).filter(s => s.role === 'cleaner' || s.role === 'cleaning');
+  const cleaners = (staffData || []).filter(s => (s.role === 'cleaner' || s.role === 'cleaning') && s.is_active !== false);
 
   // 청소사 필터 셀렉트 채우기
   const filterStaff = $('#payout-filter-staff');
@@ -20596,7 +20600,8 @@ async function loadStaffAccounts() {
     return;
   }
 
-  const cleaners = (staffList || []).filter(s => s.role === 'cleaner' || s.role === 'cleaning');
+  // 그만 오시는 분(is_active=false)은 목록에서 제외 — 과거 정산 기록은 그대로 보존됨
+  const cleaners = (staffList || []).filter(s => (s.role === 'cleaner' || s.role === 'cleaning') && s.is_active !== false);
 
   if (cleaners.length === 0) {
     $('#staff-accounts-list').innerHTML = `
