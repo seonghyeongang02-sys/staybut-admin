@@ -17547,6 +17547,7 @@ function renderCompactCleaningCard_(t) {
   const prevGuest = t.prev_guest_count || t.prev_booking?.num_guests || '?';
   const dot = cleaningStatusDot_(t);
   const fee = t.status === 'not_needed' ? null : (t.payout_amount ?? roomCleaningFee(room));
+  const xp = t.status === 'not_needed' ? 0 : Number(t.extra_pay || 0);
   const isExtra = typeof t.notes === 'string' && t.notes.indexOf('[추가청소]') === 0;
   const extraReason = isExtra ? t.notes.replace('[추가청소]', '').trim() : '';
   return `
@@ -17557,8 +17558,9 @@ function renderCompactCleaningCard_(t) {
       </div>
       <div style="font-size:11px; color:var(--text-soft); margin-top:3px;">${isExtra ? (extraReason || '추가 청소') : (prevGuest + '인 · ' + dot.label)}</div>
       ${fee != null
-        ? `<div style="font-size:11px; margin-top:2px;">₩${fee.toLocaleString('ko-KR')}</div>`
+        ? `<div style="font-size:11px; margin-top:2px;">₩${fee.toLocaleString('ko-KR')}${xp ? ` <span style="color:var(--text-warning); font-weight:700;">+₩${xp.toLocaleString('ko-KR')}</span>` : ''}</div>`
         : `<div style="font-size:11px; color:var(--text-muted); margin-top:2px;">청소 불필요</div>`}
+      ${xp && t.memo ? `<div style="font-size:10px; color:var(--text-warning); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${String(t.memo).replace(/</g,'&lt;')}</div>` : ''}
     </div>`;
 }
 
@@ -17676,6 +17678,7 @@ function renderWeekBoard() {
     const tasks = [...(cleaningTasksByDate[dateStr] || [])].sort((a,b) =>
       (a.rooms?.room_number || '').localeCompare(b.rooms?.room_number || ''));
     const dayFee = tasks.reduce((s,t) => s + (t.status === 'not_needed' ? 0 : (t.payout_amount ?? roomCleaningFee(t.rooms?.room_number))), 0);
+    const dayExtra = tasks.reduce((s,t) => s + (t.status === 'not_needed' ? 0 : Number(t.extra_pay || 0)), 0);
     const isToday = dateStr === today;
     const cards = tasks.length
       ? tasks.map(t => renderCompactCleaningCard_(t)).join('')
@@ -17691,7 +17694,7 @@ function renderWeekBoard() {
           ${isToday ? '<span style="font-size:10px; background:rgba(255,255,255,0.25); color:#fff; padding:1px 7px; border-radius:20px;">오늘</span>' : `<span style="display:flex;gap:6px;align-items:center;"><span style="font-size:11px; color:var(--text-soft);">${tasks.length}</span>${tasks.length>=2?`<button onclick="pickCleanerShare_('${dateStr}')" title="업체별 스케줄 다운로드" style="font-size:10px;border:none;background:#16161b;color:#fff;border-radius:5px;padding:3px 7px;cursor:pointer;">📤</button>`:''}</span>`}
         </div>
         <div style="padding:8px; display:flex; flex-direction:column; gap:8px; min-height:120px;">${cards}</div>
-        ${dayFee ? `<div style="padding:6px 10px; border-top:1px solid var(--border); font-size:11px; color:var(--text-soft); text-align:right;">₩${dayFee.toLocaleString('ko-KR')}</div>` : ''}
+        ${dayFee ? `<div style="padding:6px 10px; border-top:1px solid var(--border); font-size:11px; color:var(--text-soft); text-align:right;">₩${dayFee.toLocaleString('ko-KR')}${dayExtra ? `<br><span style="color:var(--text-warning); font-weight:700;">+₩${dayExtra.toLocaleString('ko-KR')}</span> <span style="color:var(--text-muted);">= ₩${(dayFee + dayExtra).toLocaleString('ko-KR')}</span>` : ''}</div>` : ''}
       </div>`;
   }
   board.innerHTML = `<div style="display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); gap:0; border:2px solid var(--border-strong); border-radius:12px; overflow:hidden; background:var(--surface);">${cols}</div>`;
@@ -17723,8 +17726,9 @@ function renderCleaningMobile_() {
     const tasks = [...(cleaningTasksByDate[ds] || [])].sort((a, b) => (a.rooms?.room_number || '').localeCompare(b.rooms?.room_number || ''));
     if (!tasks.length) continue;
     const dayFee = tasks.reduce((sum, t) => sum + (t.status === 'not_needed' ? 0 : (t.payout_amount ?? roomCleaningFee(t.rooms?.room_number))), 0);
+    const dayExtra = tasks.reduce((sum, t) => sum + (t.status === 'not_needed' ? 0 : Number(t.extra_pay || 0)), 0);
     const isToday = ds === today;
-    const meta = `${tasks.length}건 · ₩${dayFee.toLocaleString('ko-KR')}`;
+    const meta = `${tasks.length}건 · ₩${dayFee.toLocaleString('ko-KR')}${dayExtra ? ` +₩${dayExtra.toLocaleString('ko-KR')}` : ''}`;
     if (isToday) {
       html += `<div style="background:#1B5FA8;color:#fff;border-radius:8px;padding:7px 12px;display:flex;justify-content:space-between;align-items:center;margin:12px 0 8px;"><span style="font-size:15px;font-weight:700;">${dows[i]} ${d.getMonth() + 1}/${d.getDate()} · 오늘</span><span style="display:flex;gap:8px;align-items:center;"><span style="font-size:12px;opacity:.9;">${meta}</span>${tasks.length>=2?`<button onclick="event.stopPropagation();pickCleanerShare_('${ds}')" style="font-size:11px;border:none;background:rgba(255,255,255,0.25);color:#fff;border-radius:6px;padding:4px 9px;cursor:pointer;">📤 일괄</button>`:''}</span></div>`;
     } else {
@@ -17736,10 +17740,11 @@ function renderCleaningMobile_() {
       const who = t.assigned_staff?.name;
       const st = clStatus_(t);
       const fee = t.status === 'not_needed' ? null : (t.payout_amount ?? roomCleaningFee(room));
+      const xp = t.status === 'not_needed' ? 0 : Number(t.extra_pay || 0);
       const sub = t.assigned_to ? `${esc(who || '')} · ${st.tag}` : '담당 미정 · 탭해서 배정';
       html += `<div onclick="openCleaningTaskModal_('${t.id}')" style="border:1px solid ${st.bd};border-left:4px solid ${st.bar};border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">
         <div style="min-width:0;"><div style="font-size:15px;font-weight:600;">${RH(room)} <span style="font-size:13px;color:#888;font-weight:400;">· ${guests}인</span></div><div style="font-size:12px;color:${st.tc};margin-top:2px;">${sub}</div></div>
-        ${fee != null ? `<div style="font-size:14px;font-weight:600;white-space:nowrap;">₩${fee.toLocaleString('ko-KR')}</div>` : `<div style="font-size:12px;color:#aaa;">불필요</div>`}
+        ${fee != null ? `<div style="text-align:right;white-space:nowrap;"><div style="font-size:14px;font-weight:600;">₩${fee.toLocaleString('ko-KR')}</div>${xp ? `<div style="font-size:11px;font-weight:700;color:#BA7517;">+₩${xp.toLocaleString('ko-KR')}</div>` : ''}</div>` : `<div style="font-size:12px;color:#aaa;">불필요</div>`}
       </div>`;
     });
   }
@@ -17753,20 +17758,25 @@ function updateWeekSummary(tasks) {
   if (!el) return;
   const active = (tasks || []).filter(t => t.status !== 'not_needed');
   const feeOf = (t) => (t.payout_amount ?? roomCleaningFee(t.rooms?.room_number));
+  const extraOf = (t) => Number(t.extra_pay || 0);
   const totalFee = active.reduce((s,t) => s + feeOf(t), 0);
+  const totalExtra = active.reduce((s,t) => s + extraOf(t), 0);
   const byStaff = {};
   active.forEach(t => {
     const nm = t.performed_staff?.name || t.assigned_staff?.name || '미배정';
-    if (!byStaff[nm]) byStaff[nm] = { count:0, fee:0 };
-    byStaff[nm].count++; byStaff[nm].fee += feeOf(t);
+    if (!byStaff[nm]) byStaff[nm] = { count:0, fee:0, extra:0 };
+    byStaff[nm].count++; byStaff[nm].fee += feeOf(t); byStaff[nm].extra += extraOf(t);
   });
-  const chips = Object.entries(byStaff).sort((a,b) => b[1].fee - a[1].fee).map(([nm,v]) =>
-    `<span style="display:inline-flex; gap:6px; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:4px 12px; font-size:12px;"><strong style="font-weight:600;">${nm}</strong> ${v.count}건 · ₩${v.fee.toLocaleString('ko-KR')}</span>`
+  const chips = Object.entries(byStaff).sort((a,b) => (b[1].fee + b[1].extra) - (a[1].fee + a[1].extra)).map(([nm,v]) =>
+    `<span style="display:inline-flex; gap:6px; align-items:center; background:var(--surface); border:1px solid ${v.extra ? 'var(--text-warning)' : 'var(--border)'}; border-radius:20px; padding:4px 12px; font-size:12px;"><strong style="font-weight:600;">${nm}</strong> ${v.count}건 · ₩${v.fee.toLocaleString('ko-KR')}` +
+    (v.extra ? `<span style="color:var(--text-warning); font-weight:700;">+₩${v.extra.toLocaleString('ko-KR')}</span><span style="color:var(--text-muted);">= ₩${(v.fee + v.extra).toLocaleString('ko-KR')}</span>` : '') +
+    `</span>`
   ).join('');
   el.innerHTML = `
     <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; background:var(--surface-soft); border-radius:10px; padding:10px 14px; margin-bottom:12px;">
       <div style="font-size:13px; font-weight:700;">이번 주 정산</div>
-      <div style="font-size:13px;">총 <strong>${active.length}건</strong> · <strong>₩${totalFee.toLocaleString('ko-KR')}</strong></div>
+      <div style="font-size:13px;">총 <strong>${active.length}건</strong> · <strong>₩${totalFee.toLocaleString('ko-KR')}</strong>` +
+        (totalExtra ? ` <span style="color:var(--text-warning); font-weight:700;">추가보수 +₩${totalExtra.toLocaleString('ko-KR')}</span> <span style="color:var(--text-muted);">→ 지급 합계 <strong>₩${(totalFee + totalExtra).toLocaleString('ko-KR')}</strong></span>` : '') + `</div>
       <div style="display:flex; gap:6px; flex-wrap:wrap; margin-left:auto;">${chips || '<span style="font-size:12px; color:var(--text-muted);">담당 배정 대기</span>'}</div>
     </div>`;
 }
