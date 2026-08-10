@@ -7943,12 +7943,12 @@
                   <input type="text" id="bp-memo" class="form-input" placeholder="예: 여름 인상" />
                 </div>
                 <div id="bp-preview" style="font-size:13px; color:var(--text-muted); line-height:1.7; padding:10px 12px; background:var(--surface-2, #f7f8f9); border-radius:9px;">
-                  기간을 고르고 <b>대상 확인</b>을 눌러주세요.
+                  기간·금액을 정하고 <b>적용</b>을 누르면 대상 건수를 확인한 뒤 반영합니다.
                 </div>
               </div>
               <div style="display:flex; gap:8px; justify-content:flex-end; padding:14px 18px; border-top:1px solid var(--border);">
-                <button class="btn btn-secondary" id="bp-check-btn">대상 확인</button>
-                <button class="btn btn-primary" id="bp-apply-btn" disabled>적용</button>
+                <button class="btn btn-secondary" id="bp-check-btn">미리보기</button>
+                <button class="btn btn-primary" id="bp-apply-btn">적용</button>
               </div>
             </div>
           </div>
@@ -17469,14 +17469,13 @@ function bpOpen_() {
   const sun = new Date(mon); sun.setDate(sun.getDate() + 6);
   document.getElementById('bp-from').value = ymd_(mon);
   document.getElementById('bp-to').value = ymd_(sun);
-  document.getElementById('bp-preview').innerHTML = '기간을 고르고 <b>대상 확인</b>을 눌러주세요.';
-  document.getElementById('bp-apply-btn').disabled = true;
+  document.getElementById('bp-preview').innerHTML = '기간·금액을 정하고 <b>적용</b>을 누르면 대상 건수를 확인한 뒤 반영합니다.';
   bpTargets = [];
   document.getElementById('bulk-pay-modal').classList.add('open');
 }
 async function bpCheck_() {
   const from = $('#bp-from').value, to = $('#bp-to').value;
-  if (!from || !to) { alert('기간을 먼저 선택해주세요.'); return; }
+  if (!from || !to) { alert('기간을 먼저 선택해주세요.'); return false; }
   let q = db.from('cleaning_tasks')
     .select('id, scheduled_date, extra_pay, rooms(room_number), staff:assigned_to(name)')
     .gte('scheduled_date', from).lte('scheduled_date', to)
@@ -17484,11 +17483,11 @@ async function bpCheck_() {
   const sid = $('#bp-staff').value;
   if (sid) q = q.eq('assigned_to', sid);
   const { data, error } = await q;
-  if (error) { $('#bp-preview').textContent = '조회 실패: ' + error.message; return; }
+  if (error) { $('#bp-preview').textContent = '조회 실패: ' + error.message; return false; }
   bpTargets = data || [];
   if (!bpTargets.length) {
     $('#bp-preview').textContent = '해당 기간에 대상 청소가 없습니다.';
-    $('#bp-apply-btn').disabled = true; return;
+    return false;
   }
   const mode = $('#bp-mode').value;
   const amt = (mode === 'clear') ? 0 : Number($('#bp-amt').value || 0);
@@ -17500,16 +17499,21 @@ async function bpCheck_() {
     `<b>대상 ${bpTargets.length}건</b> · ${from} ~ ${to}<br>` +
     Object.keys(byStaff).map(n => `· ${n} ${byStaff[n]}건`).join('<br>') +
     `<br><br>추가보수 합계 <b>₩${curSum.toLocaleString('ko-KR')}</b> → <b style="color:var(--text-warning);">₩${newSum.toLocaleString('ko-KR')}</b>`;
-  $('#bp-apply-btn').disabled = false;
+  return true;
 }
 async function bpApply_() {
-  if (!bpTargets.length) return;
+  const okCheck = await bpCheck_();          // 항상 최신 대상으로 다시 조회
+  if (!okCheck || !bpTargets.length) return;
   const mode = $('#bp-mode').value;
   const amt = (mode === 'clear') ? 0 : Number($('#bp-amt').value || 0);
   const memo = $('#bp-memo').value.trim();
-  const ok = await showConfirm(`청소 ${bpTargets.length}건의 추가보수를 변경할까요?\n\n되돌리려면 같은 기간에 "추가보수 없애기"를 실행하면 됩니다.`);
+  const modeTxt = (mode === 'add') ? `기존 금액에 ₩${amt.toLocaleString('ko-KR')} 더하기`
+                : (mode === 'clear') ? '추가보수 0원으로 되돌리기'
+                : `추가보수를 ₩${amt.toLocaleString('ko-KR')}으로 설정`;
+  const ok = await showConfirm(`청소 ${bpTargets.length}건 · ${$('#bp-from').value} ~ ${$('#bp-to').value}\n\n${modeTxt}${memo ? `\n메모: ${memo}` : ''}\n\n적용할까요?\n(되돌리려면 같은 기간에 "추가보수 없애기"를 실행하세요)`);
   if (!ok) return;
   const btn = $('#bp-apply-btn'); btn.disabled = true; btn.textContent = '적용 중…';
+  const t0 = Date.now();
   let done = 0, fail = 0;
   for (const t of bpTargets) {
     const next = (mode === 'add') ? Number(t.extra_pay || 0) + amt : amt;
@@ -17519,19 +17523,14 @@ async function bpApply_() {
     const { error } = await db.from('cleaning_tasks').update(patch).eq('id', t.id);
     if (error) fail++; else done++;
   }
-  btn.textContent = '적용';
-  alert(`완료 · ${done}건 반영${fail ? ` (실패 ${fail}건)` : ''}`);
+  btn.textContent = '적용'; btn.disabled = false;
+  alert(`완료 · ${done}건 반영${fail ? ` (실패 ${fail}건)` : ''} · ${Math.round((Date.now() - t0) / 100) / 10}초`);
   document.getElementById('bulk-pay-modal').classList.remove('open');
   try { await loadCleaning(); } catch (e) {}
 }
 document.getElementById('cleaning-bulk-btn')?.addEventListener('click', bpOpen_);
 document.getElementById('bp-check-btn')?.addEventListener('click', bpCheck_);
 document.getElementById('bp-apply-btn')?.addEventListener('click', bpApply_);
-['bp-mode', 'bp-amt', 'bp-from', 'bp-to', 'bp-staff'].forEach(id => {
-  document.getElementById(id)?.addEventListener('change', () => {
-    const b = document.getElementById('bp-apply-btn'); if (b) b.disabled = true;
-  });
-});
 
 function cleaningStatusDot_(t) {
   if (t.status === 'completed')   return { c:'#1D9E75', label:(t.assigned_staff?.name || t.performed_staff?.name || '완료') };
