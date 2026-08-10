@@ -11895,21 +11895,27 @@ async function renderDashMonthSummary() {
     const lm = monthRange(lmD);
     const lbl = document.getElementById('dash-month-label');
     if (lbl) lbl.textContent = `${today.getMonth() + 1}월`;
-    const q = (r) => db.from('bookings')
-      .select('gross_amount, nights, checkin_date, checkout_date')
+    // [기준 통일] 예약 건수·점유율 = 체크인 기준(이번 달 받은 팀)
+    //             매출·평균 객단가 = 체크아웃 기준 → 매출 분석 탭과 금액이 일치함
+    const qIn = (r) => db.from('bookings')
+      .select('gross_amount, nights')
       .gte('checkin_date', r.start).lte('checkin_date', r.end).neq('booking_status', 'cancelled');
-    const [curRes, lmRes] = await Promise.all([q(cur), q(lm)]);
-    const calc = (arr, r) => {
-      const rows = arr || [];
-      const rev = rows.reduce((a, b) => a + Number(b.gross_amount || 0), 0);
-      const nights = rows.reduce((a, b) => a + Number(b.nights || 0), 0);
+    const qOut = (r) => db.from('bookings')
+      .select('gross_amount, nights')
+      .gte('checkout_date', r.start).lte('checkout_date', r.end).neq('booking_status', 'cancelled');
+    const [curIn, lmIn, curOut, lmOut] = await Promise.all([qIn(cur), qIn(lm), qOut(cur), qOut(lm)]);
+    const calc = (inArr, outArr, r) => {
+      const inRows = inArr || [], outRows = outArr || [];
+      const inNights = inRows.reduce((a, b) => a + Number(b.nights || 0), 0);
+      const rev = outRows.reduce((a, b) => a + Number(b.gross_amount || 0), 0);
+      const outNights = outRows.reduce((a, b) => a + Number(b.nights || 0), 0);
       const activeRooms = (cachedRooms || []).filter(x => x.is_active !== false).length || 1;
       const days = Math.round((new Date(r.end) - new Date(r.start)) / 86400000) + 1;
-      const occ = Math.min(100, Math.round(nights / (activeRooms * days) * 100));
-      const adr = nights ? Math.round(rev / nights) : 0;
-      return { n: rows.length, rev, occ, adr };
+      const occ = Math.min(100, Math.round(inNights / (activeRooms * days) * 100));
+      const adr = outNights ? Math.round(rev / outNights) : 0;
+      return { n: inRows.length, rev, occ, adr };
     };
-    const c = calc(curRes.data, cur), p = calc(lmRes.data, lm);
+    const c = calc(curIn.data, curOut.data, cur), p = calc(lmIn.data, lmOut.data, lm);
     const delta = (now, before, unit) => {
       if (!before) return '<span style="font-size:11.5px;color:var(--text-muted);">비교 없음</span>';
       const d = now - before;
@@ -11925,9 +11931,9 @@ async function renderDashMonthSummary() {
         <div class="today-metric-rooms">${sub}</div></div>`;
     box.innerHTML =
       card('예약', `${c.n}<span class="unit">건</span>`, delta(c.n, p.n)) +
-      card('매출', fmtKRW(c.rev), delta(c.rev, p.rev, '%')) +
+      card('매출', fmtKRW(c.rev), delta(c.rev, p.rev, '%') + ' · <span style="font-size:11px;color:var(--text-muted);">체크아웃 기준</span>') +
       card('점유율', `${c.occ}<span class="unit">%</span>`, `지난달 ${p.occ}%`) +
-      card('평균 객단가', fmtKRW(c.adr), '박당');
+      card('평균 객단가', fmtKRW(c.adr), '박당 · <span style="font-size:11px;color:var(--text-muted);">체크아웃 기준</span>');
   } catch (err) {
     box.innerHTML = `<div class="empty-hint" style="padding:10px 0;">월 요약을 불러오지 못했어요</div>`;
   }
