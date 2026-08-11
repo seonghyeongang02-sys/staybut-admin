@@ -6566,6 +6566,24 @@
       .modal-body { padding: 14px !important; }
       .modal-title { font-size: 16px; }
 
+      /* 모달 내용이 화면보다 길면 삭제/취소/저장 버튼이 아래로 잘려서
+         한참 스크롤해야 닿았습니다. 헤더·푸터를 고정해 항상 누를 수 있게 합니다. */
+      .modal-header {
+        position: sticky !important; top: 0; z-index: 4;
+        background: var(--surface); border-bottom: 1px solid var(--border);
+      }
+      .modal-footer {
+        position: sticky !important; bottom: 0; z-index: 4;
+        background: var(--surface) !important;
+        border-top: 1px solid var(--border);
+        flex-wrap: wrap; gap: 8px;
+        box-shadow: 0 -6px 14px rgba(20,24,30,0.06);
+        padding-bottom: calc(12px + env(safe-area-inset-bottom)) !important;
+      }
+      /* 좁은 화면에서 버튼이 찌그러지지 않게 — 최소 크기 확보(터치 44px) */
+      .modal-footer .btn { min-height: 42px; flex: 0 0 auto; }
+      .modal-footer .btn-danger { margin-right: auto !important; }
+
       /* === 폼 입력 — iOS 자동 줌 방지 + 터치 최적화 === */
       .form-input,
       .form-textarea,
@@ -15424,6 +15442,69 @@ async function editBooking(id) {
   if (error) { alert('에러: ' + error.message); return; }
   openBookingModal(data);
 }
+
+// ===== 예약 삭제 =====
+//  이 버튼에 핸들러가 아예 안 붙어 있어서 눌러도 아무 일이 없었습니다. (2026-08-10 수정)
+//  cleaning_tasks 의 prev/next FK 가 ON DELETE 동작이 없어서(NO ACTION)
+//  참조를 먼저 정리하지 않으면 23503 으로 거부됩니다.
+//    · prev_booking_id 로 걸린 청소 = 이 예약의 퇴실 때문에 생긴 청소  → 같이 삭제
+//    · next_booking_id 로 걸린 청소 = 다른(이전) 예약의 청소           → 연결만 끊기
+async function deleteBookingById_(bookingId, label) {
+  const ok = await showConfirm(
+    `예약 ${label || ''} 을(를) 삭제할까요?\n\n` +
+    `· 이 예약의 퇴실로 생긴 청소도 함께 삭제됩니다\n` +
+    `· 다른 예약의 청소에 걸린 연결은 끊기만 합니다\n\n` +
+    `되돌릴 수 없습니다.`
+  );
+  if (!ok) return false;
+
+  const btn = document.getElementById('delete-booking');
+  const orig = btn ? btn.textContent : '';
+  if (btn) { btn.disabled = true; btn.textContent = '삭제 중…'; }
+
+  try {
+    // 1) 다음 예약으로 걸린 참조는 끊기만
+    const { error: e1 } = await db.from('cleaning_tasks')
+      .update({ next_booking_id: null }).eq('next_booking_id', bookingId);
+    if (e1) throw new Error('청소 연결 해제 실패: ' + e1.message);
+
+    // 2) 이 예약의 퇴실로 생긴 청소는 삭제
+    const { data: own } = await db.from('cleaning_tasks')
+      .select('id').eq('prev_booking_id', bookingId);
+    if (own && own.length) {
+      const { error: e2 } = await db.from('cleaning_tasks')
+        .delete().in('id', own.map(t => t.id));
+      if (e2) throw new Error('연결된 청소 삭제 실패: ' + e2.message);
+    }
+
+    // 3) 예약 삭제
+    const { error: e3 } = await db.from('bookings').delete().eq('id', bookingId);
+    if (e3) throw new Error('예약 삭제 실패: ' + e3.message);
+
+    try { logEvent('booking_deleted', `예약 삭제 (${label || bookingId})`, { targetType: 'booking', targetId: bookingId }); } catch (_) {}
+
+    document.getElementById('booking-modal')?.classList.remove('open');
+    alert(`삭제 완료${own && own.length ? ` · 연결된 청소 ${own.length}건도 정리했습니다` : ''}`);
+    try { await loadBookings(); } catch (_) {}
+    try { await refreshIntegrityBadge_(); } catch (_) {}
+    if (document.querySelector('#cleaning-week-board')) { try { await loadCleaning(); } catch (_) {} }
+    return true;
+  } catch (err) {
+    // 예전에는 실패해도 조용히 넘어가서 "안 눌린다"고 느껴졌습니다 — 이제 이유를 보여줍니다.
+    alert('삭제하지 못했습니다.\n\n' + (err.message || err) +
+          '\n\n정산·채팅 등 다른 곳에서 참조 중일 수 있습니다. 이 메시지를 저장해두시면 원인을 찾아드립니다.');
+    return false;
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = orig || '🗑️ 삭제'; }
+  }
+}
+
+document.getElementById('delete-booking')?.addEventListener('click', async () => {
+  const id = document.getElementById('booking-id')?.value;
+  if (!id) { alert('삭제할 예약을 찾지 못했습니다. 창을 닫고 다시 열어주세요.'); return; }
+  const label = document.getElementById('booking-code')?.value || '';
+  await deleteBookingById_(id, label);
+});
 
 $('#open-booking-modal').addEventListener('click', () => openBookingModal());
 document.getElementById('new-arrivals-ackall')?.addEventListener('click', ackAllArrivals);
