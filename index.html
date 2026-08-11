@@ -18421,21 +18421,14 @@ window.viewCompletionPhotos = async (taskId) => {
   const roomNumber = task?.rooms?.room_number || '?';
   const dateStr = task?.scheduled_date || '';
   const completedAt = task?.completed_at ? new Date(task.completed_at).toLocaleString('ko-KR') : '-';
-  const photos = task?.completion_photo_urls || [];
+  const who = task?.performed_staff?.name || '';
 
   body.innerHTML = `
     <div style="margin-bottom: 16px; padding: 12px; background: var(--accent-soft); border-radius: 8px;">
       <div style="font-weight: 600; font-size: 16px;">${RH(roomNumber)} 청소 완료</div>
-      <div style="font-size: 12px; color: var(--text-soft); margin-top: 4px;">${dateStr} · 완료 시각 ${completedAt}</div>
+      <div style="font-size: 12px; color: var(--text-soft); margin-top: 4px;">${dateStr} · 완료 시각 ${completedAt}${who ? ' · ' + who : ''}</div>
     </div>
-    ${photos.length === 0
-      ? '<div class="empty-state">첨부된 완료 사진이 없어요. (코드 업데이트 전 완료된 작업일 수 있어요)</div>'
-      : `<div style="display: flex; flex-wrap: wrap; gap: 8px;">
-          ${photos.map(u => `
-            <img data-cp="${String(u).replace(/"/g, '&quot;')}" alt="완료 사진" style="width: 160px; height: 160px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); cursor: zoom-in; background: var(--surface-soft);" />
-          `).join('')}
-        </div>`
-    }
+    <div class="empty-state">사진 기능은 사용하지 않습니다.</div>
   `;
 };
 
@@ -18448,61 +18441,16 @@ function openLightbox(url) {
 }
 
 // 사진 그리드 HTML
-// ===== 청소 사진: 비공개 버킷 + 서명 URL =====
-//  버킷이 public 이던 동안은 주소만 알면 누구나 객실 사진을 볼 수 있었습니다.
-//  이제 비공개로 두고, 볼 때마다 1시간짜리 서명 URL 을 발급받아 씁니다.
-//  DB 에는 예전 public URL 문자열이 남아 있어도 되도록, 경로만 추출해서 서명합니다.
-const __cpCache = {};
+// ===== 청소 사진 기능 제거됨 (2026-08-11) =====
+//  청소사 페이지를 쓰지 않기로 하여 사진 기능을 걷어냈습니다.
+//  cleaning-issues 저장소는 버킷째 삭제했습니다(공개 상태로 노출돼 있었음).
+//  DB 컬럼(completion_photo_urls / photo_urls)은 과거 기록이라 그대로 두고 화면에만 안 씁니다.
 function cpPath_(urlOrPath) {
   const s = String(urlOrPath || '');
   const m = s.match(/cleaning-issues\/(.+?)(?:\?|$)/);
   return m ? decodeURIComponent(m[1]) : s.replace(/^\/+/, '');
 }
-async function cpSigned_(urlOrPath) {
-  const path = cpPath_(urlOrPath);
-  if (!path) return '';
-  const hit = __cpCache[path];
-  if (hit && hit.exp > Date.now()) return hit.url;
-  try {
-    const { data, error } = await db.storage.from('cleaning-issues').createSignedUrl(path, 3600);
-    if (error || !data?.signedUrl) return '';
-    __cpCache[path] = { url: data.signedUrl, exp: Date.now() + 50 * 60 * 1000 };
-    return data.signedUrl;
-  } catch (e) { return ''; }
-}
-// 화면에 그려진 <img data-cp="..."> 들을 찾아 서명 URL 을 채워 넣습니다.
-async function cpFill_(root) {
-  const imgs = [...(root || document).querySelectorAll('img[data-cp]:not([data-cp-done])')];
-  await Promise.all(imgs.map(async (img) => {
-    img.setAttribute('data-cp-done', '1');
-    const u = await cpSigned_(img.getAttribute('data-cp'));
-    if (u) { img.src = u; img.onclick = () => openLightbox(u); }
-    else {
-      img.replaceWith(Object.assign(document.createElement('div'), {
-        className: 'detail-photo-thumb',
-        style: 'display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--text-muted);background:var(--surface-soft);',
-        textContent: '사진 없음'
-      }));
-    }
-  }));
-}
-// 렌더 후 자동으로 채워주기 — 모달·상세가 다시 그려질 때마다 동작
-if (!window.__cpObs) {
-  window.__cpObs = new MutationObserver(() => { cpFill_(document); });
-  window.__cpObs.observe(document.body, { childList: true, subtree: true });
-}
-
-function renderDetailPhotos(urls) {
-  if (!urls || urls.length === 0) return '';
-  return `
-    <div class="detail-section">
-      <div class="detail-section-label">📷 첨부 사진 (${urls.length}장)</div>
-      <div class="detail-photos-grid">
-        ${urls.map(u => `<img class="detail-photo-thumb" data-cp="${String(u).replace(/"/g, '&quot;')}" alt="첨부 사진" />`).join('')}
-      </div>
-    </div>
-  `;
-}
+function renderDetailPhotos() { return ''; }
 
 // 청소사 + 작업 정보 가져오기 (cleaning_issue → cleaning_task → staff/rooms)
 async function fetchIssueContext(issueId) {
@@ -18695,13 +18643,6 @@ window.viewIssueDetail = async (taskId) => {
           <span style="font-size: 11px; color: var(--text-muted);">${new Date(issue.created_at).toLocaleString('ko-KR')}</span>
         </div>
         <div style="font-size: 14px; line-height: 1.6; margin-bottom: 12px; white-space: pre-wrap;">${(issue.description || '').replace(/</g, '&lt;')}</div>
-        ${issue.photo_urls && issue.photo_urls.length > 0 ? `
-          <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-            ${issue.photo_urls.map(u => `
-              <img data-cp="${String(u).replace(/"/g, '&quot;')}" alt="첨부 사진" style="width: 120px; height: 120px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border); cursor: zoom-in; background: var(--surface-soft);" />
-            `).join('')}
-          </div>
-        ` : '<div style="font-size: 12px; color: var(--text-muted);">📷 첨부 사진 없음</div>'}
       </div>
     `).join('')}
   `;
@@ -19270,14 +19211,8 @@ $('#complete-submit').addEventListener('click', async () => {
     const ts = Date.now();
     const uploadResults = await Promise.all(
       completionPhotos.map(async (photo, i) => {
-        const path = `${currentCompletionTaskId}/completion_${ts}_${i}.jpg`;
-        const { error: upErr } = await db.storage
-          .from('cleaning-issues')
-          .upload(path, photo.file, { cacheControl: '3600', upsert: false });
-        if (upErr) { console.error('업로드 실패:', upErr); return null; }
-        // 비공개 버킷이므로 공개 주소를 만들지 않고 경로만 저장합니다.
-        // 볼 때 cpSigned_() 가 1시간짜리 서명 URL 을 발급합니다.
-        return path;
+        // 사진 기능 제거 — 저장소를 삭제했으므로 업로드하지 않습니다.
+        return null;
       })
     );
     const photoUrls = uploadResults.filter(Boolean);
@@ -19510,13 +19445,8 @@ $('#save-issue').addEventListener('click', async () => {
     const ts = Date.now();
     const uploadResults = await Promise.all(
       issuePhotos.map(async (photo, i) => {
-        const path = `${taskId}/${ts}_${i}.jpg`;
-        const { error: upErr } = await db.storage
-          .from('cleaning-issues')
-          .upload(path, photo.file, { cacheControl: '3600', upsert: false });
-        if (upErr) { console.error('업로드 실패:', upErr); return null; }
-        // 비공개 버킷 — 경로만 저장하고 볼 때 서명 URL 을 발급합니다.
-        return path;
+        // 사진 기능 제거 — 저장소를 삭제했으므로 업로드하지 않습니다.
+        return null;
       })
     );
     const photoUrls = uploadResults.filter(Boolean);
@@ -20350,11 +20280,6 @@ async function loadDamageReports() {
         </div>
         <div class="damage-actions" onclick="event.stopPropagation()">${actions}</div>
       </div>
-      ${(r.photo_urls || []).length > 0 ? `
-        <div class="damage-photos" onclick="event.stopPropagation()">
-          ${(r.photo_urls || []).map(u => `<img data-cp="${String(u).replace(/"/g, '&quot;')}" alt="첨부 사진" />`).join('')}
-        </div>
-      ` : ''}
       ${r.resolution_notes ? `<div class="damage-resolution">처리: ${r.resolution_notes}</div>` : ''}
     </div>
   `;
@@ -22500,15 +22425,8 @@ async function cleanupOldPhotos() {
       const urls = task.completion_photo_urls || [];
       if (urls.length === 0) continue;
 
-      // 예전에 저장된 공개 URL 과 새로 저장되는 순수 경로 둘 다 처리
-      const paths = urls.map(u => cpPath_(u)).filter(Boolean);
-
-      if (paths.length > 0) {
-        try {
-          await db.storage.from('cleaning-issues').remove(paths);
-          deletedCount += paths.length;
-        } catch (e) { /* 이미 삭제된 파일 무시 */ }
-      }
+      // 저장소(cleaning-issues 버킷)는 삭제됨 — DB 에 남은 옛 기록만 비웁니다.
+      deletedCount += urls.length;
 
       // DB에서 URL 클리어
       await db.from('cleaning_tasks')
