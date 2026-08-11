@@ -131,18 +131,21 @@ async function loadUnits(){
   if(error){ box.innerHTML=`<div class="empty">불러오지 못했어요: ${esc(error.message)}</div>`; return; }
   const active=(rooms||[]).filter(r=>r.is_active!==false);
   if(!active.length){ box.innerHTML='<div class="empty">아직 숙소가 없어요. 아래 “+ 숙소 추가”로 시작하세요.</div>'; return; }
-  const {data:feeds}=await db.from('ical_feeds').select('room_id,channel,url');
-  const fmap={}; (feeds||[]).forEach(f=>{ fmap[f.room_id+'|'+f.channel]=f.url; });
+  // 링크는 암호화 보관되어 브라우저로 내려오지 않습니다. 가려진 힌트만 받습니다.
+  const {data:feeds}=await db.rpc('ical_feed_list');
+  const fmap={}; (feeds||[]).forEach(f=>{ fmap[f.room_id+'|'+f.channel]=f; });
   box.innerHTML=active.map(r=>`
     <div class="rc" data-room="${r.id}">
       <div class="rh"><input class="nm" value="${esc(r.room_number)}" /><button class="del">삭제</button></div>
       ${CHANNELS.map(([k,label,color])=>{
-        const url=fmap[r.id+'|'+k]||''; const on=!!url;
+        const f=fmap[r.id+'|'+k]; const on=!!f;
         return `<div class="row">
           <span class="tag" style="background:${color};">${label}</span>
-          <input class="inp" data-ch="${k}" value="${esc(url)}" placeholder="iCal 주소 붙여넣기…" />
+          <input class="inp" data-ch="${k}" type="password" autocomplete="off" value=""
+                 placeholder="${on?'연결됨 — 바꿀 때만 새 주소 입력':'iCal 주소 붙여넣기…'}" />
           <span class="st" data-stfor="${k}" style="color:${on?'var(--ok)':'var(--dim)'};"><span class="dot" style="background:${on?'#22c55e':'#cfd5df'};"></span>${on?'연결됨':'미연결'}</span>
-        </div><div class="phint" data-phfor="${k}"></div>`;
+          ${on?`<button class="unlink" data-ch="${k}" title="연결 해제" style="border:0;background:none;color:var(--dim);cursor:pointer;font-size:12px;">해제</button>`:''}
+        </div><div class="phint" data-phfor="${k}">${on?`<span style="color:var(--dim);">🔒 ${esc(f.url_hint||'저장됨')}${f.last_synced_at?' · 마지막 동기화 '+new Date(f.last_synced_at).toLocaleString('ko-KR'):''}</span>`:''}</div>`;
       }).join('')}
       <div class="bottom"><button class="save">저장</button><span class="saved" style="display:none;">✓ 저장됨</span></div>
     </div>`).join('');
@@ -154,9 +157,19 @@ async function loadUnits(){
     nm.addEventListener('keydown',e=>{ if(e.key==='Enter') nm.blur(); });
     card.querySelectorAll('.inp').forEach(inp=>{
       inp.addEventListener('blur',()=>preview(inp));
-      preview(inp);
+    });
+    card.querySelectorAll('.unlink').forEach(b=>{
+      b.addEventListener('click',()=>unlinkFeed(card, b.dataset.ch));
     });
   });
+}
+
+// 연결 해제 — 저장된 링크를 지웁니다 (빈칸 저장으로는 지워지지 않게 분리했습니다)
+async function unlinkFeed(card, ch){
+  if(!confirm('이 채널 연결을 해제할까요?\n저장된 주소가 삭제됩니다. 다시 쓰려면 주소를 새로 넣어야 합니다.')) return;
+  const {error}=await db.rpc('ical_feed_delete',{p_room:card.dataset.room, p_channel:ch});
+  if(error){ alert('해제 실패: '+error.message); return; }
+  loadUnits();
 }
 
 async function preview(inp){
@@ -191,20 +204,20 @@ async function delUnit(card){
 async function saveFeeds(card){
   const roomId=card.dataset.room; const btn=card.querySelector('.save'), savedTag=card.querySelector('.saved');
   btn.disabled=true; btn.textContent='저장 중…';
+  let n=0;
   try{
     for(const inp of card.querySelectorAll('.inp')){
       const ch=inp.dataset.ch, url=inp.value.trim();
-      const stEl=card.querySelector(`.st[data-stfor="${ch}"]`);
-      if(url){
-        const {error}=await db.from('ical_feeds').upsert({room_id:roomId,channel:ch,url,is_active:true},{onConflict:'tenant_id,room_id,channel'});
-        if(error) throw error;
-        stEl.innerHTML='<span class="dot" style="background:#22c55e;"></span>연결됨'; stEl.style.color='var(--ok)';
-      }else{
-        await db.from('ical_feeds').delete().eq('room_id',roomId).eq('channel',ch);
-        stEl.innerHTML='<span class="dot" style="background:#cfd5df;"></span>미연결'; stEl.style.color='var(--dim)';
-      }
+      if(!url) continue;                       // 빈칸은 "그대로 두기" — 지우려면 [해제] 버튼
+      // 링크는 서버로만 보내고 암호화 보관됩니다. 응답으로 되돌려받지 않습니다.
+      const {error}=await db.rpc('ical_feed_save',{p_room:roomId, p_channel:ch, p_url:url});
+      if(error) throw error;
+      inp.value='';                            // 화면에서 즉시 지움
+      n++;
     }
-    savedTag.style.display='inline'; setTimeout(()=>savedTag.style.display='none',1800);
+    if(n===0){ alert('새로 입력한 주소가 없습니다.\n\n연결을 지우려면 오른쪽 [해제]를 눌러주세요.'); }
+    else { savedTag.style.display='inline'; setTimeout(()=>savedTag.style.display='none',1800); }
+    await loadUnits();
   }catch(e){ alert('저장 실패: '+(e.message||e)); }
   btn.disabled=false; btn.textContent='저장';
 }
