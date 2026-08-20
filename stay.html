@@ -1,0 +1,584 @@
+<!DOCTYPE html><html lang="ko"><head><meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>숙소 안내</title>
+<style>
+:root{
+  --bg:#f5f5f4;--card:#fff;--line:#f5f5f4;--line2:#e8e6e1;
+  --text:#1a1815;--muted:#78736b;--dim:#a8a39a;--ink:#1a1815;
+  --ok:#4a8a3d;--okbg:#ecf6e9;--okline:#c9e0c1;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-size:15px;
+  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Apple SD Gothic Neo','Malgun Gothic',Roboto,sans-serif;}
+
+.hd{background:#fff;padding:14px 16px;display:flex;align-items:center;gap:11px;
+  border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20;}
+.hd .lg{width:36px;height:36px;flex:none;border-radius:11px;background:var(--ink);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;overflow:hidden;}
+.hd .lg img{width:100%;height:100%;object-fit:contain;background:#fff;}
+.hd .t{min-width:0;flex:1;}
+.hd .t b{display:block;font-size:16px;font-weight:700;letter-spacing:-.02em;}
+.hd .t span{display:block;font-size:12px;color:var(--muted);margin-top:2px;}
+.badge{flex:none;font-size:11px;font-weight:700;border-radius:20px;padding:4px 10px;
+  background:var(--okbg);color:var(--ok);border:1px solid var(--okline);}
+.langbtn{flex:none;border:1px solid var(--line2);background:#fff;color:#57534c;font-size:12px;
+  font-weight:600;padding:7px 11px;border-radius:20px;cursor:pointer;}
+.langsheet{display:none;background:#fff;border-bottom:1px solid var(--line);padding:11px 16px;
+  gap:6px;flex-wrap:wrap;position:sticky;top:65px;z-index:19;}
+.langsheet.open{display:flex;}
+.langsheet .lang{border:1px solid var(--line2);background:#fff;color:#57534c;font-size:12.5px;
+  font-weight:600;padding:7px 12px;border-radius:20px;cursor:pointer;}
+.langsheet .lang.on{background:var(--ink);color:#fff;border-color:var(--ink);}
+
+.wrap{padding:20px 16px 40px;}
+
+.pill{width:100%;border:0;background:var(--ink);color:#fff;border-radius:999px;
+  padding:20px 24px;text-align:left;cursor:pointer;display:flex;align-items:center;gap:14px;
+  box-shadow:0 2px 10px rgba(16,24,40,.10);}
+.pill .pt{flex:1;min-width:0;}
+.pill .pt b{display:block;font-size:18px;font-weight:700;letter-spacing:-.02em;}
+.pill .pt span{display:block;font-size:13px;color:rgba(255,255,255,.66);margin-top:4px;}
+.pill .ar{flex:none;font-size:20px;color:rgba(255,255,255,.5);}
+
+.sec{font-size:12px;font-weight:700;color:var(--muted);margin:26px 0 9px 4px;}
+.list{background:var(--card);border-radius:16px;overflow:hidden;box-shadow:0 1px 2px rgba(16,24,40,.05);}
+.r{display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid var(--line);
+  cursor:pointer;background:none;border-left:0;border-right:0;border-top:0;width:100%;text-align:left;font:inherit;color:inherit;}
+.r:last-child{border-bottom:0;}
+.r:active{background:#fafaf9;}
+.r .rt{flex:1;min-width:0;}
+.r .rt b{display:block;font-size:15px;font-weight:600;letter-spacing:-.01em;}
+.r .rt span{display:block;font-size:12.5px;color:var(--muted);margin-top:3px;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.r .ar{flex:none;font-size:17px;color:var(--dim);}
+.r.lock .rt b{color:var(--dim);}
+.r.ask{background:var(--okbg);}
+.r.ask .rt b{color:#3a7030;}
+.r.ask .rt span{color:#4a8a3d;}
+
+.sheetbg{position:fixed;inset:0;background:rgba(16,20,26,.42);opacity:0;pointer-events:none;
+  transition:opacity .2s;z-index:40;}
+.sheetbg.on{opacity:1;pointer-events:auto;}
+.sheet{position:fixed;left:0;right:0;bottom:0;background:#fff;border-radius:20px 20px 0 0;
+  transform:translateY(100%);transition:transform .26s cubic-bezier(.32,.72,0,1);z-index:41;
+  max-height:86vh;display:flex;flex-direction:column;}
+.sheet.on{transform:translateY(0);}
+.sheet .sh{padding:16px 18px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;}
+.sheet .sh b{flex:1;font-size:17px;font-weight:700;letter-spacing:-.02em;}
+.sheet .x{border:0;background:#f5f5f4;color:#57534c;width:30px;height:30px;border-radius:50%;
+  font-size:15px;cursor:pointer;flex:none;}
+.sheet .sb{padding:18px;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  font-size:15px;line-height:1.8;color:#3f3c36;white-space:pre-wrap;flex:1;}
+.sheet .sf{padding:0 18px calc(18px + env(safe-area-inset-bottom));display:flex;gap:8px;flex-wrap:wrap;}
+.btn{border:1px solid var(--line2);background:#fff;color:#3f3c36;border-radius:11px;
+  padding:12px 16px;font-size:14px;font-weight:600;cursor:pointer;flex:1;}
+.btn.dark{background:var(--ink);color:#fff;border-color:var(--ink);}
+.big{font-size:26px;font-weight:700;letter-spacing:.12em;color:#3a7030;
+  font-variant-numeric:tabular-nums;background:var(--okbg);border-radius:12px;
+  padding:14px 16px;text-align:center;margin-bottom:12px;}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);}
+.kv:last-child{border-bottom:0;}
+.kv .k{font-size:13px;color:var(--muted);}
+.kv .v{font-size:15px;font-weight:600;text-align:right;}
+
+.chat{display:flex;flex-direction:column;gap:9px;}
+.crow{display:flex;align-items:flex-end;gap:7px;}
+.crow.g{justify-content:flex-start;} .crow.s{justify-content:flex-end;}
+.b{max-width:78%;padding:11px 14px;border-radius:17px;font-size:15px;line-height:1.55;
+  word-break:break-word;white-space:pre-wrap;}
+.crow.g .b{background:#E9E9EB;color:#000;border-bottom-left-radius:6px;}   /* 받은 말풍선 — 콘솔과 동일 */
+.crow.s .b{background:#0A84FF;color:#fff;border-bottom-right-radius:6px;}   /* 보낸 말풍선 — 콘솔과 동일 */
+.b .tr{display:block;font-size:13px;margin-top:8px;padding-top:8px;
+  border-top:1px dashed rgba(0,0,0,.12);color:#78736b;}
+.crow.s .b .tr{border-top-color:rgba(255,255,255,.2);color:#d6d3cd;}
+.time{font-size:10.5px;color:var(--dim);flex:none;padding-bottom:2px;}
+.sys{background:#fafaf9;border-radius:14px;padding:14px 16px;font-size:13.5px;
+  color:var(--muted);line-height:1.7;text-align:center;}
+.ft{border-top:1px solid var(--line);padding:10px 12px calc(10px + env(safe-area-inset-bottom));
+  display:flex;gap:8px;align-items:flex-end;}
+.ft textarea{flex:1;min-height:42px;max-height:110px;border:1px solid var(--line2);border-radius:21px;
+  padding:11px 16px;font-size:15px;font-family:inherit;resize:none;outline:none;background:var(--bg);line-height:1.4;}
+.ft textarea:focus{border-color:var(--ink);background:#fff;}
+.ft .snd{flex:none;border:0;background:var(--ink);color:#fff;border-radius:21px;padding:0 18px;
+  height:42px;font-size:14.5px;font-weight:700;cursor:pointer;}
+.ft .snd:disabled{opacity:.35;}
+.priv{margin:22px 4px 0;font-size:11.5px;color:var(--dim);line-height:1.75;}
+
+@media (min-width:760px){
+  body{background:#e8e6e1;padding:26px 0;}
+  .hd,.langsheet,.wrap{width:100%;max-width:560px;margin-left:auto;margin-right:auto;}
+  .hd{position:static;border:1px solid var(--line);border-radius:18px 18px 0 0;}
+  .langsheet{position:static;border-left:1px solid var(--line);border-right:1px solid var(--line);}
+  .wrap{background:var(--bg);border:1px solid var(--line);border-top:0;border-radius:0 0 18px 18px;}
+  .sheet{left:50%;transform:translate(-50%,100%);width:100%;max-width:560px;border-radius:20px 20px 0 0;}
+  .sheet.on{transform:translate(-50%,0);}
+}
+  /* 답장 알림 메일 등록 */
+  .emwrap{ border-top:1px solid var(--line); background:#fbfaf7; padding:11px 14px 12px; }
+  .emwrap.done{ background:#f4f6f2; }
+  .emhead b{ display:block; font-size:13px; font-weight:800; color:#3f3c36; }
+  .emhead span{ display:block; font-size:11.5px; color:#8b867d; margin-top:4px; line-height:1.5; }
+  .emrow{ display:flex; gap:8px; margin-top:9px; }
+  .emrow input{ flex:1; min-width:0; border:1px solid #d6d3cd; border-radius:10px;
+                padding:10px 12px; font-size:16px; font-family:inherit; background:#fff; outline:none; }
+  .emrow input:focus{ border-color:#8b867d; }
+  .emrow button{ flex:0 0 auto; border:none; background:#1f1f23; color:#FAEEC4; border-radius:10px;
+                 padding:0 16px; font-size:13px; font-weight:800; font-family:inherit; cursor:pointer; }
+  .emrow button:disabled{ opacity:.45; cursor:default; }
+  .emnote{ font-size:10.5px; color:#a8a39a; margin-top:7px; }
+  .emwrap.done .emrow{ display:none; }
+  .emwrap.done .emhead span{ color:#3a7030; font-weight:600; }
+</style></head>
+<body>
+
+<div class="hd">
+  <div class="lg" id="hLogo">S</div>
+  <div class="t"><b id="hBiz">숙소</b><span id="hRoom"></span></div>
+  <span class="badge" id="hBadge" style="display:none;">숙박중</span>
+  <button class="langbtn" id="langBtn">한국어</button>
+</div>
+<div class="langsheet" id="langSheet">
+  <button class="lang on" data-l="ko">한국어</button>
+  <button class="lang" data-l="en">English</button>
+  <button class="lang" data-l="ja">日本語</button>
+  <button class="lang" data-l="zh">中文</button>
+  <button class="lang" data-l="de">Deutsch</button>
+  <button class="lang" data-l="fr">Français</button>
+  <button class="lang" data-l="es">Español</button>
+</div>
+
+<div class="wrap">
+  <button class="pill" id="pillBtn">
+    <span class="pt"><b id="pillT">체크인 안내</b><span id="pillS"></span></span>
+    <span class="ar">›</span>
+  </button>
+
+  <div id="hcCard" style="display:none;background:var(--card,#fff);border:1px solid var(--line,#e8e6e1);
+       border-radius:14px;padding:15px 16px;margin:12px 0 4px;">
+    <div style="font-size:15px;font-weight:700;" id="hcQ"></div>
+    <div style="font-size:12.5px;color:var(--muted,#78736b);margin:3px 0 12px;" id="hcSub"></div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;" id="hcBtns"></div>
+    <div style="font-size:12.5px;margin-top:9px;" id="hcMsg"></div>
+  </div>
+
+  <div class="sec" id="secInfo">숙소 안내</div>
+  <div class="list" id="listInfo"></div>
+
+  <div class="sec" id="secHelp">도움</div>
+  <div class="list" id="listHelp"></div>
+
+  <div class="priv" id="priv"></div>
+</div>
+
+<div class="sheetbg" id="bg"></div>
+
+<div class="sheet" id="sheet">
+  <div class="sh"><b id="shT"></b><button class="x" id="shX">✕</button></div>
+  <div class="sb" id="shB"></div>
+  <div class="sf" id="shF"></div>
+</div>
+
+<div class="sheet" id="csheet" style="height:86vh;">
+  <div class="sh"><b id="csT">문의하기</b><button class="x" id="csX">✕</button></div>
+  <div class="sb" id="csB" style="white-space:normal;"><div class="chat" id="chat"><div class="sys" id="welcome"></div></div></div>
+  <div class="emwrap" id="emwrap">
+    <div class="emhead"><b id="emT">답장 알림 받기</b><span id="emSub">메일 주소를 남기시면 답장이 도착했을 때 알려드립니다</span></div>
+    <div class="emrow">
+      <input id="emIn" type="email" inputmode="email" autocomplete="email" autocapitalize="off" spellcheck="false" placeholder="메일 주소 (선택)" />
+      <button id="emBtn">등록</button>
+    </div>
+    <div class="emnote" id="emNote">퇴실 30일 후 삭제됩니다</div>
+  </div>
+  <div class="ft">
+    <textarea id="inp" rows="1"></textarea>
+    <button class="snd" id="sendBtn">전송</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script>
+const SB_URL='https://ijvfwajtotbqfxpdlcal.supabase.co';
+const SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlqdmZ3YWp0b3RicWZ4cGRsY2FsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg0ODE1NDYsImV4cCI6MjA5NDA1NzU0Nn0.39TLrxZyfYthQggvef_RIQQ0YtR2DCu79KmEfEZwGZM';
+const db=supabase.createClient(SB_URL,SB_KEY);
+const $=s=>document.querySelector(s);
+const KEY=(new URLSearchParams(location.search).get('k')||'').trim().toLowerCase();
+const TR_EDGE=SB_URL+'/functions/v1/translate';
+
+const T={
+ ko:{guide:'체크인 안내',info:'숙소 안내',help:'도움',way:'오는 길',waySub:'교통편·주차 안내',addr:'주소',wifi:'Wi-Fi',door:'도어락 · 공동현관',
+     rules:'이용 규칙',near:'주변 추천',notes:'이용 안내',ask:'문의하기',askSub:'무엇이든 물어보세요',
+     ci:'체크인',co:'체크아웃',ent:'공동현관',dl:'도어락',wid:'네트워크',wpw:'비밀번호',
+     locked:'체크인 후 공개',lockedSub:'도착일이 되면 자동으로 열려요',copy:'복사',copied:'복사됨',map:'지도 열기',close:'닫기',
+     inp:'메시지 입력…',send:'전송',wel:'궁금하신 점을 남겨주세요. 확인 후 답변드립니다.',stay:'숙박중',
+     hcUnit:'명',hcQ:'몇 분 오시나요?',hcSub:'수건·생수를 맞춰 준비해 드릴게요',hcOk:'확인됐습니다',hcMore:'4명 이상',hcErr:'잠시 후 다시 시도해 주세요',
+     emT:'답장 알림 받기',emSub:'메일 주소를 남기시면 답장이 도착했을 때 알려드립니다',emPh:'메일 주소 (선택)',emOk:'등록됐습니다',emErr:'메일 주소를 확인해 주세요',emNote:'퇴실 30일 후 삭제됩니다',emBtn:'등록',
+     endT:'문의가 종료되었습니다',endB:'체크아웃 이후에는 이전 대화를 볼 수 없습니다.',endBtn:'새로 문의하기',
+     priv:['상담 내용은 응대 목적으로만 사용됩니다.','이름·연락처 등 개인정보는 저장하지 않습니다.','대화는 약 90일 후 자동 삭제됩니다.']},
+ en:{guide:'Check-in guide',info:'Stay information',help:'Help',way:'Getting here',waySub:'Transit & parking',addr:'Address',wifi:'Wi-Fi',door:'Door lock & entrance',
+     rules:'House rules',near:'Nearby',notes:'House notes',ask:'Ask us',askSub:'Message us anytime',
+     ci:'Check-in',co:'Check-out',ent:'Entrance',dl:'Door lock',wid:'Network',wpw:'Password',
+     locked:'Shown after check-in',lockedSub:'Unlocks automatically on arrival day',copy:'Copy',copied:'Copied',map:'Open map',close:'Close',
+     inp:'Type a message…',send:'Send',wel:'Feel free to ask anything. We will reply shortly.',stay:'Staying',
+     hcUnit:' guests',hcQ:'How many guests?',hcSub:'So we can prepare towels and water for you',hcOk:'Thank you',hcMore:'4 or more',hcErr:'Please try again shortly',
+     emT:'Get reply alerts',emSub:'Leave your email and we’ll notify you when we reply',emPh:'Email (optional)',emOk:'Saved',emErr:'Please check your email address',emNote:'Deleted 30 days after check-out',emBtn:'Save',
+     endT:'This chat has ended',endB:'Past conversations are not available after check-out.',endBtn:'Start a new chat',
+     priv:['Chats are used only to assist you.','We do not store personal data such as name or contact.','Messages are deleted after about 90 days.']},
+ ja:{guide:'チェックイン案内',info:'ご案内',help:'ヘルプ',way:'アクセス',waySub:'交通・駐車のご案内',addr:'住所',wifi:'Wi-Fi',door:'ドアロック・共同玄関',
+     rules:'ご利用ルール',near:'周辺のおすすめ',notes:'ご利用案内',ask:'お問い合わせ',askSub:'お気軽にどうぞ',
+     ci:'チェックイン',co:'チェックアウト',ent:'共同玄関',dl:'ドアロック',wid:'ネットワーク',wpw:'パスワード',
+     locked:'チェックイン後に公開',lockedSub:'到着日になると自動で表示されます',copy:'コピー',copied:'コピー済み',map:'地図を開く',close:'閉じる',
+     inp:'メッセージを入力…',send:'送信',wel:'ご質問をお気軽にどうぞ。確認後ご返信します。',stay:'滞在中',
+     hcUnit:'名',hcQ:'何名でお越しですか？',hcSub:'タオル・お水をご人数に合わせてご用意します',hcOk:'確認しました',hcMore:'4名以上',hcErr:'しばらくして再度お試しください',
+     emT:'返信通知を受け取る',emSub:'メールアドレスをご登録いただくと、返信時にお知らせします',emPh:'メールアドレス（任意）',emOk:'登録しました',emErr:'メールアドレスをご確認ください',emNote:'チェックアウト30日後に削除されます',emBtn:'登録',
+     endT:'お問い合わせは終了しました',endB:'チェックアウト後は以前の会話をご覧いただけません。',endBtn:'新しく問い合わせる',
+     priv:['相談内容は対応目的にのみ利用されます。','氏名・連絡先などの個人情報は保存しません。','会話は約90日後に自動削除されます。']},
+ zh:{guide:'入住指南',info:'住宿指南',help:'帮助',way:'交通路线',waySub:'交通·停车说明',addr:'地址',wifi:'Wi-Fi',door:'门锁·大门',
+     rules:'使用规则',near:'周边推荐',notes:'使用说明',ask:'咨询',askSub:'随时可以联系我们',
+     ci:'入住',co:'退房',ent:'大门',dl:'门锁',wid:'网络',wpw:'密码',
+     locked:'入住后公开',lockedSub:'到达当天将自动显示',copy:'复制',copied:'已复制',map:'打开地图',close:'关闭',
+     inp:'输入消息…',send:'发送',wel:'有任何问题请随时告诉我们。',stay:'入住中',
+     hcUnit:'位',hcQ:'共几位入住？',hcSub:'我们会按人数准备毛巾和饮用水',hcOk:'已确认',hcMore:'4位以上',hcErr:'请稍后再试',
+     emT:'接收回复通知',emSub:'留下邮箱地址，我们回复时会通知您',emPh:'邮箱地址（选填）',emOk:'已登记',emErr:'请检查邮箱地址',emNote:'退房30天后删除',emBtn:'登记',
+     endT:'咨询已结束',endB:'退房后无法查看以前的对话。',endBtn:'重新咨询',
+     priv:['对话内容仅用于为您提供服务。','我们不保存姓名、联系方式等个人信息。','对话将在约90天后自动删除。']},
+ de:{guide:'Check-in Info',info:'Informationen',help:'Hilfe',way:'Anfahrt',waySub:'Verkehr & Parken',addr:'Adresse',wifi:'WLAN',door:'Türschloss & Eingang',
+     rules:'Hausregeln',near:'In der Nähe',notes:'Hinweise',ask:'Fragen',askSub:'Schreiben Sie uns jederzeit',
+     ci:'Check-in',co:'Check-out',ent:'Eingang',dl:'Türschloss',wid:'Netzwerk',wpw:'Passwort',
+     locked:'Nach Check-in sichtbar',lockedSub:'Wird am Anreisetag freigeschaltet',copy:'Kopieren',copied:'Kopiert',map:'Karte öffnen',close:'Schließen',
+     inp:'Nachricht schreiben…',send:'Senden',wel:'Fragen Sie uns gern. Wir antworten in Kürze.',stay:'Aufenthalt',
+     hcUnit:' Gäste',hcQ:'Wie viele Gäste?',hcSub:'Damit wir Handtücher und Wasser vorbereiten können',hcOk:'Danke',hcMore:'4 oder mehr',hcErr:'Bitte später erneut versuchen',
+     emT:'Antwort-Benachrichtigung',emSub:'Hinterlassen Sie Ihre E-Mail, wir benachrichtigen Sie bei einer Antwort',emPh:'E-Mail (optional)',emOk:'Gespeichert',emErr:'Bitte E-Mail-Adresse prüfen',emNote:'30 Tage nach Abreise gelöscht',emBtn:'Speichern',
+     endT:'Chat beendet',endB:'Nach dem Check-out sind frühere Gespräche nicht verfügbar.',endBtn:'Neuen Chat starten',
+     priv:['Der Chat dient ausschließlich Ihrer Unterstützung.','Wir speichern keine personenbezogenen Daten.','Nachrichten werden nach ca. 90 Tagen gelöscht.']},
+ fr:{guide:"Guide d'arrivée",info:'Informations',help:'Aide',way:'Accès',waySub:'Transports & parking',addr:'Adresse',wifi:'Wi-Fi',door:'Serrure & entrée',
+     rules:'Règles',near:'À proximité',notes:'Consignes',ask:'Nous contacter',askSub:'Écrivez-nous à tout moment',
+     ci:'Arrivée',co:'Départ',ent:'Entrée',dl:'Serrure',wid:'Réseau',wpw:'Mot de passe',
+     locked:"Visible après l'arrivée",lockedSub:"S'affiche le jour de l'arrivée",copy:'Copier',copied:'Copié',map:'Ouvrir la carte',close:'Fermer',
+     inp:'Écrire un message…',send:'Envoyer',wel:'Posez-nous vos questions, nous répondrons vite.',stay:'Séjour',
+     hcUnit:' pers.',hcQ:'Combien de personnes ?',hcSub:'Pour préparer serviettes et eau',hcOk:'Merci',hcMore:'4 ou plus',hcErr:'Veuillez réessayer plus tard',
+     emT:'Alerte de réponse',emSub:'Laissez votre e-mail, nous vous préviendrons de notre réponse',emPh:'E-mail (facultatif)',emOk:'Enregistré',emErr:'Veuillez vérifier votre e-mail',emNote:'Supprimé 30 jours après le départ',emBtn:'Enregistrer',
+     endT:'Conversation terminée',endB:'Les échanges précédents ne sont plus accessibles après le départ.',endBtn:'Nouvelle demande',
+     priv:['La conversation sert uniquement à vous aider.','Nous ne conservons aucune donnée personnelle.','Les messages sont supprimés après environ 90 jours.']},
+ es:{guide:'Guía de entrada',info:'Información',help:'Ayuda',way:'Cómo llegar',waySub:'Transporte y parking',addr:'Dirección',wifi:'Wi-Fi',door:'Cerradura y portal',
+     rules:'Normas',near:'Cerca de aquí',notes:'Indicaciones',ask:'Contacto',askSub:'Escríbanos cuando quiera',
+     ci:'Entrada',co:'Salida',ent:'Portal',dl:'Cerradura',wid:'Red',wpw:'Contraseña',
+     locked:'Visible tras la entrada',lockedSub:'Se muestra el día de llegada',copy:'Copiar',copied:'Copiado',map:'Abrir mapa',close:'Cerrar',
+     inp:'Escribir un mensaje…',send:'Enviar',wel:'Pregúntenos lo que necesite. Responderemos pronto.',stay:'Alojado',
+     hcUnit:' pers.',hcQ:'¿Cuántas personas?',hcSub:'Para preparar toallas y agua',hcOk:'Gracias',hcMore:'4 o más',hcErr:'Inténtelo de nuevo más tarde',
+     emT:'Aviso de respuesta',emSub:'Deje su correo y le avisaremos cuando respondamos',emPh:'Correo (opcional)',emOk:'Guardado',emErr:'Compruebe su correo electrónico',emNote:'Se elimina 30 días tras la salida',emBtn:'Guardar',
+     endT:'La conversación ha finalizado',endB:'Los mensajes anteriores no están disponibles tras la salida.',endBtn:'Nueva consulta',
+     priv:['El chat se utiliza únicamente para ayudarle.','No guardamos datos personales.','Los mensajes se eliminan tras unos 90 días.']}
+};
+const TRC={ko:'KO',en:'EN',ja:'JA',zh:'ZH',de:'DE',fr:'FR',es:'ES'};
+const LANGNAME={ko:'한국어',en:'English',ja:'日本語',zh:'中文',de:'Deutsch',fr:'Français',es:'Español'};
+function detect(){const l=(navigator.language||'en').toLowerCase();for(const k of ['ko','ja','zh','de','fr','es'])if(l.startsWith(k))return k;return 'en';}
+let LANG=detect(), INFO=null, convId=null, token=null, lastTs='1970-01-01', seen=new Set(), pollTimer=null, chatReady=false;
+
+function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function tk(){const k='sb_stay_'+KEY;let t=null;try{t=localStorage.getItem(k);if(!t){t='g'+Math.random().toString(36).slice(2)+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem(k,t);}}catch(e){t='g'+Math.random().toString(36).slice(2)+Date.now().toString(36);}return t;}
+function fmt(ts){const d=new Date(ts);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');}
+
+/* ---------- 시트 ---------- */
+function openSheet(el){ $('#bg').classList.add('on'); el.classList.add('on'); }
+function closeAll(){ $('#bg').classList.remove('on'); $('#sheet').classList.remove('on'); $('#csheet').classList.remove('on'); }
+$('#bg').addEventListener('click',closeAll);
+$('#shX').addEventListener('click',closeAll);
+$('#csX').addEventListener('click',closeAll);
+
+function showDetail(title, bodyHtml, footHtml){
+  $('#shT').textContent=title;
+  $('#shB').innerHTML=bodyHtml;
+  $('#shF').innerHTML=footHtml||'';
+  bindCopy($('#sheet'));
+  openSheet($('#sheet'));
+}
+function bindCopy(root){
+  root.querySelectorAll('[data-cp]').forEach(b=>b.addEventListener('click',()=>{
+    navigator.clipboard.writeText(b.dataset.cp).then(()=>{
+      const o=b.textContent; b.textContent=(T[LANG]||T.en).copied;
+      setTimeout(()=>b.textContent=o,1400);
+    });
+  }));
+}
+
+/* ---------- 목록 렌더 ---------- */
+function row(id,title,sub,cls){
+  return `<button class="r ${cls||''}" data-row="${id}">
+    <span class="rt"><b>${esc(title)}</b>${sub?`<span>${esc(sub)}</span>`:''}</span>
+    <span class="ar">›</span></button>`;
+}
+function render(){
+  const t=T[LANG]||T.en, i=INFO||{};
+  $('#langBtn').textContent=LANGNAME[LANG]||'Language';
+  document.querySelectorAll('.langsheet .lang').forEach(b=>b.classList.toggle('on',b.dataset.l===LANG));
+  $('#secInfo').textContent=t.info; $('#secHelp').textContent=t.help;
+  $('#pillT').textContent=t.guide;
+  $('#pillS').textContent=`${t.ci} ${i.checkin_time||'16:00'} · ${t.co} ${i.checkout_time||'11:00'}`;
+  $('#csT').textContent=t.ask; $('#inp').placeholder=t.inp; $('#sendBtn').textContent=t.send;
+  $('#welcome').textContent=t.wel;
+  $('#priv').innerHTML=t.priv.map(x=>'· '+esc(x)).join('<br>');
+
+  let h='';
+  if(i.directions) h+=row('way',t.way,t.waySub);
+  if(i.address)    h+=row('addr',t.addr,i.address);
+  if(i.staying){
+    if(i.wifi_id) h+=row('wifi',t.wifi,i.wifi_id);
+    if(i.door||i.entrance) h+=row('door',t.door,'••••');
+  }else{
+    h+=row('lock',t.wifi+' · '+t.door,t.locked,'lock');
+  }
+  if(i.notes) h+=row('notes',t.notes,'');
+  if(i.rules) h+=row('rules',t.rules,'');
+  if(i.nearby) h+=row('near',t.near,'');
+  $('#listInfo').innerHTML=h||`<div style="padding:18px;color:var(--muted);font-size:14px;">—</div>`;
+  $('#listHelp').innerHTML=row('ask',t.ask,t.askSub,'ask');
+
+  $('#hBiz').textContent=i.biz||'숙소';
+  $('#hRoom').textContent=(i.room||'')+(i.stay?'  ·  '+i.stay:'');
+  $('#hLogo').innerHTML = i.logo_url ? '<img src="'+esc(i.logo_url)+'" alt=""/>' : esc((i.biz||'S').charAt(0));
+  if(i.staying){ $('#hBadge').textContent=t.stay; $('#hBadge').style.display='inline-block'; }
+
+  document.querySelectorAll('[data-row]').forEach(b=>b.addEventListener('click',()=>openRow(b.dataset.row)));
+  renderHeadcount();
+}
+
+/* ---------- 인원 확인 ----------
+   iCal 에는 인원이 없고, 예약사이트 인원도 실제와 다를 때가 많습니다.
+   손님이 직접 눌러주면 수건·생수 수량이 정확해집니다. */
+function renderHeadcount(){
+  const t=T[LANG]||T.en, i=INFO||{};
+  const card=$('#hcCard'); if(!card) return;
+  if(!i.ask_headcount){                       // 이미 확인됐거나 대상 예약이 없음
+    if(i.headcount){
+      card.style.display='block';
+      $('#hcQ').innerHTML='<span style="color:#4a8a3d;">✓ '+i.headcount+esc(t.hcUnit)+'</span>';
+      $('#hcSub').textContent=t.hcOk;
+      $('#hcBtns').innerHTML='';
+      $('#hcMsg').textContent='';
+    } else {
+      card.style.display='none';
+    }
+    return;
+  }
+  card.style.display='block';
+  $('#hcQ').textContent=t.hcQ;
+  $('#hcSub').textContent=t.hcSub;
+  $('#hcMsg').textContent='';
+  $('#hcBtns').innerHTML=[1,2,3,4].map(n=>
+    `<button data-hc="${n}" style="flex:1;min-width:62px;border:1px solid var(--line2,#d6d3cd);background:#fff;
+      border-radius:11px;padding:11px 8px;font-size:15px;font-weight:700;cursor:pointer;">${n===4?esc(t.hcMore):n}</button>`
+  ).join('');
+  $('#hcBtns').querySelectorAll('[data-hc]').forEach(b=>
+    b.addEventListener('click',()=>saveHeadcount(Number(b.dataset.hc))));
+}
+
+async function saveHeadcount(n){
+  const t=T[LANG]||T.en;
+  $('#hcBtns').querySelectorAll('button').forEach(b=>b.disabled=true);
+  $('#hcMsg').textContent='…';
+  try{
+    const {data,error}=await db.rpc('guest_set_headcount',{p_key:KEY,p_count:n});
+    if(error||!data||!data.ok) throw new Error((data&&data.error)||'fail');
+    INFO.headcount=data.count; INFO.ask_headcount=false;
+    renderHeadcount();
+  }catch(e){
+    $('#hcMsg').innerHTML='<span style="color:#b85c3f;">'+esc(t.hcErr)+'</span>';
+    $('#hcBtns').querySelectorAll('button').forEach(b=>b.disabled=false);
+  }
+}
+
+function openRow(id){
+  const t=T[LANG]||T.en, i=INFO||{};
+  if(id==='ask'){ openChat(); return; }
+  if(id==='way')   return showDetail(t.way, esc(i.directions||''), '');
+  if(id==='addr')  return showDetail(t.addr, esc(i.address||''),
+      `<button class="btn" data-cp="${esc(i.address||'')}">${t.copy}</button>`+
+      (i.map_url?`<button class="btn dark" onclick="window.open('${esc(i.map_url)}','_blank')">${t.map}</button>`:''));
+  if(id==='wifi')  return showDetail(t.wifi,
+      `<div class="kv"><span class="k">${t.wid}</span><span class="v">${esc(i.wifi_id||'-')}</span></div>`+
+      `<div class="kv"><span class="k">${t.wpw}</span><span class="v">${esc(i.wifi_pw||'-')}</span></div>`,
+      i.wifi_pw?`<button class="btn dark" data-cp="${esc(i.wifi_pw)}">${t.copy}</button>`:'');
+  if(id==='door'){
+    let b='';
+    if(i.entrance) b+=`<div style="font-size:13px;color:var(--muted);margin-bottom:6px;">${t.ent}</div><div class="big">${esc(i.entrance)}</div>`;
+    if(i.door)     b+=`<div style="font-size:13px;color:var(--muted);margin-bottom:6px;">${t.dl}</div><div class="big">${esc(i.door)}</div>`;
+    return showDetail(t.door, b, '');
+  }
+  if(id==='lock')  return showDetail(t.locked, esc(t.lockedSub), '');
+  if(id==='notes') return showDetail(t.notes, esc(i.notes||''), '');
+  if(id==='rules') return showDetail(t.rules, esc(i.rules||''), '');
+  if(id==='near')  return showDetail(t.near, esc(i.nearby||''), '');
+}
+
+/* ---------- 언어 ---------- */
+$('#langBtn').addEventListener('click',()=>$('#langSheet').classList.toggle('open'));
+document.querySelectorAll('.langsheet .lang').forEach(b=>b.addEventListener('click',()=>{
+  LANG=b.dataset.l; try{localStorage.setItem('sb_stay_lang',LANG);}catch(e){}
+      try{ emApplyLang(); }catch(e){}
+  $('#langSheet').classList.remove('open'); render();
+}));
+$('#pillBtn').addEventListener('click',()=>{
+  const t=T[LANG]||T.en, i=INFO||{};
+  showDetail(t.guide,
+    `<div class="kv"><span class="k">${t.ci}</span><span class="v">${esc(i.checkin_time||'16:00')}</span></div>`+
+    `<div class="kv"><span class="k">${t.co}</span><span class="v">${esc(i.checkout_time||'11:00')}</span></div>`+
+    (i.notes?`<div style="margin-top:14px;">${esc(i.notes)}</div>`:''), '');
+});
+
+/* ---------- 채팅 ---------- */
+function atBottom(){const b=$('#csB');return b.scrollHeight-b.scrollTop-b.clientHeight<130;}
+function down(){const b=$('#csB');b.scrollTop=b.scrollHeight;}
+async function translate(text,target){
+  try{
+    const r=await fetch(TR_EDGE,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SB_KEY,'apikey':SB_KEY},body:JSON.stringify({text,target})});
+    const j=await r.json(); if(j&&j.ok&&j.text) return j.text;
+  }catch(e){}
+  return null;
+}
+const trCache={};
+async function maybeTranslate(bubble,text,fromGuest){
+  const s=(text||'').trim(); if(s.length<2) return;
+  const isKo=/[가-힣]/.test(s);
+  let target=null;
+  if(fromGuest){ if(!isKo) target='KO'; }
+  else { if(isKo && LANG!=='ko') target=TRC[LANG]; }
+  if(!target) return;
+  const ck=target+'|'+s; let out=trCache[ck];
+  if(!out){ out=await translate(s,target); if(out) trCache[ck]=out; }
+  if(!out || out.trim()===s) return;
+  const el=document.createElement('span'); el.className='tr'; el.textContent=out;
+  bubble.appendChild(el); if(atBottom()) down();
+}
+function addMsg(m){
+  if(seen.has(m.id)) return; seen.add(m.id);
+  const stick=atBottom(), isG=m.sender==='guest';
+  const r=document.createElement('div'); r.className='crow '+(isG?'g':'s');
+  const b=document.createElement('div'); b.className='b'; b.textContent=m.body||'';
+  const tm=document.createElement('span'); tm.className='time'; tm.textContent=fmt(m.created_at);
+  if(isG){ r.appendChild(tm); r.appendChild(b); } else { r.appendChild(b); r.appendChild(tm); }
+  $('#chat').appendChild(r);
+  maybeTranslate(b,m.body,isG);
+  if(m.created_at>lastTs) lastTs=m.created_at;
+  if(stick) down();
+}
+async function poll(){
+  if(!convId) return;
+  try{ const {data}=await db.rpc('chat_guest_fetch',{p_conv:convId,p_token:token,p_since:lastTs}); (data||[]).forEach(addMsg); }catch(e){}
+}
+async function send(){
+  const el=$('#inp'), v=el.value.trim(); if(!v) return;
+  if(!convId){ const ok=await startChat(); if(!ok) return; }
+  el.value=''; el.style.height='auto'; $('#sendBtn').disabled=true;
+  try{ await db.rpc('chat_guest_send',{p_conv:convId,p_token:token,p_body:v,p_image:null}); await poll(); }
+  catch(e){ el.value=v; }
+  $('#sendBtn').disabled=false; el.focus();
+}
+/* ---------- 답장 알림 메일 ---------- */
+function emApplyLang(){
+  const t=T[LANG]||T.en;
+  const set=(id,v)=>{ const el=$(id); if(el&&v) el.textContent=v; };
+  set('#emT',t.emT); set('#emNote',t.emNote);
+  const sub=$('#emSub'), wrap=$('#emwrap');
+  if(sub) sub.textContent = (wrap&&wrap.classList.contains('done')) ? (t.emOk||'') : (t.emSub||'');
+  const inp=$('#emIn'); if(inp&&t.emPh) inp.placeholder=t.emPh;
+  const btn=$('#emBtn'); if(btn&&t.emBtn) btn.textContent=t.emBtn;
+}
+function emMarkDone(){
+  const w=$('#emwrap'); if(w) w.classList.add('done');
+  emApplyLang();
+}
+async function emSave(){
+  const t=T[LANG]||T.en;
+  const el=$('#emIn'); if(!el) return;
+  const v=(el.value||'').trim();
+  if(!v) return;
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v)){
+    const sub=$('#emSub'); if(sub){ sub.textContent=t.emErr||'invalid'; sub.style.color='#b85c3f'; }
+    el.focus(); return;
+  }
+  if(!convId){ const ok=await startChat(); if(!ok) return; }
+  const btn=$('#emBtn'); if(btn) btn.disabled=true;
+  try{
+    const {error}=await db.rpc('chat_guest_set_email',{p_conv:convId,p_token:token,p_email:v});
+    if(error) throw error;
+    try{ localStorage.setItem('sb_stay_em_'+KEY,'1'); }catch(e){}
+    const sub=$('#emSub'); if(sub) sub.style.color='';
+    emMarkDone();
+  }catch(e){
+    const sub=$('#emSub'); if(sub){ sub.textContent=t.emErr||'error'; sub.style.color='#b85c3f'; }
+    if(btn) btn.disabled=false;
+  }
+}
+(function emInit(){
+  const btn=$('#emBtn'); if(btn) btn.addEventListener('click',emSave);
+  const inp=$('#emIn');
+  if(inp) inp.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); emSave(); } });
+  try{ if(localStorage.getItem('sb_stay_em_'+KEY)==='1') emMarkDone(); }catch(e){}
+  emApplyLang();
+})();
+
+$('#sendBtn').addEventListener('click',send);
+$('#inp').addEventListener('input',function(){ this.style.height='auto'; this.style.height=Math.min(110,this.scrollHeight)+'px'; });
+$('#inp').addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); send(); } });
+
+/* 체크아웃한 손님이 저장해둔 링크로 다시 들어온 경우 안내.
+   이전 대화는 보여주지 않고, 새로 문의하려면 토큰을 새로 받게 한다. */
+function showChatEnded(){
+  const t=T[LANG]||T.en;
+  $('#chat').innerHTML =
+    '<div style="padding:34px 18px;text-align:center;color:#78736b;">'
+    + '<div style="font-size:15px;font-weight:700;color:#3f3c36;margin-bottom:7px;">'+esc(t.endT)+'</div>'
+    + '<div style="font-size:13px;line-height:1.6;">'+esc(t.endB)+'</div>'
+    + '<button id="newChatBtn" style="margin-top:16px;border:1px solid #d6d3cd;background:#fff;'
+    + 'border-radius:11px;padding:10px 16px;font-size:14px;font-weight:700;cursor:pointer;">'
+    + esc(t.endBtn)+'</button></div>';
+  const ft=document.querySelector('#csheet .ft'); if(ft) ft.style.display='none';
+  const ew=$('#emwrap'); if(ew) ew.style.display='none';
+  const nb=$('#newChatBtn');
+  if(nb) nb.addEventListener('click',async()=>{
+    try{ localStorage.removeItem('sb_stay_'+KEY); }catch(e){}
+    token = tk();
+    if(ft) ft.style.display='';
+    if(ew) ew.style.display='';
+    try{ localStorage.removeItem('sb_stay_em_'+KEY); }catch(e){}
+    const _w=$('#emwrap'); if(_w) _w.classList.remove('done');
+    const _i=$('#emIn'); if(_i) _i.value='';
+    const _b=$('#emBtn'); if(_b) _b.disabled=false;
+    try{ emApplyLang(); }catch(e){}
+    $('#chat').innerHTML='<div class="sys" id="welcome"></div>';
+    chatReady=false; await startChat(); down();
+  });
+}
+
+async function startChat(){
+  const t=T[LANG]||T.en;
+  try{
+    const {data,error}=await db.rpc('chat_open_v2',{p_key:KEY,p_token:token});
+    if(error){ $('#welcome').textContent='연결에 실패했어요. 잠시 후 다시 시도해 주세요.'; return false; }
+    if(!data || !data.ok){
+      if(data && data.reason==='ended'){ showChatEnded(); return false; }
+      $('#welcome').textContent='연결에 실패했어요. 잠시 후 다시 시도해 주세요.'; return false;
+    }
+    convId=data.conv; await poll();
+    if(!pollTimer){ pollTimer=setInterval(poll,5000);
+      document.addEventListener('visibilitychange',()=>{ if(!document.hidden) poll(); }); }
+    return true;
+  }catch(e){ $('#welcome').textContent='연결에 실패했어요. 잠시 후 다시 시도해 주세요.'; return false; }
+}
+async function openChat(){
+  openSheet($('#csheet'));
+  if(!chatReady){ chatReady=true; await startChat(); down(); }
+  setTimeout(()=>$('#inp').focus(),260);
+}
+
+/* ---------- 부팅 ---------- */
+(async function(){
+  try{ const sl=localStorage.getItem('sb_stay_lang'); if(sl&&T[sl]) LANG=sl; }catch(e){}
+  if(!KEY){ document.querySelector('.wrap').innerHTML='<div style="padding:40px 8px;text-align:center;color:#78736b;">잘못된 주소입니다.<br>객실 QR로 접속해 주세요.</div>'; return; }
+  token=tk();
+  render();
+  try{ const {data}=await db.rpc('room_info_by_key',{p_key:KEY}); if(data){ INFO=data; render(); } }catch(e){}
+})();
+</script>
+</body></html>
