@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="theme-color" content="#16161b" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="StayBUT" />
+  <meta name="application-name" content="StayBUT" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Stay BUT 성수 · Admin</title>
+
+  <!-- 파비콘 + 브랜드 로고 (base64 내장 — 외부 파일 불필요) -->
+  <link id="favicon" rel="icon" type="image/jpeg" href="/logo.png" />
+  <link id="apple-icon" rel="apple-touch-icon" href="/logo.png" />
+  <script src="/assets/app-0.js"></script>
+
+  <!-- Pretendard (Korean modern sans) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style id="viewer-mode-css">
+    /* 뷰어(읽기 전용) 계정: 편집 컨트롤 숨김 · 전체 화면 열람은 가능 */
+    body.viewer-mode .nav-item[data-view="import"] { display:none !important; }
+    body.viewer-mode #app-view .btn-primary,
+    body.viewer-mode #app-view .btn-danger,
+    body.viewer-mode #app-view [data-write],
+    body.viewer-mode #app-view .fab,
+    body.viewer-mode #app-view button[onclick*="delete"],
+    body.viewer-mode #app-view button[onclick*="Delete"],
+    body.viewer-mode #app-view button[onclick*="save"],
+    body.viewer-mode #app-view button[onclick*="Save"] { display:none !important; }
+    body.viewer-mode .viewer-ribbon { display:flex !important; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <link rel="stylesheet" href="/assets/style-1.css" />
+</head>
+<body>
+
+  <!-- ============================================================== -->
+  <!-- 로그인 화면                                                      -->
+  <!-- ============================================================== -->
+  <div id="boot"></div>
+    <div id="login-view">
+    <div class="login-split">
+      <div class="login-left">
+        <div></div>
+        <div>
+          <img src="/logo.jpg" alt="STAY BUT 성수" class="login-logo-img"
+               style="max-width:440px; width:90%;"
+               onerror="this.style.display='none'; var s=document.getElementById('login-stamp-fb'); if(s) s.style.display='flex';" />
+          <div id="login-stamp-fb" class="login-stamp" style="display:none;" aria-label="STAY BUT">
+            <div class="sr"><span class="big">S</span><span class="up">T</span><span class="up">A</span><span class="mid">Y</span></div>
+            <div class="sr"><span class="big">B</span><span class="up">U</span><span class="up">T</span><span class="mid">友</span></div>
+          </div>
+          <div class="login-left-sub">성수점 운영 관리 시스템</div>
+        </div>
+        <div class="login-left-foot"></div>
+      </div>
+      <div class="login-right">
+        <div class="login-form-wrap">
+          <div class="login-form-title">로그인</div>
+          <div class="login-form-hint">관리자 계정으로 접속해주세요</div>
+
+          <div id="login-alert"></div>
+
+          <form id="login-form">
+            <div class="form-group">
+              <label class="form-label" for="login-email">이메일</label>
+              <input type="email" id="login-email" class="form-input" autocomplete="username" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="login-password">비밀번호</label>
+              <input type="password" id="login-password" class="form-input" autocomplete="current-password" required />
+            </div>
+            <button type="submit" class="btn btn-primary btn-block" id="login-btn" style="margin-top: 8px; background:#111;">
+              로그인
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 메인 앱                                                          -->
+  <!-- ============================================================== -->
+  <div id="app-view">
+    <div class="app-shell">
+
+      <!-- 알림 패널 -->
+      <div class="notif-panel" id="notif-panel">
+        <div class="notif-panel-header">
+          <div class="notif-panel-title">🔔 알림</div>
+          <div class="notif-panel-actions">
+            <button class="notif-mark-all" id="notif-mark-all">모두 읽음</button>
+            <button class="notif-panel-close" id="notif-panel-close">✕</button>
+          </div>
+        </div>
+        <div class="notif-list" id="notif-list">
+          <div class="notif-empty">새 알림이 없습니다.</div>
+        </div>
+      </div>
+
+      <!-- 토스트 컨테이너 (우측 상단 자동 알림) -->
+      <div class="toast-container" id="toast-container"></div>
+
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="sidebar-brand-left">
+            <img src="/logo.png" alt="StayBUT" class="sidebar-logo-img"
+                 onerror="if(!this.dataset.t2){this.dataset.t2=1;this.src='/logo.png.png';}else{this.style.display='none';}" />
+            <div>
+              Stay BUT
+            </div>
+          </div>
+          <button class="notif-bell" id="notif-bell" title="알림" aria-label="알림">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="notif-badge" id="notif-badge" style="display:none;">0</span>
+          </button>
+        </div>
+
+        <!-- 빠른 검색 -->
+        <div class="sidebar-search">
+          <input type="text" id="quick-search" class="sidebar-search-input"
+                 placeholder="검색 (⌘K · 예: 강, ㄱㅅㅎ)" autocomplete="off" />
+          <div class="sidebar-search-results" id="quick-search-results" style="display:none;"></div>
+        </div>
+
+        <div class="nav-section-label">메인</div>
+        <div class="nav-item active" data-view="dashboard"><span class="nl-full">운영 현황</span><span class="nl-short">운영</span></div>
+        <div class="nav-item" data-view="bookings"><span class="nl-full">예약 관리</span><span class="nl-short">예약</span></div>
+        <div class="nav-item" data-view="analysis"><span class="nl-full">매출 분석</span><span class="nl-short">매출</span></div>
+        <div class="nav-item" data-view="cleaning"><span class="nl-full">청소 관리</span><span class="nl-short">청소</span></div>
+        <a class="nav-item" href="/console.html" id="nav-console" style="text-decoration:none;"><span class="nl-full">상담</span><span class="nl-short">상담</span><span id="chat-tab-badge" style="display:none;margin-left:auto;font-size:9.5px;font-weight:800;background:#9a4a32;color:#fff;border-radius:9px;padding:1px 6px;"></span></a>
+        <div class="nav-item" data-view="supplies"><span class="nl-full">비품관리</span><span class="nl-short">비품</span></div>
+        <div class="nav-item" data-view="audit">동기화·점검<span id="ops-check-badge" style="display:none;margin-left:auto;font-size:9.5px;font-weight:800;background:#9a4a32;color:#fff;border-radius:9px;padding:1px 6px;"></span></div>
+        <div class="nav-item" data-view="import">데이터 가져오기</div>
+
+        <div class="sidebar-footer">
+          <div class="user-info" id="user-info"></div>
+          <div class="nav-item" id="logout-btn">로그아웃</div>
+        </div>
+      </aside>
+
+      <!-- 정합성 점검 모달 -->
+      <div class="modal-backdrop" id="integrity-modal">
+        <div class="modal">
+          <div class="modal-header">
+            <div class="modal-title">⚠ 데이터 정합성 점검</div>
+            <button class="modal-close" onclick="document.getElementById('integrity-modal').classList.remove('open')">✕</button>
+          </div>
+          <div class="modal-body">
+            <div style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">예약과 청소가 어긋난 항목이에요. 자동으로 고치지 않으니 직접 확인·수정하세요.</div>
+            <div id="integrity-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 청소 작업 상세 모달 (보드 카드 클릭 시) -->
+      <div class="modal-backdrop" id="cleaning-task-modal">
+        <div class="modal" style="max-width:420px;">
+          <div class="modal-header">
+            <div class="modal-title">🧹 청소 상세</div>
+            <button class="modal-close" onclick="document.getElementById('cleaning-task-modal').classList.remove('open')">✕</button>
+          </div>
+          <div class="modal-body" id="cleaning-task-modal-body"></div>
+        </div>
+      </div>
+
+      <!-- 청소 수동 추가 모달 -->
+      <div class="modal-backdrop" id="cleaning-add-modal">
+        <div class="modal" style="max-width:380px;">
+          <div class="modal-header">
+            <div class="modal-title">+ 청소 추가</div>
+            <button class="modal-close" onclick="document.getElementById('cleaning-add-modal').classList.remove('open')">✕</button>
+          </div>
+          <div class="modal-body" id="cleaning-add-modal-body"></div>
+        </div>
+      </div>
+
+      <!-- 비품 상세 모달 (발주 토글 + 삭제) -->
+      <div class="modal-backdrop" id="supply-modal">
+        <div class="modal" style="max-width:360px;">
+          <div class="modal-header">
+            <div class="modal-title">📦 비품</div>
+            <button class="modal-close" onclick="document.getElementById('supply-modal').classList.remove('open')">✕</button>
+          </div>
+          <div class="modal-body" id="supply-modal-body"></div>
+        </div>
+      </div>
+
+      <!-- ═══ 상단 내비게이션 (전체 폭) ═══ -->
+      <div class="gnb">
+        <div class="gnb-in gnb-row1">
+          <span class="gnb-brand">STAY<span class="sp"></span>BUT<span class="cjk">友</span></span>
+          <span class="gnb-sub">admin</span>
+          <div class="gnb-right">
+            <button class="gnb-out" id="top-logout">LOGOUT</button>
+          </div>
+        </div>
+
+        <nav class="gnb-in gnb-row2" id="topTabs">
+          <button data-view="dashboard" class="on">
+            <svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg><span>운영 현황</span></button>
+          <button data-view="bookings">
+            <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M8 3v4M16 3v4M3 11h18"/></svg><span>예약 관리</span></button>
+          <button data-view="analysis">
+            <svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>매출 분석</span></button>
+          <button data-view="cleaning">
+            <svg viewBox="0 0 24 24"><path d="M15.5 3.5 9 10"/><path d="M12.5 8.5 6 15"/><path d="M6 15h8l1.5 5.5h-11z"/><path d="M8.5 15v5.5M11.5 15v5.5"/></svg><span>청소 관리</span></button>
+          <a href="/console.html" id="tb-chat">
+            <svg viewBox="0 0 24 24"><path d="M20.5 12.2c0 4.1-3.8 7.4-8.5 7.4-1 0-2-.15-2.9-.42L4 21l1.5-3.6C4.2 16.1 3.5 14.2 3.5 12.2c0-4.1 3.8-7.4 8.5-7.4s8.5 3.3 8.5 7.4z"/></svg>
+            <span>상담</span><span class="gnb-badge" id="tb-chat-badge" style="display:none;"></span></a>
+          <button data-view="supplies">
+            <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M3 11h18M9 7V4h6v3"/></svg><span>비품관리</span></button>
+          <button data-view="audit">
+            <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
+            <span>동기화·점검</span><span class="gnb-badge" id="tb-audit-badge" style="display:none;"></span></button>
+        </nav>
+      </div>
+
+      <!-- Main -->
+      <main>
+
+        <!-- 대시보드 -->
+        <section id="view-dashboard">
+          <div class="page-header">
+            <div>
+              <div class="page-title">운영 현황</div>
+              <div class="page-subtitle" id="dashboard-period">이번 달 운영 데이터를 한눈에</div>
+            </div>
+          </div>
+
+          <!-- 오늘의 현황 + 이번 주 현황 (좌우 나란히) -->
+          <div class="home-cards-row">
+            <div id="today-summary"></div>
+          </div>
+
+          <!-- 🧹 이번 주 청소 -->
+          <div class="section-label" style="margin-top:22px;">이번 주 청소 <span id="dash-cleaning-range" style="font-weight:600;text-transform:none;letter-spacing:-0.005em;color:var(--text-muted);margin-left:6px;"></span></div>
+          <div id="dash-cleaning-week" class="data-card" style="padding:14px 16px; margin-bottom:6px;">
+            <div class="empty-state" style="padding:14px 0;"><span class="sb-spinner"></span><div class="empty-hint">불러오는 중…</div></div>
+          </div>
+
+          <!-- 📊 이번 달 요약 -->
+          <div class="section-label" style="margin-top:22px;">이번 달 요약 <span id="dash-month-label" style="font-weight:600;text-transform:none;letter-spacing:-0.005em;color:var(--text-muted);margin-left:6px;"></span></div>
+          <div id="dash-month-summary" class="today-metrics" style="margin-bottom:6px;">
+            <div class="empty-state" style="padding:14px 0;"><span class="sb-spinner"></span><div class="empty-hint">불러오는 중…</div></div>
+          </div>
+
+          <!-- 📅 예약 타임라인 → 예약관리 탭으로 이동, 운영현황에서는 숨김 -->
+          <div id="dash-booking-timeline" style="display:none;">
+          <div class="section-label" style="margin-top:22px;">예약 현황 <span style="font-weight:600;text-transform:none;letter-spacing:-0.005em;color:var(--text-muted);margin-left:6px;">방별 · 1주일</span></div>
+          <div style="display:flex; align-items:center; justify-content:space-between; margin: 4px 0 10px; flex-wrap:wrap; gap:8px;">
+            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-secondary" id="tl-prev" style="padding:5px 9px;">‹</button>
+              <span id="tl-range" style="font-size:24px; font-weight:700; text-align:left; letter-spacing:-0.01em;">—</span>
+              <button class="btn btn-secondary" id="tl-next" style="padding:5px 9px;">›</button>
+              <button class="btn btn-secondary" id="tl-today" style="padding:5px 9px; font-size:12px;">오늘</button>
+            </div>
+          </div>
+          <div id="timeline-wrap" style="overflow-x:auto; border:1px solid var(--border); border-radius:12px; background:var(--surface);">
+            <div id="timeline-inner" style="min-width:600px;"><div class="empty-state"><span class="sb-spinner"></span><div class="empty-hint">불러오는 중…</div></div></div>
+          </div>
+          <div id="timeline-legend" style="display:flex; gap:14px; margin:8px 0 18px; font-size:11.5px; color:var(--text-muted); flex-wrap:wrap;"></div>
+
+          </div><!-- /dash-booking-timeline (예약관리로 이동) -->
+
+          <!-- 아래 분석 섹션들은 '매출 분석' 시트로 이동 → 대시보드에서는 숨김 -->
+          <div style="display:none;">
+
+          <!-- 상단 컨트롤 바: 날짜 / 채널 / 기간 토글 -->
+          <div class="ops-control-bar">
+            <div class="ops-control-left">
+              <span class="ops-control-date" id="ops-today-label">로딩…</span>
+              <span style="color: var(--text-muted);">·</span>
+              <div class="page-channel-filter" id="dashboard-channel-filter" style="margin:0;"></div>
+            </div>
+            <div class="ops-control-right">
+              <div class="ops-period-toggle" id="ops-period-toggle">
+                <button class="active" data-period="this-month">이번 달</button>
+                <button data-period="next-month">다음 달</button>
+                <button data-period="last-month">지난 달</button>
+                <button data-period="this-year">올해</button>
+              </div>
+              <button class="btn btn-secondary" id="ops-analysis-btn" title="AI 매출 분석" style="padding: 8px 14px; font-weight:700; background:#FAEEC4; color:#16161b; border-color:#16161b;">✦ AI 매출분석</button>
+              <button class="btn btn-secondary" id="ops-refresh-btn" title="새로고침" style="padding: 8px 12px;">↻</button>
+            </div>
+          </div>
+
+          <!-- (예약/정산 타임라인은 예약관리로 이동) -->
+
+
+          <!-- 핵심 지표 (이번 달 + 변화율) -->
+          <div class="section-label">핵심 지표 <span id="ops-period-label" style="font-weight:600; text-transform:none; letter-spacing:-0.005em; color: var(--text-muted); margin-left:6px;"></span></div>
+          <div class="stat-grid" id="kpi-grid">
+            <!-- 동적 채워짐 -->
+          </div>
+
+          <!-- 예약 인사이트 (매출 미사용) -->
+          <div class="section-label">예약 인사이트</div>
+          <div class="insight-2col" style="display:grid; grid-template-columns:1fr 1.4fr; gap:14px; margin-bottom:14px;">
+            <div class="chart-card">
+              <div class="chart-card-header"><div><div class="chart-card-title">채널 비중</div><div class="chart-card-subtitle">예약 건수 기준</div></div></div>
+              <div class="chart-canvas-wrap" style="height:200px; display:flex; align-items:center; gap:16px;">
+                <div style="position:relative; width:140px; height:140px; flex-shrink:0;"><canvas id="insight-channel" role="img" aria-label="채널 비중 도넛"></canvas></div>
+                <div id="insight-channel-legend" style="font-size:12px; display:flex; flex-direction:column; gap:8px;"></div>
+              </div>
+            </div>
+            <div class="chart-card">
+              <div class="chart-card-header"><div><div class="chart-card-title">예약 리드타임</div><div class="chart-card-subtitle">체크인 며칠 전에 예약하는지</div></div></div>
+              <div class="chart-canvas-wrap" style="height:200px;"><canvas id="insight-lead" role="img" aria-label="예약 리드타임 막대"></canvas></div>
+            </div>
+          </div>
+          <div class="chart-card" style="margin-bottom:14px;">
+            <div class="chart-card-header"><div><div class="chart-card-title">요일별 체크인</div><div class="chart-card-subtitle">무슨 요일에 몰리는지 — 가격·청소 인력 배치 참고</div></div></div>
+            <div class="chart-canvas-wrap" style="height:200px;"><canvas id="insight-dow" role="img" aria-label="요일별 체크인 막대"></canvas></div>
+          </div>
+
+          <!-- 객실별 이번 달 매출/점유율 미니 카드 -->
+          <div class="section-label">객실별 성과 <span id="room-perf-period" style="font-weight:500; color:var(--text-muted); font-size:12px; margin-left:4px;"></span></div>
+          <div class="ops-room-mini-grid" id="ops-room-mini-grid">
+            <!-- 동적 채워짐 -->
+          </div>
+
+          <!-- 국적별 게스트 분포 -->
+          <div class="section-label">국적별 게스트 분포</div>
+          <div class="data-card" style="margin-bottom: 24px;">
+            <div id="ops-country-list" style="padding: 16px 0;">
+              <div class="empty-state" style="padding: 24px;">로딩 중…</div>
+            </div>
+          </div>
+
+          </div><!-- /숨김 래퍼 -->
+        </section>
+
+        <!-- 예약 관리 -->
+        <section id="view-analysis" style="display:none;">
+          <div id="analysis-sheet"></div>
+        </section>
+
+        <section id="view-bookings" style="display:none;">
+          <div class="page-header">
+            <div>
+              <div class="page-title">예약 관리</div>
+              <div class="page-subtitle">캘린더에서 한눈에 보고, 아래 목록에서 자세히 확인하세요</div>
+            </div>
+          </div>
+
+          <!-- 🆕 새로 들어온 예약 (메일 자동 등록, 미확인) -->
+          <div class="data-card" id="new-arrivals-card" style="display:none; margin-bottom:18px; border:1.5px solid #1B4480;">
+            <div class="data-card-header">
+              <div class="data-card-title">🆕 최근 변동 <span id="new-arrivals-count" style="color:var(--text-muted); font-size:12px;"></span><span style="color:var(--text-muted); font-size:11px; font-weight:500; margin-left:6px;">자동 확정 · 확인만</span></div>
+              <button class="btn" id="new-arrivals-ackall" style="font-size:12px; padding:4px 10px;">모두 확인</button>
+            </div>
+            <div id="new-arrivals-list"></div>
+          </div>
+
+          <!-- ⚠ 검토 필요 (자동 파싱 예약 + 실패 메일 통합) -->
+          <div id="bk-review-section" style="display:none; margin-bottom:18px;">
+            <div class="data-card" id="bk-needs-card" style="display:none; margin-bottom:14px;">
+              <div class="data-card-header">
+                <div class="data-card-title">⚠ 확인 필요 메일 <span id="bk-needs-count" style="color:var(--text-muted); font-size:12px;"></span></div>
+                <div style="font-size:11px; color:var(--text-muted);">자동 인식이 안 된 메일 — 직접 처리</div>
+              </div>
+              <div id="bk-needs-list"></div>
+            </div>
+            <div class="data-card" id="bk-queue-card" style="display:none; padding:0; overflow:hidden;">
+              <details id="bk-queue-details" open style="width:100%;">
+                <summary style="list-style:none; cursor:pointer; display:flex; align-items:center; justify-content:space-between; padding:14px 18px; user-select:none;">
+                  <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:14px; font-weight:700; color:#8a5a00;">🔔 검토 대기 예약</span>
+                    <span id="bk-queue-count" style="color:var(--text-muted); font-size:12px;"></span>
+                  </div>
+                  <span style="font-size:11px; color:var(--text-muted);">수락하면 예약에 바로 반영 · 클릭해 접기/펼치기</span>
+                </summary>
+                <div id="bk-queue-list" style="border-top:1px solid var(--border);"></div>
+              </details>
+            </div>
+          </div>
+
+          <!-- 채널 필터 -->
+          <div class="page-channel-filter" id="bookings-channel-filter"></div>
+
+          <!-- 통계바 -->
+          <div class="booking-stats-bar" id="bk-stats-bar" style="display: flex; margin-bottom: 16px;"></div>
+
+          <!-- 📅 예약 타임라인은 운영현황(대시보드) 하단으로 이동 -->
+
+          <!-- 📅 예약 타임라인 (방별 · 한 달) -->
+          <div class="section-label" style="margin-top:22px;">예약 현황 <span id="tlbk-span-label" style="font-weight:600;text-transform:none;letter-spacing:-0.005em;color:var(--text-muted);margin-left:6px;">방별 · 한 달</span></div>
+          <div style="display:flex; align-items:center; gap:8px; margin:4px 0 10px; flex-wrap:wrap;">
+            <button class="btn btn-secondary" onclick="tlBkShift(-30)" style="padding:5px 9px;" title="이전 기간">‹</button>
+            <input type="date" id="tlbk-date" onchange="tlBkGo(this.value)" title="날짜를 클릭해서 원하는 날로 이동"
+                   style="font-size:18px; font-weight:700; letter-spacing:-0.01em; padding:4px 10px; border:1px solid var(--border-strong,#d6d3cd); border-radius:9px; background:#fff; color:var(--text,#16161b); cursor:pointer; max-width:190px;">
+            <button class="btn btn-secondary" onclick="tlBkShift(30)" style="padding:5px 9px;" title="다음 기간">›</button>
+            <button class="btn btn-secondary" onclick="tlBkToday()" style="padding:5px 10px; font-size:12px;">오늘</button>
+            <span id="tlbk-range" style="display:none;"></span>
+          </div>
+          <div id="timeline-wrap-bk" style="overflow-x:auto; border:1px solid var(--border); border-radius:12px; background:var(--surface);">
+            <div id="timeline-inner-bk" style="min-width:600px;"><div class="empty-state"><span class="sb-spinner"></span><div class="empty-hint">불러오는 중…</div></div></div>
+          </div>
+          <div id="timeline-legend-bk" style="display:flex; gap:14px; margin:8px 0 18px; font-size:11.5px; color:var(--text-muted); flex-wrap:wrap;"></div>
+
+          <!-- 📱 모바일 전용: 월 달력 + 그날 체크인·체크아웃(채널별) — 폰에서만 표시 -->
+          <div id="bk-mobile" style="display:none;"></div>
+
+          <!-- 📅 기간 조회 바 (캘린더로 대체 — 숨김) -->
+          <div id="bk-range-bar" style="display:none; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+            <button class="btn btn-secondary" id="bk-range-toggle" style="font-size:12px; padding:6px 12px;">📅 기간 조회</button>
+            <span id="bk-range-hint" style="font-size:12px; color:var(--text-muted); display:none;">아래 달력에서 <b>시작일</b>과 <b>종료일</b>을 차례로 클릭하세요</span>
+            <span id="bk-range-label" style="font-size:13px; font-weight:700; color:#0C447C; display:none;"></span>
+            <button class="btn btn-secondary" id="bk-range-clear" style="font-size:12px; padding:6px 10px; display:none;">✕ 해제</button>
+          </div>
+
+          <!-- 📅 기간 선택 두 달 캘린더 (기간 조회 켜면 펼쳐짐) -->
+          <div id="bk-range-picker" style="display:none; margin-bottom:16px;"></div>
+
+          <!-- 📊 기간 요약 패널 (기간 선택 시 표시) -->
+          <div id="bk-range-summary" style="display:none; margin-bottom:16px;"></div>
+
+          <!-- (레거시 방별 막대 — 사용 안 함) -->
+          <div class="booking-cal-grid" id="bk-cal-grid" style="display:none;"></div>
+
+          <!-- 예약 조회 조건 -->
+          <style>
+            .bk-preset{font-size:12px;color:var(--text-soft);background:#fff;border:1px solid var(--border-strong);border-radius:6px;padding:4px 10px;cursor:pointer;}
+            .bk-preset:hover{border-color:var(--accent);}
+            .bk-preset.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+            /* ── 조회 조건 박스 (표 형태) ── */
+            .bk-qbox{border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#fff;}
+            .bk-qrow{display:grid;grid-template-columns:104px minmax(0,1fr) 104px minmax(0,1fr);border-bottom:1px solid var(--border);}
+            .bk-qrow:last-child{border-bottom:0;}
+            .bk-qrow.full{grid-template-columns:104px minmax(0,1fr);}
+            .bk-qlb{background:var(--neutral-50);border-right:1px solid var(--border);padding:10px 12px;font-size:12px;font-weight:700;color:var(--text-soft);display:flex;align-items:center;gap:4px;white-space:nowrap;}
+            .bk-qlb i{font-style:normal;width:13px;height:13px;border-radius:50%;border:1px solid var(--border-strong);color:var(--text-muted);font-size:8px;line-height:11px;text-align:center;flex:none;}
+            .bk-qvl{padding:8px 12px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;min-width:0;border-right:1px solid var(--border);}
+            .bk-qvl:last-child{border-right:0;}
+            .bk-qvl label{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;color:var(--text-soft);cursor:pointer;white-space:nowrap;}
+            .bk-qvl input[type=radio],.bk-qvl input[type=checkbox]{accent-color:var(--accent);width:15px;height:15px;cursor:pointer;margin:0;}
+            .bk-qvl input:checked + span{color:var(--text);font-weight:700;}
+            .bk-qvl .dot{width:7px;height:7px;border-radius:50%;flex:none;display:inline-block;}
+            .bk-th{cursor:pointer;user-select:none;white-space:nowrap;}
+            .bk-th u{text-decoration:none;color:var(--neutral-300);margin-left:2px;}
+            .bk-th.on u{color:var(--accent);}
+            @media(max-width:820px){
+              .bk-qrow,.bk-qrow.full{grid-template-columns:96px minmax(0,1fr);}
+              .bk-qvl{border-right:0;border-bottom:1px solid var(--border);}
+              .bk-qrow > .bk-qvl:last-child{border-bottom:0;}
+              .bk-qlb{border-bottom:1px solid var(--border);}
+              .bk-qrow > .bk-qlb:nth-last-child(2){border-bottom:1px solid var(--border);}
+            }
+          </style>
+          <div class="data-card" id="bk-query-card" style="margin-bottom:12px;">
+            <div class="data-card-header"><div class="data-card-title">예약 조회</div></div>
+            <div class="bk-qbox">
+              <div class="bk-qrow">
+                <span class="bk-qlb">기준일자 <i>?</i></span>
+                <span class="bk-qvl">
+                  <label><input type="radio" name="bk-basis" value="checkin_date" checked><span>체크인일</span></label>
+                  <label><input type="radio" name="bk-basis" value="checkout_date"><span>체크아웃일</span></label>
+                  <label><input type="radio" name="bk-basis" value="booked_at"><span>예약일</span></label>
+                </span>
+                <span class="bk-qlb">목록보기 <i>?</i></span>
+                <span class="bk-qvl">
+                  <label><input type="radio" name="bk-view" value="booking" checked><span>예약건별</span></label>
+                  <label><input type="radio" name="bk-view" value="date"><span>일자별</span></label>
+                  <label><input type="radio" name="bk-view" value="room"><span>객실별</span></label>
+                </span>
+              </div>
+              <div class="bk-qrow full">
+                <span class="bk-qlb">조회기간 <i>?</i></span>
+                <span class="bk-qvl">
+                  <input type="date" id="bk-date-from" class="form-input" style="font-size:12px;padding:5px 9px;width:140px;">
+                  <span style="color:var(--text-muted);">~</span>
+                  <input type="date" id="bk-date-to" class="form-input" style="font-size:12px;padding:5px 9px;width:140px;">
+                  <span style="display:inline-flex;gap:4px;flex-wrap:wrap;">
+                    <button type="button" class="bk-preset" data-range="today">오늘</button>
+                    <button type="button" class="bk-preset" data-range="week">이번 주</button>
+                    <button type="button" class="bk-preset" data-range="month">이번 달</button>
+                    <button type="button" class="bk-preset" data-range="lastmonth">지난 달</button>
+                    <button type="button" class="bk-preset active" data-range="all">전체</button>
+                  </span>
+                </span>
+              </div>
+              <div class="bk-qrow">
+                <span class="bk-qlb">채널</span>
+                <span class="bk-qvl" id="bk-ch-filter"><span style="color:var(--text-muted);font-size:11.5px;">불러오는 중…</span></span>
+                <span class="bk-qlb">예약상태</span>
+                <span class="bk-qvl">
+                  <label><input type="radio" name="bk-status" value="confirmed" checked><span>확정</span></label>
+                  <label><input type="radio" name="bk-status" value="all"><span>전체</span></label>
+                  <label><input type="radio" name="bk-status" value="cancelled"><span>취소</span></label>
+                </span>
+              </div>
+            </div>
+            <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+              <button class="btn btn-primary" id="bk-query-btn" style="font-size:12.5px;padding:8px 26px;font-weight:700;">조회하기</button>
+            </div>
+          </div>
+
+          <!-- 상세내역 -->
+          <div class="data-card" id="bk-list-card">
+            <div class="data-card-header">
+              <div class="data-card-title">상세내역 <span style="color: var(--text-muted); font-size: 12px; margin-left: 6px;" id="bk-list-summary"></span></div>
+              <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <input type="text" id="bk-search" class="form-input" placeholder="고객번호 · 예약번호 · 객실 검색" style="font-size:12px; padding:6px 10px; min-width:190px;">
+                <button class="btn btn-primary" id="open-booking-modal" style="font-size:12px; padding:6px 12px;">+ 예약 추가</button>
+                <button class="btn btn-secondary" id="bk-export-csv" style="font-size:12px; padding:6px 12px;" onclick="exportBookingsCsv()">⬇ 엑셀</button>
+                <button class="btn btn-secondary" id="bk-print" style="font-size:12px; padding:6px 12px;" onclick="printView()">🖨 인쇄</button>
+                <button class="btn btn-danger" id="bk-bulk-delete" style="font-size:12px; padding:6px 12px;" disabled>🗑 선택 삭제 (<span id="bk-sel-count">0</span>)</button>
+              </div>
+            </div>
+            <div id="bk-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;margin:0 0 12px;"></div>
+            <div style="overflow-x:auto;">
+              <table id="bk-table">
+                <thead id="bookings-thead"></thead>
+                <tbody id="bookings-tbody">
+                  <tr><td colspan="12" class="empty-state"><span class="sb-spinner"></span><div class="empty-hint">불러오는 중…</div></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- 예약 검토 (자동 파싱된 예약 매니저 확인) -->
+        <section id="view-review" style="display:none;">
+          <div class="page-header">
+            <div>
+              <div class="page-title">예약 검토</div>
+              <div class="page-subtitle">자동 파싱된 예약을 확인하고 [확정]/[수정]/[거절] 하세요. 확정 시 청소 작업이 자동 생성됩니다.</div>
+            </div>
+            <button class="btn btn-secondary" id="review-refresh-btn">↻ 새로고침</button>
+          </div>
+
+          <!-- 상단 상태 카드 3개 -->
+          <div class="review-status-grid">
+            <div class="review-status-card pending">
+              <div class="review-status-label">검토 대기</div>
+              <div class="review-status-value" id="review-pending-count">0</div>
+              <div class="review-status-sub">매니저 확인 필요</div>
+            </div>
+            <div class="review-status-card failed">
+              <div class="review-status-label">파싱 실패 (24h)</div>
+              <div class="review-status-value" id="review-failed-count">0</div>
+              <div class="review-status-sub">원본 메일이 사장님 메일로 전달됨</div>
+            </div>
+            <div class="review-status-card success">
+              <div class="review-status-label">자동 처리 성공 (24h)</div>
+              <div class="review-status-value" id="review-success-count">0</div>
+              <div class="review-status-sub">대부분 자동화됨</div>
+            </div>
+          </div>
+
+          <!-- ⚠ 확인 필요 메일 (자동 인식 실패/미파싱 — 무손실 검토) -->
+          <div class="data-card" style="margin-top: 20px; display:none;" id="review-needs-card">
+            <div class="data-card-header">
+              <div class="data-card-title">⚠ 확인 필요 메일 <span id="review-needs-count" style="color:var(--text-muted); font-size:12px;"></span></div>
+              <div style="font-size: 11px; color: var(--text-muted);">자동 인식이 안 된 메일 — 직접 처리하세요</div>
+            </div>
+            <div id="review-needs-list"><div class="empty-state">로딩 중…</div></div>
+          </div>
+
+          <!-- 검토 대기 리스트 -->
+          <div class="data-card" style="margin-top: 20px;">
+            <div class="data-card-header">
+              <div class="data-card-title">🔔 검토 대기 예약</div>
+              <div style="font-size: 11px; color: var(--text-muted);">자동 5분마다 새로고침</div>
+            </div>
+            <div id="review-queue-list"><div class="empty-state">로딩 중…</div></div>
+          </div>
+
+          <!-- 최근 자동 처리 (참고용) -->
+          <div class="data-card" style="margin-top: 20px;">
+            <div class="data-card-header">
+              <div class="data-card-title">📋 최근 자동 처리 내역 (10건)</div>
+            </div>
+            <div id="review-recent-log"><div class="empty-state">로딩 중…</div></div>
+          </div>
+        </section>
+
+        <!-- 객실 관리 -->
+        <section id="view-rooms" style="display:none;">
+          <!-- (A) 객실 카드 그리드 — 기본 화면 -->
+          <div id="rooms-grid-view">
+            <div class="page-header">
+              <div>
+                <div class="page-title">객실 관리</div>
+                <div class="page-subtitle">5개 객실 · 카드를 클릭하면 상세 정보 (인원·요금·편의시설·운영 메모) 보기·수정</div>
+              </div>
+            </div>
+
+            <div id="rooms-card-grid" class="room-status-grid">
+              <div class="empty-state" style="grid-column: 1/-1;">로딩 중…</div>
+            </div>
+          </div>
+
+          <!-- (B) 객실 상세 페이지 — 카드 클릭 시 전환 -->
+          <div id="rooms-detail-view" style="display:none;">
+            <div class="page-header">
+              <button class="btn btn-secondary" onclick="closeRoomDetail()" style="margin-right: 12px;">← 객실 목록</button>
+              <div>
+                <div class="page-title" id="room-detail-title">— 호</div>
+                <div class="page-subtitle" id="room-detail-subtitle">객실 상세 정보</div>
+              </div>
+              <div style="margin-left: auto; display: flex; gap: 8px;">
+                <button class="btn btn-secondary" onclick="cancelRoomDetailEdit()">취소</button>
+                <button class="btn btn-primary" onclick="saveRoomDetail()">저장</button>
+              </div>
+            </div>
+
+            <!-- 객실 빠른 탭 (5개) -->
+            <div class="room-quick-tabs" id="room-quick-tabs"></div>
+
+            <div id="room-detail-body" class="room-detail-grid">
+              <!-- 동적 렌더 -->
+            </div>
+          </div>
+        </section>
+
+        <!-- 데이터 가져오기 -->
+        <!-- 정산 관리 -->
+        <section id="view-payout" style="display:none;">
+          <div class="page-header">
+            <div>
+              <div class="page-title">청소업체 정산</div>
+              <div class="page-subtitle">청소 완료 시 자동으로 정산 카드가 생성됩니다. 입금 후 체크하시면 처리 완료됩니다.</div>
+            </div>
+            <button class="btn btn-secondary" id="payout-refresh-btn">↻ 새로고침</button>
+          </div>
+
+          <!-- 탭 2개 -->
+          <div class="review-tabs" style="display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border);">
+            <button class="review-tab active" data-payout-tab="process">정산 처리</button>
+            <button class="review-tab" data-payout-tab="accounts">청소업체 계좌</button>
+          </div>
+
+          <!-- 탭 1: 정산 처리 — A+C 혼합 디자인 -->
+          <div class="payout-tab-content" data-payout-content="process">
+            <!-- 🅐 KPI 카드 4개 (야놀자 스타일) -->
+            <div class="payout-kpi-grid" id="payout-kpi-grid"></div>
+
+            <!-- 🅐 정산 처리 필요 (빨간 ❗ 강조) -->
+            <div class="data-card" style="margin-top: 20px;">
+              <div class="data-card-header">
+                <div class="data-card-title" id="payout-pending-title">🟡 정산 처리 필요</div>
+              </div>
+              <div class="payout-process-controls" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px;">
+                <input type="text" id="payout-pending-search" class="form-input" placeholder="🔍 청소업체 검색" style="font-size:12px; padding:6px 10px; flex:1; min-width:130px; width:auto;">
+                <select id="payout-pending-room" class="form-input" style="font-size:12px; padding:6px 10px; width:auto;">
+                  <option value="all">전체 객실</option>
+                  <option value="101">101호</option>
+                  <option value="102">102호</option>
+                  <option value="201">201호</option>
+                  <option value="202">202호</option>
+                  <option value="301">301호</option>
+                </select>
+                <span style="font-size:12px; color:var(--text-muted);">기간</span>
+                <input type="date" id="payout-pending-from" class="form-input" style="font-size:12px; padding:6px 8px; width:148px;">
+                <span style="color:var(--text-muted);">~</span>
+                <input type="date" id="payout-pending-to" class="form-input" style="font-size:12px; padding:6px 8px; width:148px;">
+                <button class="btn btn-secondary" id="payout-week-btn" style="font-size:12px; padding:6px 10px;" title="이번 주 월요일~일요일로 설정">이번 주(월~일)</button>
+                <button class="btn btn-primary" id="payout-bulk-settle" style="font-size:12px; padding:6px 12px;">✓ 이 기간 일괄 정산</button>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px; margin-bottom:10px; flex-wrap:wrap;">
+                <label style="font-size:12px; display:flex; align-items:center; gap:5px; cursor:pointer;">
+                  <input type="checkbox" id="payout-pending-selectall"> 전체 선택
+                </label>
+                <button class="btn btn-secondary" id="payout-settle-selected" style="font-size:12px; padding:5px 10px;">선택 정산</button>
+                <span id="payout-pending-count" style="font-size:12px; color:var(--text-muted);"></span>
+              </div>
+              <div id="payout-pending-list"><div class="empty-state">로딩 중…</div></div>
+            </div>
+
+            <!-- 🅐 청소사별 이번 달 요약 (드릴다운) -->
+            <div class="data-card" style="margin-top: 20px;">
+              <div class="data-card-header">
+                <div class="data-card-title">청소업체 이번 달</div>
+              </div>
+              <div id="payout-by-staff"><div class="empty-state">로딩 중…</div></div>
+            </div>
+
+            <!-- 🅒 정산 완료 내역 표 (부킹닷컴 익스트라넷 스타일) -->
+            <div class="data-card" style="margin-top: 20px;">
+              <div class="data-card-header">
+                <div class="data-card-title">정산 완료 내역</div>
+                <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                  <select id="payout-filter-period" class="form-input" style="font-size: 12px; padding: 6px 10px; min-width: 120px;">
+                    <option value="month">이번 달</option>
+                    <option value="last_month">지난 달</option>
+                    <option value="3months">최근 3개월</option>
+                    <option value="all">전체</option>
+                  </select>
+                  <select id="payout-filter-staff" class="form-input" style="font-size: 12px; padding: 6px 10px; min-width: 130px;">
+                    <option value="all">전체 청소업체</option>
+                  </select>
+                  <button class="btn btn-secondary" id="payout-export-csv" style="font-size: 13.5px; padding: 8px 16px; font-weight: 600;">📥 엑셀 내려받기</button>
+                </div>
+              </div>
+              <div id="payout-paid-list"><div class="empty-state">로딩 중…</div></div>
+            </div>
+          </div>
+
+          <!-- 탭 2: 청소사 계좌 -->
+          <div class="payout-tab-content" data-payout-content="accounts" style="display:none;">
+            <div class="page-subtitle" style="margin-bottom: 16px; font-size: 13px;">
+              청소업체 이번 달 활동 현황과 계좌 정보입니다. 계좌 등록 시 정산 카드에 자동 표시됩니다.
+            </div>
+            <div id="staff-accounts-list"><div class="empty-state">로딩 중…</div></div>
+          </div>
+        </section>
+
+        <!-- 리뷰 관리 -->
+        <section id="view-reviews" style="display:none;">
+          <div class="page-header">
+            <div>
+              <div class="page-title">리뷰 관리</div>
+              <div class="page-subtitle">스위트스팟 리뷰는 인수 전 데이터로 운영 방향 참고용. 우리 리뷰는 6월부터 누적됩니다.</div>
+            </div>
+          </div>
+
+          <div class="review-tabs" style="display: flex; gap: 4px; margin-bottom: 20px; border-bottom: 1px solid var(--border);">
+            <button class="review-tab active" data-review-tab="ours">우리 리뷰</button>
+            <button class="review-tab" data-review-tab="sweetspot">스위트스팟 (인수 전)</button>
+          </div>
+
+          <!-- 우리 리뷰 탭 -->
+          <div class="review-tab-content" data-tab-content="ours">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap;">
+              <div class="stat-grid" id="reviews-stats" style="flex: 1; min-width: 280px;"></div>
+              <div style="display:flex; gap: 8px;">
+                <button class="btn btn-secondary" id="review-import-btn">📁 CSV 업로드</button>
+                <button class="btn btn-primary" id="review-add-btn">+ 리뷰 추가</button>
+              </div>
+            </div>
+
+            <div id="reviews-monthly-list"><div class="empty-state">6월부터 리뷰가 누적됩니다. 첫 리뷰를 추가하세요.</div></div>
+          </div>
+
+          <!-- 스위트스팟 탭 -->
+          <div class="review-tab-content" data-tab-content="sweetspot" style="display:none;">
+            <div id="sweetspot-content"></div>
+          </div>
+        </section>
+
+        <!-- 리뷰 추가 모달 -->
+        <div class="modal-backdrop" id="review-add-modal">
+          <div class="modal">
+            <div class="modal-header">
+              <div class="modal-title">📝 리뷰 추가</div>
+              <button class="modal-close" onclick="document.getElementById('review-add-modal').classList.remove('open')">✕</button>
+            </div>
+            <div class="modal-body">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">날짜</label>
+                  <input type="date" id="r-date" class="form-input" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">채널</label>
+                  <select id="r-channel" class="form-input">
+                    <option value="airbnb">에어비앤비</option>
+                    <option value="booking">부킹닷컴</option>
+                    <option value="direct">직접</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">객실</label>
+                  <select id="r-room" class="form-input"></select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">국가</label>
+                  <input type="text" id="r-country" class="form-input" placeholder="예: 한국 / Japan" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">평점</label>
+                  <input type="number" id="r-rating" class="form-input" min="0" max="10" step="0.1" placeholder="에어비앤비는 5점, 부킹닷컴은 10점" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">평점 척도</label>
+                  <select id="r-rating-scale" class="form-input">
+                    <option value="5">5점 만점 (Airbnb)</option>
+                    <option value="10">10점 만점 (Booking)</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">리뷰 내용</label>
+                <textarea id="r-text" class="form-textarea" placeholder="원본 리뷰 내용을 그대로 붙여넣으세요"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">태그 (선택, 쉼표로 구분)</label>
+                <input type="text" id="r-tags" class="form-input" placeholder="예: 청결, 친절, 위치" />
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" onclick="document.getElementById('review-add-modal').classList.remove('open')">취소</button>
+              <button class="btn btn-primary" id="submit-review-btn">저장</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 비품·파손 관리 -->
+        <section id="view-supplies" style="display:none;">
+          <div class="page-header">
+            <div>
+              <div class="page-title">비품관리</div>
+              <div class="page-subtitle">산 날짜만 기록합니다. 오래 안 산 품목이 위로 올라옵니다.</div>
+            </div>
+          </div>
+
+          <!-- (파손 신고 탭 제거 — 비품만 사용) -->
+          <div class="review-tabs" style="display:none;">
+            <button class="review-tab active" data-supplies-tab="orders">비품</button>
+          </div>
+
+          <!-- 탭 1: 비품 재고·발주 -->
+          <div class="supplies-tab-content" data-supplies-content="orders">
+            <!-- (발주 후보 자동 인식 제거 — 숨김, 참조 안전용) -->
+            <div class="data-card" style="margin-bottom: 20px; display:none;">
+              <div class="data-card-header">
+                <div class="data-card-title" id="supply-candidates-title">발주 후보</div>
+              </div>
+              <div id="supply-candidates"></div>
+            </div>
+
+            <!-- 🔴 발주 필요 (구매일 기록 방식으로 전환 — 숨김, 참조 안전용) -->
+            <div class="data-card" style="margin-bottom: 20px; display:none;">
+              <div class="data-card-header">
+                <div class="data-card-title" id="supply-confirmed-title">발주 필요</div>
+              </div>
+              <div id="supply-confirmed"><div class="empty-state">로딩 중…</div></div>
+            </div>
+
+            <!-- 🟢 처리 완료 (숨김) -->
+            <div class="data-card" style="margin-bottom: 20px; display:none;">
+              <div class="data-card-header">
+                <div class="data-card-title">처리 완료 (최근 20건)</div>
+              </div>
+              <div id="supply-completed"><div class="empty-state">로딩 중…</div></div>
+            </div>
+
+            <!-- 비품 마스터 -->
+            <div class="data-card">
+              <div class="data-card-header">
+                <div class="data-card-title">구매 기록</div>
+                <button class="btn btn-primary" id="add-supply-btn" style="font-size: 12px;">+ 비품 추가</button>
+              </div>
+              <div id="supplies-master-list"><div class="empty-state">로딩 중…</div></div>
+            </div>
+          </div>
+
+          <!-- 탭 2: 파손 신고 -->
+          <div class="supplies-tab-content" data-supplies-content="damage" style="display:none;">
+            <div class="data-card" style="margin-bottom: 20px;">
+              <div class="data-card-header">
+                <div class="data-card-title">신규 파손 보고</div>
+              </div>
+              <div id="damage-new"><div class="empty-state">로딩 중…</div></div>
+            </div>
+
+            <div class="data-card" style="margin-bottom: 20px;">
+              <div class="data-card-header">
+                <div class="data-card-title">확인됨 (수리/교체 대기)</div>
+              </div>
+              <div id="damage-confirmed"><div class="empty-state">로딩 중…</div></div>
+            </div>
+
+            <div class="data-card">
+              <div class="data-card-header">
+                <div class="data-card-title">해결 완료 (최근 20건)</div>
+              </div>
+              <div id="damage-resolved"><div class="empty-state">로딩 중…</div></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 비품 추가 모달 -->
+        <div class="modal-backdrop" id="supply-add-modal">
+          <div class="modal" style="max-width: 580px;">
+            <div class="modal-header">
+              <div class="modal-title" id="supply-modal-title">+ 비품 추가</div>
+              <button class="modal-close" onclick="document.getElementById('supply-add-modal').classList.remove('open')">✕</button>
+            </div>
+            <div class="modal-body">
+              <input type="hidden" id="sup-id" />
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">비품명 <span style="color:var(--danger);">*</span></label>
+                  <input type="text" id="sup-name" class="form-input" placeholder="예: 슬리퍼" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">카테고리</label>
+                  <select id="sup-category" class="form-select">
+                    <option value="청소">청소용품 (세제·락스·수세미 등)</option>
+                    <option value="세탁">세탁용품 (섬유유연제 등)</option>
+                    <option value="세제">세제</option>
+                    <option value="어메니티">어메니티 (샴푸·비누·치약 등)</option>
+                    <option value="주방">주방·집기 (수저·컵 등)</option>
+                    <option value="침구">침구 (수건·시트 등)</option>
+                    <option value="음료">음료 (생수·커피 등)</option>
+                    <option value="소모품">소모품 (휴지·쓰레기봉투 등)</option>
+                    <option value="기타" selected>기타</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">단위</label>
+                  <input type="text" id="sup-unit" class="form-input" placeholder="예: 켤레, 장, 병" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">현재 재고</label>
+                  <input type="number" id="sup-stock" class="form-input" placeholder="0" min="0" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">최소 재고 (이하 시 빨간 알림)</label>
+                  <input type="number" id="sup-min-stock" class="form-input" placeholder="5" min="0" value="5" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">1회 주문 수량</label>
+                  <input type="number" id="sup-order-qty" class="form-input" placeholder="1" min="1" value="1" />
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label">개당 단가 (선택)</label>
+                  <input type="number" id="sup-unit-price" class="form-input" placeholder="원" min="0" />
+                </div>
+                <div class="form-group">
+                  <!-- 비워둠 -->
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">🛒 구매 링크 (쿠팡 / 11번가 / 알리 등)</label>
+                <input type="url" id="sup-purchase-link" class="form-input" placeholder="https://www.coupang.com/..." />
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">발주 시 [구매 링크] 버튼으로 바로 이동.</div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">자동 인식 키워드 <small style="font-weight:400;color:var(--text-muted);">(쉼표 구분, 선택)</small></label>
+                <input type="text" id="sup-keywords" class="form-input" placeholder="예: 슬리퍼, 실내화" />
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">청소사가 "기타 - 직접 입력"으로 보고했을 때 fallback 매칭에만 사용. 정확한 보고는 셀렉트 박스 방식이 권장됩니다.</div>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" onclick="document.getElementById('supply-add-modal').classList.remove('open')">취소</button>
+              <button class="btn btn-primary" id="submit-supply-btn">저장</button>
+            </div>
+          </div>
+        </div>
+
+        <section id="view-import" style="display:none;">
+          <div class="page-header">
+            <div>
+              <div class="page-title">데이터 가져오기</div>
+              <div class="page-subtitle">부킹닷컴 .xls 또는 CSV 파일을 업로드하면 자동으로 분석해서 어드민에 추가합니다</div>
+            </div>
+          </div>
+
+          <div class="data-card">
+            <div style="padding: 20px;">
+              <div class="import-tabs">
+                <button class="import-tab active" data-import-tab="bookingxls"><span class="tab-logo tl-bk">Booking.com</span><span class="tab-fmt">.xls</span></button>
+                <button class="import-tab" data-import-tab="airbnbcsv"><span class="tab-logo tl-air"><svg viewBox="0 0 24 24" fill="#FF385C" aria-hidden="true"><path d="M12 1.5c-1.7 0-2.9 1.2-4 3.4C6.3 8.2 3 15 3 18c0 2.5 1.9 4.5 4.4 4.5 1.6 0 3.1-.9 4.6-2.6 1.5 1.7 3 2.6 4.6 2.6 2.5 0 4.4-2 4.4-4.5 0-3-3.3-9.8-5-13.1-1.1-2.2-2.3-3.4-4-3.4zm0 2c.7 0 1.4.7 2.2 2.3 1.6 3.1 4.8 9.7 4.8 12.2 0 1.4-1 2.5-2.4 2.5-1.1 0-2.3-.8-3.6-2.4 2.2-2.8 3.5-5.3 3.5-7 0-2-1.5-3.6-3.5-3.6S8 9.3 8 11.3c0 1.7 1.3 4.2 3.5 7-1.3 1.6-2.5 2.4-3.6 2.4-1.4 0-2.4-1.1-2.4-2.5 0-2.5 3.2-9.1 4.8-12.2C10.6 4.2 11.3 3.5 12 3.5zm0 5.8c1 0 1.6.7 1.6 1.9 0 1.1-.9 3-1.6 4.1-.7-1.1-1.6-3-1.6-4.1 0-1.2.6-1.9 1.6-1.9z"/></svg>airbnb</span><span class="tab-fmt">CSV</span></button>
+                <button class="import-tab" data-import-tab="agodacsv"><span class="tab-logo tl-agoda"><span class="agoda-dots"><i></i><i></i><i></i><i></i><i></i></span>agoda</span><span class="tab-fmt">CSV</span></button>
+                <button class="import-tab" data-import-tab="csv">📂 CSV 파일</button>
+              </div>
+
+              <!-- 부킹닷컴 .xls (기본 탭) -->
+              <div id="import-bookingxls" class="import-tab-content">
+                <div class="form-group">
+                  <label class="form-label">부킹닷컴 익스트라넷 예약 .xls 파일</label>
+                  <input type="file" id="import-bookingxls-file" accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" class="form-input" style="padding: 8px;" />
+                </div>
+                <button class="btn btn-primary" id="import-bookingxls-btn">📊 파일 분석</button>
+                <div class="import-help">
+                  <strong>다운로드 위치:</strong> 부킹닷컴 익스트라넷 → 예약 → 우측 상단 "다운로드" 버튼 (.xls)<br>
+                  <strong>자동 입력:</strong> 수수료율·결제대행수수료(매출의 2.5%)·취소일·도착예정시간·국적·기기 등 26개 컬럼 자동 매핑<br>
+                  <strong>참고:</strong> 취소된 예약(cancelled_by_guest)은 자동으로 cancelled 상태로 저장되며 청소 작업이 생성되지 않습니다.
+                </div>
+              </div>
+
+              <!-- 에어비앤비 CSV -->
+              <div id="import-airbnbcsv" class="import-tab-content" style="display:none;">
+                <div class="form-group">
+                  <label class="form-label">에어비앤비 거래내역 CSV 파일</label>
+                  <input type="file" id="import-airbnbcsv-file" accept=".csv,text/csv" class="form-input" style="padding: 8px;" />
+                </div>
+                <button class="btn btn-primary" id="import-airbnbcsv-btn">🏠 파일 분석</button>
+                <div class="import-help">
+                  <strong>다운로드 위치:</strong> 에어비앤비 호스트 → 수익 → 거래 내역 → CSV 다운로드<br>
+                  <strong>자동 매핑:</strong> 예약코드 · 시작일/종료일 · 게스트명 · 리스팅의 (호실) · 금액(매출=호스팅 총수입, 실수령, 서비스 수수료)<br>
+                  <strong>참고:</strong> 이미 등록된 예약번호(메일 자동등록 포함)는 자동으로 제외됩니다. 객실은 리스팅명의 (202호)에서 자동 인식됩니다.
+                </div>
+              </div>
+
+              <!-- 아고다 CSV -->
+              <div id="import-agodacsv" class="import-tab-content" style="display:none;">
+                <div class="form-group">
+                  <label class="form-label">아고다 예약 리포트 CSV 파일</label>
+                  <input type="file" id="import-agodacsv-file" accept=".csv,text/csv" class="form-input" style="padding: 8px;" />
+                </div>
+                <button class="btn btn-primary" id="import-agodacsv-btn">🅰️ 파일 분석</button>
+                <div class="import-help">
+                  <strong>다운로드 위치:</strong> 아고다 YCS(익스트라넷) → 예약 → 리포트 다운로드 요청 → 계정 메일(seongsu@staybut.net)로 도착한 CSV 첨부파일<br>
+                  <strong>자동 매핑:</strong> 예약번호 · 체크인/체크아웃 · 게스트명 · 국적 · 객실유형(호실 자동인식) · 매출(ReferenceSellInclusive) · 수수료(Commission) · 결제수수료(부가세) · 도착예정시간<br>
+                  <strong>참고:</strong> 이미 등록된 예약번호는 자동 제외되고, 취소/노쇼 예약은 cancelled로 저장됩니다. 객실은 룸타입으로 자동 인식됩니다(101·102·201·202·301). 못 알아본 건만 미리보기에서 직접 선택해주세요.
+                </div>
+              </div>
+
+              <!-- CSV 파일 -->
+              <div id="import-csv" class="import-tab-content" style="display:none;">
+                <div class="form-group">
+                  <label class="form-label">CSV 또는 TSV 파일</label>
+                  <input type="file" id="import-csv-file" accept=".csv,.tsv,text/csv,text/tab-separated-values" class="form-input" style="padding: 8px;" />
+                </div>
+                <button class="btn btn-primary" id="import-csv-btn">📊 파일 분석</button>
+                <div class="import-help">
+                  <strong>지원 컬럼:</strong>
+                  <code>체크인</code> · <code>체크아웃</code> · <code>객실</code>(또는 listing) · <code>매출</code>(또는 gross/price/amount) · <code>수수료</code>(또는 fee/commission) · <code>예약번호</code>(또는 code/confirmation)<br>
+                  <strong>인코딩:</strong> UTF-8 권장. 깨지면 엑셀에서 "다른 이름으로 저장 → CSV UTF-8"로 다시 저장해주세요.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 미리보기 -->
+          <div id="import-preview" style="display:none; margin-top: 20px;">
+            <div class="data-card">
+              <div class="data-card-header">
+                <div class="data-card-title">미리보기 — <span id="import-preview-count">0</span>건 인식 (수정 가능)</div>
+                <button class="btn btn-primary" id="import-save-btn">✅ 확인 후 저장</button>
+              </div>
+              <div id="import-preview-content" style="padding: 0;">
+                <!-- 동적 채워짐 -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 운영 일지 -->
+        <!-- 동기화 · 점검 (운영일지 대체) -->
+        <section id="view-audit" style="display:none;">
+          <div class="page-header">
+            <div>
+              <div class="page-title">동기화 · 점검</div>
+              <div class="page-subtitle">메일에서 자동으로 들어온 예약과, 확인이 필요한 데이터를 모아 봅니다.</div>
+            </div>
+            <button class="btn btn-secondary" id="audit-refresh-btn">↻ 새로고침</button>
+          </div>
+          <div id="ops-check-body">
+            <div class="empty-state" style="padding:24px;"><span class="sb-spinner"></span><div class="empty-hint">불러오는 중…</div></div>
+          </div>
+        </section>
+
+        <!-- 운영 체크리스트 -->
+        <section id="view-checklist" style="display:none;">
+          <div class="page-header">
+            <div>
+              <div class="page-title">운영 체크리스트</div>
+              <div class="page-subtitle">매일/주/월 해야 하는 점검 항목 — 까먹지 마세요</div>
+            </div>
+            <button class="btn btn-secondary" id="checklist-refresh-btn">↻ 새로고침</button>
+          </div>
+
+          <div id="checklist-content">
+            <div class="empty-state" style="padding: 30px;">로딩 중…</div>
+          </div>
+        </section>
+
+        <!-- 청소 관리 (매니저) -->
+        <section id="view-cleaning" style="display:none;">
+          <div class="page-header">
+            <div>
+              <div class="page-title">청소 관리</div>
+              <div class="page-subtitle">예약 저장 시 자동 생성됩니다. 캘린더에서 날짜를 클릭하면 상세가 보여요.</div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn btn-secondary" id="cleaning-week-excel-btn">⬇ 주간 엑셀</button>
+              <button class="btn btn-secondary" id="cleaning-bulk-btn">기간 일괄 조정</button>
+              <button class="btn btn-primary" id="cleaning-add-btn">+ 청소 추가</button>
+              <button class="btn btn-secondary" id="cleaning-refresh-btn">↻ 새로고침</button>
+            </div>
+          </div>
+
+          <!-- 💰 기간 일괄 추가보수 조정 -->
+          <div class="modal-backdrop" id="bulk-pay-modal">
+            <div class="modal">
+              <div class="modal-header">
+                <div class="modal-title">기간 일괄 추가보수</div>
+                <button class="modal-close" onclick="document.getElementById('bulk-pay-modal').classList.remove('open')">✕</button>
+              </div>
+              <div class="modal-body">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                  <div class="form-group"><label class="form-label">시작일</label><input type="date" id="bp-from" class="form-input" /></div>
+                  <div class="form-group"><label class="form-label">종료일</label><input type="date" id="bp-to" class="form-input" /></div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">담당 실장님</label>
+                  <select id="bp-staff" class="form-select"><option value="">전체</option></select>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                  <div class="form-group">
+                    <label class="form-label">적용 방식</label>
+                    <select id="bp-mode" class="form-select">
+                      <option value="set">이 금액으로 설정</option>
+                      <option value="add">기존 금액에 더하기</option>
+                      <option value="clear">추가보수 없애기 (0원)</option>
+                    </select>
+                  </div>
+                  <div class="form-group"><label class="form-label">추가보수 (원)</label><input type="number" id="bp-amt" class="form-input" value="5000" step="1000" /></div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">메모 (비고에 표시)</label>
+                  <input type="text" id="bp-memo" class="form-input" placeholder="예: 여름 인상" />
+                </div>
+                <div id="bp-preview" style="font-size:13px; color:var(--text-muted); line-height:1.7; padding:10px 12px; background:var(--surface-2, #f7f8f9); border-radius:9px;">
+                  기간·금액을 정하고 <b>적용</b>을 누르면 대상 건수를 확인한 뒤 반영합니다.
+                </div>
+              </div>
+              <div style="display:flex; gap:8px; justify-content:flex-end; padding:14px 18px; border-top:1px solid var(--border);">
+                <button class="btn btn-secondary" id="bp-check-btn">미리보기</button>
+                <button class="btn btn-primary" id="bp-apply-btn">적용</button>
+              </div>
+            </div>
+          </div>
+
+
+          <!-- 주 네비게이션 (위) + 상태 통계 (아래) -->
+          <div class="cleaning-month-bar cleaning-month-bar-stacked">
+            <div class="cleaning-month-nav">
+              <button class="month-nav-btn" id="cal-prev-month">‹</button>
+              <div class="cleaning-month-label" id="cal-month-label">이번 주</div>
+              <button class="month-nav-btn" id="cal-next-month">›</button>
+              <button class="btn btn-secondary" id="cal-today-btn" style="margin-left:8px; padding: 5px 12px;">오늘</button>
+              <span class="cl-scope" style="margin-left:10px;">
+                <button type="button" class="cl-sc on" data-scope="week">주간</button>
+                <button type="button" class="cl-sc" data-scope="month">월간</button>
+              </span>
+            </div>
+            <div class="cleaning-stats" id="cleaning-stats"></div>
+          </div>
+
+          <!-- 주간 정산 요약 -->
+          <div id="cleaning-week-summary"></div>
+
+          <!-- 주간 청소 보드 (월~일) -->
+          <div id="cl-mobile" style="display:none;"></div>
+          <div id="cleaning-week-board"><!-- 동적 생성 --></div>
+
+          <!-- (레거시 컨테이너 — 참조 안전용, 숨김) -->
+          <div id="cleaning-cal-grid" style="display:none;"></div>
+          <div id="cleaning-day-detail" style="display:none;"></div>
+        </section>
+
+        <!-- 오늘의 청소 (청소사 전용 화면) -->
+        <section id="view-cleaner" style="display:none;">
+          <div class="cleaner-header">
+            <div>
+              <div class="cleaner-header-title" id="cleaner-today-date">청소 일정</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div class="lang-switcher">
+                <button class="lang-btn" data-lang="ko" onclick="setLang('ko')">한</button>
+                <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+                <button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中</button>
+                <button class="lang-btn" data-lang="ja" onclick="setLang('ja')">日</button>
+              </div>
+              <button class="btn btn-ghost" id="cleaner-logout-btn" title="로그아웃">↩</button>
+            </div>
+          </div>
+
+          <!-- 월 네비게이션 -->
+          <div class="cleaning-month-bar">
+            <div class="cleaning-month-nav">
+              <button class="month-nav-btn" id="cleaner-cal-prev">‹</button>
+              <div class="cleaning-month-label" id="cleaner-cal-label">2026년 5월</div>
+              <button class="month-nav-btn" id="cleaner-cal-next">›</button>
+              <button class="btn btn-secondary" id="cleaner-cal-today" style="margin-left:8px; padding: 5px 12px;">오늘</button>
+            </div>
+          </div>
+
+          <!-- 캘린더 그리드 -->
+          <div class="cleaning-cal-grid" id="cleaner-cal-grid">
+            <div class="empty-state" style="grid-column: 1/-1;">로딩중…</div>
+          </div>
+
+          <!-- 선택된 날 상세 -->
+          <div id="cleaner-day-detail"></div>
+        </section>
+      </main>
+
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 예약 추가/수정 모달                                              -->
+  <!-- ============================================================== -->
+  <div class="modal-backdrop" id="booking-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="booking-modal-title">예약 추가</div>
+        <button class="btn btn-ghost" id="close-booking-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="booking-form">
+          <input type="hidden" id="booking-id" />
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">채널</label>
+              <select id="booking-channel" class="form-select" required></select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">객실</label>
+              <select id="booking-room" class="form-select" required></select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">채널 예약번호 (선택)</label>
+            <input type="text" id="booking-code" class="form-input" placeholder="예: HMABCDXX" />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">체크인</label>
+              <input type="date" id="booking-checkin" class="form-input" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">체크아웃</label>
+              <input type="date" id="booking-checkout" class="form-input" required />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">인원</label>
+              <input type="number" id="booking-guests" class="form-input" min="1" value="2" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">국적 (선택)</label>
+              <input type="text" id="booking-country" class="form-input" placeholder="KR, JP, US…" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">매출 (원)</label>
+              <input type="number" id="booking-gross" class="form-input" min="0" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">수수료 (원)</label>
+              <input type="number" id="booking-commission" class="form-input" min="0" value="0" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">예약 상태</label>
+              <select id="booking-status" class="form-select">
+                <option value="confirmed">확정</option>
+                <option value="completed">완료</option>
+                <option value="cancelled">취소</option>
+                <option value="no_show">노쇼</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">정산 상태</label>
+              <select id="booking-payment" class="form-select">
+                <option value="pending">대기</option>
+                <option value="paid">결제완료</option>
+                <option value="settled">정산완료</option>
+                <option value="refunded">환불</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">메모 (선택)</label>
+            <textarea id="booking-notes" class="form-textarea"></textarea>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">채팅 접속코드</label>
+            <input type="text" id="booking-chat-code" class="form-input" readonly placeholder="—" style="background:var(--surface-soft); letter-spacing:2px;" />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="delete-booking" style="display:none; margin-right:auto;">🗑️ 삭제</button>
+        <button class="btn btn-secondary" id="cancel-booking">취소</button>
+        <button class="btn btn-primary" id="save-booking">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================== -->
+  <!-- 객실 수정 모달                                                   -->
+  <!-- ============================================================== -->
+  <div class="modal-backdrop" id="room-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">객실 수정</div>
+        <button class="btn btn-ghost" id="close-room-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="room-form">
+          <input type="hidden" id="room-id" />
+
+          <div class="form-group">
+            <label class="form-label">객실 번호</label>
+            <input type="text" id="room-number" class="form-input" disabled />
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">최대 인원</label>
+              <input type="number" id="room-capacity" class="form-input" min="1" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">기준가 (원)</label>
+              <input type="number" id="room-price" class="form-input" min="0" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">반려동물 가능</label>
+              <select id="room-pet" class="form-select">
+                <option value="false">아니오</option>
+                <option value="true">예</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">빔프로젝터</label>
+              <select id="room-projector" class="form-select">
+                <option value="false">없음</option>
+                <option value="true">있음</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">운영중</label>
+            <select id="room-active" class="form-select">
+              <option value="true">운영중</option>
+              <option value="false">운영 중지</option>
+            </select>
+          </div>
+
+          <div style="border-top: 1px solid var(--border); margin: 20px 0 16px; padding-top: 16px;">
+            <div style="font-weight: 700; font-size: 14px; margin-bottom: 6px;">📤 체크인 안내 정보</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 12px;">
+              여기 등록한 정보로 게스트에게 보낼 체크인 안내문이 자동 생성됩니다.
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">공동현관 비번</label>
+              <input type="text" id="room-entrance-code" class="form-input" placeholder="예: 1369369*" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">도어락 비번</label>
+              <input type="text" id="room-door-code" class="form-input" placeholder="예: 2580*" />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Wi-Fi ID</label>
+              <input type="text" id="room-wifi-id" class="form-input" placeholder="예: staybut_101" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Wi-Fi 비번</label>
+              <input type="text" id="room-wifi-pw" class="form-input" placeholder="예: stay101@" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">추가 안내 (선택)</label>
+            <textarea id="room-extra-notes" class="form-textarea" rows="3" placeholder="객실별 특이사항 (예: 주차 안내, 분리수거 위치, 전망 등)"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancel-room">취소</button>
+        <button class="btn btn-primary" id="save-room">저장</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============================================================== -->
+  <!-- 체크인 안내 메시지 모달                                            -->
+  <!-- ============================================================== -->
+  <!-- ============================================================ -->
+  <!-- 🤖 챗봇 FAB + 모달 (PC + 모바일)                                 -->
+  <!-- ============================================================ -->
+  <!-- 청소 카톡 공유 모달 (방별) -->
+  <div class="modal-backdrop" id="cleaning-share-modal">
+    <div class="modal" style="max-width: 460px;">
+      <div class="modal-header">
+        <div class="modal-title" id="cleaning-share-title">카톡 공유</div>
+        <button class="btn btn-ghost" id="close-cleaning-share">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="cleaning-share-task-id" />
+        <div class="form-group">
+          <label class="form-label">담당 실장님</label>
+          <div id="cleaning-share-chips" style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;"></div>
+          <input type="text" id="cleaning-share-manager" class="form-input" placeholder="직접 입력 (예: 김진 실장님)" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">추가요금 (선택)</label>
+          <input type="text" id="cleaning-share-extra" class="form-input" placeholder="예: 늦은 체크아웃 +1만" />
+        </div>
+        <label class="form-label" style="margin-top:10px; display:block;">미리보기</label>
+        <pre id="cleaning-share-preview" style="white-space:pre-wrap; word-break:break-word; background: var(--surface-soft, #f5f7f2); border:1px solid var(--border, #e2e6dc); border-radius:10px; padding:14px; font-family:-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', Roboto, sans-serif; font-size:13px; line-height:1.65; margin:6px 0 0; color: var(--text-soft, #333);"></pre>
+        <div style="display:flex; gap:8px; margin-top:14px;">
+          <button class="btn btn-secondary" id="copy-cleaning-share" style="flex:1;">📋 텍스트</button>
+          <button class="btn btn-primary" id="save-cleaning-img" style="flex:1;">🖼 이미지 다운로드</button>
+        </div>
+        <div id="cleaning-share-fallback" style="margin-top:12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <button class="chatbot-fab" id="chatbot-fab" title="BUT" aria-label="BUT 비서">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+    </svg>
+  </button>
+
+  <div class="modal-backdrop analysis-modal" id="analysis-modal">
+    <div class="analysis-panel">
+      <div class="analysis-head">
+        <div>
+          <div class="analysis-title">✦ AI 매출 분석</div>
+          <div class="analysis-sub" id="analysis-scope-label">전체 누적</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+          <div class="analysis-view-toggle" id="analysis-view-toggle"></div>
+          <button class="analysis-pdf-btn" id="analysis-img" title="보고용 이미지 저장 (노션용 PNG)" style="background:#2d6cdf;border-color:#2d6cdf;color:#fff;">🖼 이미지</button>
+          <button class="analysis-pdf-btn" id="analysis-pdf" title="PDF로 저장">⬇ PDF</button>
+          <button class="analysis-close" id="analysis-close" aria-label="닫기">✕</button>
+        </div>
+      </div>
+      <div class="analysis-body" id="analysis-body">
+        <div class="empty-state" style="padding:40px;">데이터를 불러오는 중…</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop chatbot-modal" id="chatbot-modal">
+    <div class="chatbot-panel">
+      <div class="chatbot-header">
+        <div>
+          <div class="chatbot-title">BUT</div>
+          <div class="chatbot-sub">날짜·예약·매출·청소 등 무엇이든 물어보세요</div>
+        </div>
+        <button class="chatbot-close" id="chatbot-close" aria-label="닫기">✕</button>
+      </div>
+
+      <div class="chatbot-body" id="chatbot-body">
+        <!-- 초기 인사 + 명령어 제안 -->
+      </div>
+
+      <div class="chatbot-input-bar">
+        <input type="text" id="chatbot-input" placeholder="예: 6/26 예약 · 오늘 체크인 · 이번달 매출 · 101호" autocomplete="off" />
+        <button id="chatbot-send" class="chatbot-send-btn">→</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 📱 모바일 빠른 검색 FAB + 풀스크린 모달                       -->
+  <!-- ============================================================ -->
+  <button class="mobile-search-fab" id="mobile-search-fab" title="검색" aria-label="검색">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/>
+    </svg>
+  </button>
+
+  <div class="modal-backdrop mobile-search-modal" id="mobile-search-modal">
+    <div class="mobile-search-sheet">
+      <div class="mobile-search-header">
+        <input type="text" id="mobile-search-input" class="form-input mobile-search-input-field"
+               placeholder="예약·청소사·비품·객실 검색 (예: 강, ㄱㅅㅎ)" autocomplete="off" />
+        <button class="btn btn-ghost mobile-search-close" id="mobile-search-close" aria-label="닫기">✕</button>
+      </div>
+      <div class="mobile-search-body" id="mobile-search-results">
+        <div class="sidebar-search-hint">예약 게스트명·예약번호 / 청소사·비품·객실명으로 검색하세요</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="checkin-msg-modal">
+    <div class="modal" style="max-width: 640px;">
+      <div class="modal-header">
+        <div class="modal-title">📤 게스트 메시지</div>
+        <button class="btn btn-ghost" onclick="document.getElementById('checkin-msg-modal').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="checkin-msg-meta" style="background: var(--accent-soft); padding: 12px; border-radius: 8px; margin-bottom: 14px; font-size: 13px; line-height: 1.6;"></div>
+
+        <!-- 메시지 종류 탭 -->
+        <div class="msg-type-tabs" style="display: flex; gap: 6px; margin-bottom: 12px;">
+          <button class="msg-type-tab active" data-msg-type="checkin">체크인 안내 (도어락·Wi-Fi)</button>
+          <button class="msg-type-tab" data-msg-type="reminder">D-1 리마인더</button>
+          <button class="msg-type-tab" data-msg-type="checkout">체크아웃 + 리뷰</button>
+        </div>
+
+        <!-- 언어 탭 -->
+        <div class="lang-tabs" style="display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid var(--border);">
+          <button class="lang-tab active" data-lang="ko">🇰🇷 한국어</button>
+          <button class="lang-tab" data-lang="en">🇬🇧 English</button>
+          <button class="lang-tab" data-lang="zh">🇨🇳 中文</button>
+          <button class="lang-tab" data-lang="ja">🇯🇵 日本語</button>
+        </div>
+
+        <textarea id="checkin-msg-preview" readonly style="width:100%; min-height: 320px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', Roboto, sans-serif; font-size: 13px; line-height: 1.65; resize: vertical; background: #fafafa;"></textarea>
+
+        <div id="checkin-msg-warning" style="display:none; margin-top: 12px; padding: 10px 12px; background: #fff8e1; border-left: 3px solid var(--warning); border-radius: 4px; font-size: 12px; line-height: 1.5;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="document.getElementById('checkin-msg-modal').classList.remove('open')">닫기</button>
+        <button class="btn btn-primary" id="copy-checkin-msg-btn">📋 이 텍스트 복사</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============================================================== -->
+  <!-- 청소 특이사항 보고 모달                                              -->
+  <!-- ============================================================== -->
+  <div class="modal-backdrop" id="issue-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">특이사항 보고</div>
+        <button class="btn btn-ghost" id="close-issue-modal">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="issue-task-id" />
+        <input type="hidden" id="issue-room-id" />
+
+        <div class="form-group">
+          <label class="form-label">분류</label>
+          <select id="issue-category" class="form-select">
+            <option value="damage">파손</option>
+            <option value="missing_item">비품 부족·분실</option>
+            <option value="cleanliness">청결 상태</option>
+            <option value="maintenance">수리 필요</option>
+            <option value="general" selected>기타</option>
+          </select>
+        </div>
+
+        <!-- 비품 부족 선택 시 자동 표시되는 셀렉트 영역 -->
+        <div class="form-group" id="issue-supply-section" style="display:none;">
+          <label class="form-label">부족한 비품 <span style="color:var(--danger);">*</span></label>
+          <select id="issue-supply-select" class="form-select">
+            <option value="">— 비품을 선택하세요 —</option>
+            <!-- 동적 로딩 -->
+            <option value="__other__">📝 기타 — 직접 입력 (목록에 없음)</option>
+          </select>
+          <div class="form-row" style="margin-top: 8px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">필요 수량</label>
+              <input type="number" id="issue-supply-quantity" class="form-input" min="1" value="1" />
+            </div>
+            <div class="form-group" id="issue-supply-other-name-group" style="display:none; margin-bottom: 0;">
+              <label class="form-label">비품 이름 (직접 입력)</label>
+              <input type="text" id="issue-supply-other-name" class="form-input" placeholder="예: 새로운 비품 이름" />
+            </div>
+          </div>
+          <div style="font-size: 11px; color: var(--text-muted); margin-top: 6px;">
+            ✅ 정확한 비품을 선택하면 매니저가 바로 주문할 수 있어요.<br/>
+            🔍 목록에 없는 비품은 "기타 — 직접 입력"으로 보고하면 매니저가 확인 후 등록합니다.
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">내용 <span style="font-weight:400;color:var(--text-muted);" id="issue-description-hint">(자세한 상황 설명)</span></label>
+          <textarea id="issue-description" class="form-textarea" placeholder="발견한 특이사항을 자세히 적어주세요"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">사진 (선택, 여러 장 가능)</label>
+          <div class="photo-upload-area" id="photo-upload-area">
+            <button type="button" class="photo-add-btn" id="photo-add-btn">+</button>
+          </div>
+          <input type="file" id="photo-file-input" accept="image/*" multiple style="display:none;" />
+          <div style="font-size:11px; color: var(--text-muted); margin-top: 6px;">
+            여러 장 선택 가능 · 자동으로 압축됩니다
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="cancel-issue">취소</button>
+        <button class="btn btn-primary" id="save-issue">보고 제출</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 특이사항 조회 모달 (매니저용) -->
+  <div class="modal-backdrop" id="issue-view-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">📋 특이사항 상세</div>
+        <button class="modal-close" onclick="document.getElementById('issue-view-modal').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body" id="issue-view-body">
+        <div class="empty-state">로딩 중…</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="document.getElementById('issue-view-modal').classList.remove('open')">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 통합 상세 모달 (비품·파손 카드 클릭 시) -->
+  <div class="modal-backdrop" id="detail-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="detail-modal-title">상세 정보</div>
+        <button class="modal-close" onclick="document.getElementById('detail-modal').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body" id="detail-modal-body">
+        <div class="empty-state">로딩 중…</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="document.getElementById('detail-modal').classList.remove('open')">닫기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 사진 확대 모달 (lightbox) -->
+  <div class="photo-lightbox" id="photo-lightbox" onclick="this.classList.remove('open')">
+    <img id="photo-lightbox-img" src="" alt="" />
+  </div>
+
+  <!-- 청소 완료 사진 첨부 모달 (청소사용) -->
+  <div class="modal-backdrop" id="complete-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="complete-modal-title">✅ 청소 완료 보고</div>
+        <button class="modal-close" onclick="document.getElementById('complete-modal').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 12px; padding: 10px 12px; background: var(--accent-soft); border-radius: 8px; font-size: 13px;" id="complete-modal-guide">
+          청소 후 객실 사진을 1장 이상 첨부해주세요.
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="complete-modal-photo-label">사진 첨부 (필수)</label>
+          <div class="photo-upload-area" id="complete-photo-area">
+            <button type="button" class="photo-add-btn" id="complete-photo-add-btn">+</button>
+          </div>
+          <input type="file" id="complete-photo-input" accept="image/*" multiple capture="environment" style="display: none;" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="complete-cancel" onclick="document.getElementById('complete-modal').classList.remove('open')">취소</button>
+        <button class="btn btn-primary" id="complete-submit">완료 처리</button>
+      </div>
+    </div>
+  </div>
+
+
+<script src="/assets/app-5.js"></script>
+
+<link rel="stylesheet" href="/assets/style-3.css" />
+  <script src="/assets/app-6.js"></script>
+  <script src="/assets/app-7.js"></script>
+</body>
+</html>
