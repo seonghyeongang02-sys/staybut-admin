@@ -1,0 +1,16 @@
+{
+  "name": "StayBUT 상담",
+  "short_name": "StayBUT",
+  "description": "STAY BUT 성수 · 상담 콘솔과 운영 어드민",
+  "start_url": "/console.html",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1f1f23",
+  "theme_color": "#1f1f23",
+  "lang": "ko",
+  "icons": [
+    { "src": "/logo.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/logo.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
