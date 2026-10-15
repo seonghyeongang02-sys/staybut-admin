@@ -50,6 +50,7 @@ body{margin:0;background:var(--bg);color:var(--tx);
 
 /* 헤더 */
 .hd{padding:20px 16px 0}
+.brand{font-size:12.5px;font-weight:700;color:var(--tx2);letter-spacing:.04em;margin-bottom:3px}
 .hrow{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 h1{font-size:20px;font-weight:700;margin:0;letter-spacing:-.3px}
 .hsub{color:var(--tx2);font-size:13.5px;margin-top:2px}
@@ -180,6 +181,7 @@ p.n:last-child{margin-bottom:0} p.n b{color:var(--tx);font-weight:650}
 <body>
 
 <div id="login">
+  <div class="brand" style="font-size:14px;margin-bottom:8px">StayBUT</div>
   <h2>로그인</h2>
   <p>어드민과 같은 계정으로 로그인하세요.</p>
   <div class="lerr" id="lerr"></div>
@@ -197,7 +199,8 @@ p.n:last-child{margin-bottom:0} p.n b{color:var(--tx);font-weight:650}
   <div id="home">
     <div class="hd">
       <div class="hrow">
-        <div><h1>운영 대시보드</h1><div class="hsub">오늘 처리할 일과 현황</div></div>
+        <div><div class="brand">StayBUT</div>
+          <h1>운영 대시보드</h1><div class="hsub">오늘 처리할 일과 현황</div></div>
         <div class="acts">
           <button class="mini" id="reload">새로고침</button>
           <button class="mini" id="logout">로그아웃</button>
@@ -226,6 +229,7 @@ const LS='staybut_desk_session';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const man=n=>n==null?'—':(Math.round(Number(n)/10000)).toLocaleString('ko-KR');
+const won=n=>n==null?'—':Number(n).toLocaleString('ko-KR');
 
 function getSess(){ try{ return JSON.parse(localStorage.getItem(LS)||'null'); }catch(e){ return null; } }
 function setSess(s){ try{ s?localStorage.setItem(LS,JSON.stringify(s)):localStorage.removeItem(LS); }catch(e){} }
@@ -369,11 +373,11 @@ function build(){
   const nOps=left(t_ops), nPr=left(t_price), nCl=left(t_clean), nDt=left(t_data);
 
   T=[
-  {id:"ops",ic:"ops",kicker:"Operations",name:"운영팀",desc:"오늘 들고남 · 배정 · PMS",
+  {id:"ops",ic:"ops",kicker:"Operations",name:"운영팀",desc:"오늘 체크인·체크아웃 · 배정 · PMS",
    state:nOps?`할 일 ${nOps}건`:"할 일 없음", lv:nOps?"warn":"ok", badge:nOps?String(nOps):"✓",
    secs:[
    {t:"오늘 할 일",m:nOps?"warn":"ok",tag:"체크하면 지워집니다",open:1,
-    body:list('운영팀 체크리스트',t_ops,'오늘 할 일이 없습니다','들고 나는 방도, 배정할 예약도 없습니다.')},
+    body:list('운영팀 체크리스트',t_ops,'오늘 할 일이 없습니다','오늘 체크인·체크아웃도, 배정할 예약도 없습니다.')},
    {t:"PMS 일마감 · 그룹체크아웃",m:"ok",tag:"매일 09:32 자동",
     body:`<p class="n">제가 자동으로 합니다. 순서는 ① 일마감 → 「마감」 → 확인 ② 객실현황 → 미결산내역 → 그룹체크아웃 ③ 예약 점검.</p>
       <p class="n"><b>그룹체크아웃 전에 목록을 먼저 읽습니다.</b> 아직 묵고 있는 손님이나 진짜 미수금이 섞여 있으면 누르지 않고 멈춥니다.</p>
