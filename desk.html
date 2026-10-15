@@ -62,14 +62,50 @@ h1{font-size:20px;font-weight:700;margin:0;letter-spacing:-.3px}
 .date .dt{font-size:15px;font-weight:600;color:var(--tx);font-variant-numeric:tabular-nums}
 .date .dw{color:var(--tx2);font-weight:500;margin-left:5px}
 
-/* 요약 */
-.chips{display:flex;gap:8px;flex-wrap:wrap;padding:14px 16px 18px}
-.chip{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:9px 13px;
-  display:flex;align-items:baseline;gap:7px;box-shadow:var(--sh)}
-.chip b{font-size:17px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.2px}
-.chip span{font-size:12.5px;color:var(--tx2);white-space:nowrap}
-.chip.alert{border-color:#FECACA;background:var(--red-bg)}
-.chip.alert b{color:var(--red)} .chip.alert span{color:#B91C1C}
+/* ── 핵심 지표 ── */
+.hero{margin:16px 16px 0;background:#fff;border:1px solid var(--line);border-radius:12px;
+  box-shadow:var(--sh);overflow:hidden}
+.hgrid{display:grid;grid-template-columns:auto 1fr;gap:18px;padding:16px}
+.hcell{min-width:0}
+.hlb{font-size:12.5px;color:var(--tx2);font-weight:500;margin-bottom:8px}
+.hval{font-size:25px;font-weight:700;letter-spacing:-.7px;font-variant-numeric:tabular-nums;line-height:1.1}
+.hval .w{font-size:16px;font-weight:600;color:var(--tx2);margin-right:1px}
+.hcell .df{margin-top:4px}
+.donut{display:block}
+.dnum{font-size:19px;font-weight:700;fill:#111827;letter-spacing:-.5px}
+.spark{display:flex;align-items:flex-end;gap:5px;height:40px;margin-top:12px}
+.spark .sb{flex:1;background:#EEF0F3;border-radius:3px 3px 0 0;min-height:4px}
+.spark .sb.on{background:var(--pri)}
+.sl{display:flex;gap:5px;margin-top:5px}
+.sl span{flex:1;text-align:center;font-size:10.5px;color:var(--tx3);font-weight:500}
+.hsub4{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);
+  background:#FAFBFC}
+.hsub4>div{padding:11px 8px;text-align:center;border-right:1px solid var(--line);min-width:0}
+.hsub4>div:last-child{border-right:none}
+.hsub4 span{display:block;font-size:11px;color:var(--tx2);margin-bottom:3px}
+.hsub4 b{font-size:14px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.3px;
+  display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ── 오늘 처리할 일 ── */
+.chips{padding:16px 16px 0}
+.todo{background:#fff;border:1px solid var(--line);border-radius:12px;box-shadow:var(--sh);overflow:hidden}
+.todoh{padding:12px 14px;font-size:13.5px;font-weight:700;border-bottom:1px solid var(--line);
+  display:flex;justify-content:space-between;align-items:center}
+.todoh span{font-size:12.5px;font-weight:600;color:#fff;background:var(--red);
+  border-radius:11px;padding:2px 9px}
+.more{padding:11px 14px;font-size:12.5px;color:var(--tx2);background:#FAFBFC;border-top:1px solid var(--line2)}
+.todo.clear{display:flex;align-items:center;gap:13px;padding:17px 15px}
+.todo.clear .ok{width:34px;height:34px;flex:0 0 auto;border-radius:17px;background:var(--grn-bg);
+  color:var(--grn);display:grid;place-items:center;font-size:17px;font-weight:700}
+.todo.clear b{display:block;font-size:14.5px;font-weight:650}
+.todo.clear span{display:block;font-size:12.5px;color:var(--tx2);margin-top:1px}
+
+/* ── 팀 ── */
+.secttl{font-size:13px;font-weight:700;color:var(--tx2);margin:20px 2px 9px}
+.prev{margin-top:8px;padding-top:8px;border-top:1px solid var(--line2);font-size:12.5px;
+  color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prev b{color:var(--tx);font-weight:600}
+
 
 /* 목록 */
 .teams{display:flex;flex-direction:column;gap:8px}
@@ -88,6 +124,9 @@ h1{font-size:20px;font-weight:700;margin:0;letter-spacing:-.3px}
 
 .ts{font-size:13px;color:var(--tx2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tst{font-size:13px;font-weight:600;margin-top:5px;display:flex;align-items:center;gap:6px;color:var(--tx2)}
+.prev{margin-top:7px;padding-top:7px;border-top:1px dashed var(--line);font-size:12.5px;
+  color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prev b{color:var(--tx);font-weight:600}
 .tst i{width:6px;height:6px;border-radius:50%;flex:0 0 auto;background:var(--tx3)}
 .tst.warn{color:var(--red)} .tst.warn i{background:var(--red)}
 .tst.ok i{background:var(--grn)}
@@ -211,6 +250,7 @@ p.n:last-child{margin-bottom:0} p.n b{color:var(--tx);font-weight:650}
       </div>
       <div class="date"><span class="dt" id="today">—</span></div>
     </div>
+    <div class="hero" id="hero"></div>
     <div class="chips" id="chips"></div>
     <div class="screen">
       <div class="teams" id="teams"><div class="load">불러오는 중…</div></div>
@@ -293,6 +333,26 @@ function diff(c,p){ if(c==null||p==null) return '<span class="df z">비교 없�
   return `<span class="df ${cls}">${d>0?'▲':(d<0?'▼':'–')} ${Math.abs(d)}% <span class="mu">지난달</span></span>`; }
 
 let D=null,TODO=null,T=[],CUR=null;
+// 원형 게이지
+function donut(pct){
+  const R=30, C=2*Math.PI*R, v=Math.max(0,Math.min(100,Number(pct)||0));
+  return `<svg class="donut" width="78" height="78" viewBox="0 0 78 78">
+    <circle cx="39" cy="39" r="${R}" fill="none" stroke="#E5E7EB" stroke-width="9"/>
+    <circle cx="39" cy="39" r="${R}" fill="none" stroke="#2563EB" stroke-width="9"
+      stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C*(1-v/100)}"
+      transform="rotate(-90 39 39)"/>
+    <text class="dnum" x="39" y="39" text-anchor="middle" dominant-baseline="central">${v}%</text>
+  </svg>`;
+}
+// 월별 막대
+function spark(months, ym){
+  const ms=(months||[]).filter(m=>m.gmv>0).slice(-6);
+  if(!ms.length) return '';
+  const mx=Math.max(...ms.map(m=>m.gmv));
+  return `<div class="spark">`+ms.map(m=>
+      `<div class="sb ${m.ym===ym?'on':''}" style="height:${Math.max(6,Math.round(m.gmv/mx*100))}%"></div>`).join('')+
+    `</div><div class="sl">`+ms.map(m=>`<span>${Number(m.ym.slice(5))}월</span>`).join('')+`</div>`;
+}
 const CK='staybut_desk_checked';
 function ckGet(){ try{return JSON.parse(localStorage.getItem(CK)||'{}')}catch(e){return{}} }
 function ckSet(o){ try{localStorage.setItem(CK,JSON.stringify(o))}catch(e){} }
@@ -379,6 +439,10 @@ function build(){
   const _done=ckGet(), left=a=>a.filter(x=>!_done[x.k]).length;
   const nOps=left(t_ops), nPr=left(t_price), nCl=left(t_clean), nDt=left(t_data);
 
+  const peek=a=>{ const x=a.filter(i=>!_done[i.k])[0]; if(!x) return '';
+    const m=x.html.match(/class="ct">([^<]*)</); return m?m[1]:''; };
+  const PV={ops:peek(t_ops), price:peek(t_price), clean:peek(t_clean), data:peek(t_data)};
+
   T=[
   {id:"ops",ic:"ops",kicker:"Operations",name:"운영팀",desc:"오늘 체크인 · 배정 · PMS",
    state:nOps?`할 일 ${nOps}건`:"할 일 없음", lv:nOps?"warn":"ok", badge:nOps?String(nOps):"✓",
@@ -453,16 +517,44 @@ function build(){
   ];
 
   const ISSUES=nOps+nPr+nCl+nDt;
-  $('chips').innerHTML=`
-    <div class="chip ${ISSUES?'alert':''}"><b>${ISSUES}</b><span>확인 필요</span></div>
-    <div class="chip"><b>${cur.occ!=null?cur.occ+'%':'—'}</b><span>이번 달 가동률</span></div>
-    <div class="chip"><b>${man(cur.gmv)}</b><span>이번 달 거래액(만원)</span></div>
-    <div class="chip"><b>${cin.length}</b><span>오늘 체크인</span></div>`;
 
-  $('teams').innerHTML=T.map(t=>`
+  // 1) 핵심 지표
+  $('hero').innerHTML=`
+    <div class="hgrid">
+      <div class="hcell">
+        <div class="hlb">이번 달 가동률</div>
+        ${donut(cur.occ)}
+      </div>
+      <div class="hcell">
+        <div class="hlb">이번 달 거래액</div>
+        <div class="hval"><span class="w">₩</span>${won(cur.gmv)}</div>
+        ${diff(cur.gmv, prev&&prev.gmv)}
+        ${spark(M, ym)}
+      </div>
+    </div>
+    <div class="hsub4">
+      <div><span>객단가</span><b>₩${won(cur.adr)}</b></div>
+      <div><span>오늘 체크인</span><b>${cin.length}건</b></div>
+      <div><span>2주 내 빈방</span><b>${vac.length}일</b></div>
+      <div><span>다음 달 예약</span><b>${next?won(next.gmv):'—'}</b></div>
+    </div>`;
+
+  // 2) 오늘 처리할 일 (팀 가리지 않고 모아서)
+  const allTodo=[...t_ops,...t_price,...t_clean,...t_data].filter(x=>!_done[x.k]);
+  $('chips').innerHTML = allTodo.length
+    ? `<div class="todo"><div class="todoh">오늘 처리할 일<span>${allTodo.length}건</span></div>`+
+      allTodo.slice(0,4).map(x=>x.html).join('')+
+      (allTodo.length>4?`<div class="more">외 ${allTodo.length-4}건 — 팀에서 확인</div>`:'')+`</div>`
+    : `<div class="todo clear"><div class="ok">✓</div><div><b>오늘 처리할 일이 없습니다</b>
+        <span>네 팀 모두 이상 없습니다.</span></div></div>`;
+
+  // 3) 팀
+  $('teams').innerHTML=`<div class="secttl">팀별 현황</div>`+T.map(t=>`
    <button class="team" data-id="${t.id}"><div class="ic">${svg(t.ic)}</div>
-    <div class="tmid"><span class="tk">${t.kicker}</span><div class="tn">${t.name}</div>
-     <div class="ts">${t.desc}</div><div class="tst ${t.lv}"><i></i>${t.state}</div></div>
+    <div class="tmid"><div class="tn">${t.name}</div>
+     <div class="ts">${t.desc}</div>
+     <div class="tst ${t.lv}"><i></i>${t.state}</div>
+     ${PV[t.id]?`<div class="prev">다음 · <b>${PV[t.id]}</b></div>`:''}</div>
     <div class="bg ${t.badge==='✓'?'none':''}">${t.badge}</div>
     <span class="chev">›</span></button>`).join('');
 }
