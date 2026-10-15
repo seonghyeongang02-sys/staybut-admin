@@ -7036,11 +7036,11 @@ async function renderTodaySummary() {
     /* [2026-08-28] min-width:130px 때문에 390px 폰에서 3칸이 안 들어가 두 줄로 감겼습니다. · 최소 폭을 빼고, 폰에서는 아래 CSS 로 3칸 격자를 씁니다. */
     /* [2026-09-18] 글씨를 키웠습니다 — 제목 12.5→14 · 숫자 30→34 · 아래 설명 11.5→13. · 그리고 체크인 초록 / 체크아웃 주황을 빼고 셋 다 기본 글자색으로 맞췄습니다. · 숫자에 색이 들어가면 「좋다/나쁘다」처럼 읽히는데, 체크인·체크아웃 건수는 · 좋고 나쁜 값이 아니라 그냥 오늘의 사실입니다. 색은 아래 설명줄에서만 씁니다. */
     /* [2026-10-02] 라벨·숫자·내역을 세 줄로 쌓지 않고 한 줄로 붙입니다. · 전 : 칸 높이 110px 인데 들어 있는 건 「2 / 102호·201호」가 전부라 · 빈 공간이 대부분이었습니다. 세로로 밀려서 아래 내용이 안 보였습니다. · 후 : 높이 44px. 숫자 크기는 그대로 두고 빈 공간만 걷어냅니다. */
-    const cell = (label, val, sub, hl) => `
-      <div class="dash-cell" style="flex:1;min-width:0;padding:11px 16px;border-right:1px solid var(--border);display:flex;align-items:baseline;gap:9px;">
-        <span style="font-size:12px;font-weight:700;color:var(--text-muted);white-space:nowrap;">${label}</span>
-        <span style="font-size:28px;font-weight:800;letter-spacing:-.035em;line-height:1;font-variant-numeric:tabular-nums;color:${hl || 'var(--text)'};">${val}</span>
-        <span style="font-size:12.5px;color:var(--text-soft);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;">${sub || ''}</span>
+    const cell = (label, val, sub, dot) => `
+      <div class="dash-cell" style="flex:1;min-width:0;padding:11px 16px;border-right:1px solid var(--border);display:flex;align-items:flex-start;gap:0;flex-direction:column;">
+        <span style="font-size:12px;font-weight:500;color:var(--text-soft);white-space:nowrap;display:flex;align-items:center;gap:6px;margin-bottom:6px;"><i style="width:8px;height:8px;border-radius:50%;background:${dot || 'var(--text-muted)'};display:inline-block;flex:none;"></i>${label}</span>
+        <span style="font-size:24px;font-weight:700;letter-spacing:-.5px;line-height:1.1;font-variant-numeric:tabular-nums;color:var(--text);">${val}</span>
+        <span style="font-size:12px;color:var(--text-soft);font-weight:500;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;max-width:100%;">${sub || ''}</span>
       </div>`;
     /* 폰에서는 「101호 · 201호」가 칸을 넘겨 잘립니다. 폰에서만 '호'를 뺍니다. */
     const _narrow = window.matchMedia('(max-width: 768px)').matches;
@@ -7059,10 +7059,10 @@ async function renderTodaySummary() {
       : '없음';
     const strip = `
       <div class="dash-strip" style="display:flex;flex-wrap:wrap;border:1px solid var(--border);border-radius:11px;overflow:hidden;background:var(--surface);">
-        ${cell('퇴실', checkouts.length, rmTxt(checkouts), nowPhase === 'out' ? NOW_COLOR : null)}
-        ${cell('청소', cleanToday.length, cleanToday.length ? (cleanLeft.length ? `남음 ${cleanLeft.length}` : '완료') : '없음', nowPhase === 'clean' ? NOW_COLOR : null)}
-        ${cell('입실', checkins.length, rmTxt(checkins), nowPhase === 'in' ? NOW_COLOR : null)}
-        ${cell('재실', `${stayingRaw.length}/${rooms.length}`, emptyN === 0 ? '만실' : `빈 방 ${emptyN}`, emptyN === 0 ? '#16a34a' : null)}
+        ${cell('퇴실', checkouts.length, checkouts.length ? `${rmTxt(checkouts)} · 11시까지` : '없음', 'var(--warning-500)')}
+        ${cell('청소', cleanToday.length, cleanToday.length ? (cleanLeft.length ? `남음 ${cleanLeft.length}건 · 12~16시` : '완료') : '없음', 'var(--success-500)')}
+        ${cell('입실', checkins.length, checkins.length ? `${rmTxt(checkins)} · 16시부터` : '없음', 'var(--accent)')}
+        ${cell('재실', `${stayingRaw.length}/${rooms.length}`, emptyN === 0 ? '만실' : `빈 방 ${emptyN}`, emptyN === 0 ? 'var(--success-500)' : 'var(--text-muted)')}
       </div>`;
     /* 오늘 손님                                        [2026-10-02] · 위의 「오늘 객실」은 방 기준이라 한 방에 퇴실·입실이 겹치면 한 칸에 · 한 줄만 보입니다. 누가 오늘 들어오고 누가 나가는지는 안 보였습니다. · 여기서는 예약 하나당 한 줄로 펴서, 이름·채널·국적·일정까지 같이 봅니다. · 기본값은 「체크인」 — 오늘 당장 손이 가야 하는 건 들어오는 손님입니다. */
     /* esc 는 이 파일에서 함수마다 따로 만들어 쓰는 방식이라 여기에도 둡니다 · (전역에 없습니다 — 없이 쓰면 그대로 에러가 납니다). */
@@ -7135,7 +7135,7 @@ async function renderTodaySummary() {
     box.innerHTML = `
       <div class="today-card">
         <div class="today-card-head">
-          <div class="today-card-title">오늘의 StayBUT</div>
+          <div class="today-card-title">오늘</div>
           <div class="today-card-date">${dateLabel}</div>
         </div>
         ${strip}
@@ -7158,11 +7158,12 @@ window.todayGuestFilter = function (f, el) {
   if (!segs.length) return;
   segs.forEach(b => {
     const on = el ? (b === el) : (b.dataset.f === f);
-    b.style.background = on ? 'var(--text)' : 'var(--surface)';
-    b.style.color      = on ? 'var(--bg)'   : 'var(--text-soft)';
-    b.style.fontWeight = on ? '700' : '600';
+    b.style.background = on ? 'var(--accent-soft)' : 'var(--surface)';
+    b.style.color      = on ? 'var(--accent)'       : 'var(--text-soft)';
+    b.style.borderColor= on ? 'var(--accent)'       : 'var(--border)';
+    b.style.fontWeight = on ? '650' : '500';
     const num = b.querySelector('b');
-    if (num) num.style.color = on ? 'var(--bg)' : 'var(--text)';
+    if (num) num.style.color = on ? 'var(--accent)' : 'var(--text)';
   });
   let shown = 0;
   rows.forEach(tr => {
@@ -15349,6 +15350,15 @@ html:not([data-theme="dark"]) #view-dashboard .today-card-head { background: #ff
 #view-dashboard #today-summary .ops-today-value[style*="B4512C"],
 #view-dashboard #today-summary [style*="#B4512C"] { color: var(--accent) !important; }
 #view-dashboard #today-summary [style*="#16a34a"] { color: var(--success-500) !important; }
+
+/* [2026-10-15] 오늘 섹션 A안 — 칸 사이 선, 표 헤더 흰 바탕. */
+#view-dashboard .dash-strip { border:0 !important; border-radius:0 !important; border-bottom:1px solid var(--border) !important; }
+#view-dashboard .dash-strip > div { flex:1; min-width:0; padding:16px 15px; border-right:1px solid var(--border); }
+#view-dashboard .dash-strip > div:last-child { border-right:0; }
+#view-dashboard #today-summary table thead th,
+#view-dashboard #today-summary table th { background:transparent !important; color:var(--text-soft) !important;
+  font-size:11.5px !important; font-weight:600 !important; border-bottom:1px solid var(--border) !important; }
+#view-dashboard #today-guest-segs button { border:1px solid var(--border); border-radius:6px; }
 </style>
   <script>
     (function () {
