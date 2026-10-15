@@ -25225,6 +25225,12 @@ checkAuth();
 /* [2026-10-15] 청소관리 달력 — 좁은 폭(601~900px)에서 기존 모바일 버전과 동일하게 렌더.
    모바일(<=600px) 규칙이 안 걸리는 구간이라 실장님 이름이 한 글자씩 쪼개졌습니다.
    되돌리려면 이 블록만 지우세요. */
+/* 601~900px에서도 기존 모바일 청소 리스트를 씁니다.
+   PC 주간판(#cleaning-week-board)은 7열이라 이 폭에서 글자가 한 자씩 쪼개집니다. */
+@media (min-width: 601px) and (max-width: 900px){
+  #cl-mobile { display: block !important; }
+  #cleaning-week-board { display: none !important; }
+}
 @media (min-width: 601px) and (max-width: 900px){
   .cleaning-cal-grid, .booking-cal-grid { padding: 8px; gap: 3px; }
   .cleaning-cal-day, .booking-cal-day { min-height: 60px; padding: 3px 3px 2px; gap: 2px; }
