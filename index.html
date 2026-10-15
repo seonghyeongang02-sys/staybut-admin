@@ -15307,6 +15307,24 @@ html:not([data-theme="dark"]) #view-bookings .data-card-header { background: #ff
 /* [2026-10-15] 막대 위 숫자가 잘려서 y축 위에 여유를 줬습니다. 카드도 잘림 방지. */
 #view-dashboard .ceo-card .ceo-cb { overflow: visible; }
 #view-dashboard .ops-room-mini-grid { margin-bottom: 0; }
+
+/* [2026-10-15] 오늘 입·퇴실 블록(오늘의 StayBUT)을 시안 카드 모양으로.
+   시안 .card = radius 10 / border 1px #E5E7EB / 그림자 sh, .ch = 13px 15px 헤더. */
+#view-dashboard .today-card { border-radius: 10px; padding: 0; margin-bottom: 0;
+  box-shadow: 0 1px 2px rgba(16,24,40,.05); overflow: hidden; }
+#view-dashboard .today-card-head { padding: 13px 15px; margin: 0;
+  border-bottom: 1px solid var(--border); background: var(--surface); }
+#view-dashboard .today-card-title { font-size: 14.5px; font-weight: 650; }
+#view-dashboard .today-card-date { font-size: 13px; font-weight: 500; color: var(--text-muted); }
+#view-dashboard .today-card > *:not(.today-card-head) { padding-left: 15px; padding-right: 15px; }
+#view-dashboard .today-card > *:nth-child(2) { padding-top: 14px; }
+#view-dashboard .today-card > *:last-child { padding-bottom: 14px; }
+html:not([data-theme="dark"]) #view-dashboard .today-card-head { background: #fff !important; border-bottom: 1px solid var(--border) !important; }
+/* 입실·퇴실·청소·재실 4칸 — 시안 톤으로 */
+#view-dashboard .ops-today-label, #view-dashboard .today-metrics .ops-today-label {
+  text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 500; color: var(--text-muted); }
+#view-dashboard .ops-today-value { font-size: 22px; font-weight: 700; letter-spacing: -.5px; }
+#view-dashboard .ops-today-cell { border-radius: 8px; box-shadow: none; }
 </style>
   <script>
     (function () {
