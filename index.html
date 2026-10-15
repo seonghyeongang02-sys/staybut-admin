@@ -2503,7 +2503,13 @@
           <!-- ③ 2단 -->
           <!-- 오늘의 StayBUT — 카드 틀 없이 전폭. 안에 이미 제목이 있어 겹치지 않게 합니다. -->
           <span id="ops-today-label" style="display:none;"></span>
-          <div class="home-cards-row" style="margin-bottom:14px;"><div id="today-summary"></div></div>
+          <div class="ceo-g2" style="grid-template-columns:1.6fr 1fr;">
+            <div class="home-cards-row"><div id="today-summary"></div></div>
+            <div class="ceo-card">
+              <div class="ceo-ch"><b>영역별 상태</b><span class="ceo-tag">실시간</span></div>
+              <div class="ceo-cb" style="padding:0;"><div id="ops-area-status"></div></div>
+            </div>
+          </div>
           <!-- ④ 3단 -->
           <div class="ceo-g3">
             <div class="ceo-card">
@@ -2518,9 +2524,13 @@
               <div class="ceo-cb"><div style="height:190px;"><canvas id="insight-dow" role="img" aria-label="요일별 체크인 막대"></canvas></div></div>
             </div>
             <div class="ceo-card">
-              <div class="ceo-ch"><b>이번 주 청소</b><span class="ceo-tag" id="dash-cleaning-range"></span></div>
-              <div class="ceo-cb"><div id="dash-cleaning-week"></div></div>
+              <div class="ceo-ch"><b>다음 2주 빈방</b><span class="ceo-tag" id="vac-count"></span></div>
+              <div class="ceo-cb" style="padding:0;"><div id="ops-vacancy"></div></div>
             </div>
+          </div>
+          <div class="ceo-card" style="margin-bottom:14px;">
+            <div class="ceo-ch"><b>이번 주 청소</b><span class="ceo-tag" id="dash-cleaning-range"></span></div>
+            <div class="ceo-cb"><div id="dash-cleaning-week"></div></div>
           </div>
           <div class="ceo-card" style="margin-bottom:14px;">
             <div class="ceo-ch"><b>객실별 성과</b><span class="ceo-tag" id="room-perf-period"></span></div>
@@ -6589,31 +6599,91 @@ async function loadDashboard() {
   };
   const _leads = bookings.map(_leadDaysOf).filter(v => v != null && v >= 0);
   const earlyPct = _leads.length ? Math.round(_leads.filter(d => d >= 8).length / _leads.length * 100) : 0;
+  // [2026-10-15] 시안(admin_ceo.html)의 KPI 4칸 그대로.
+  //   ① 이번 달 거래액 + 6개월 막대  ② 가동률 도넛  ③ 객단가 ADR + RevPAR  ④ 다음 달 예약
+  const _w = (n) => '₩' + Math.round(n || 0).toLocaleString('ko-KR');
+  const _delta = (cur, prev, unit) => {
+    if (!prev) return '<span style="color:var(--text-muted)">지난달 없음</span>';
+    const d = unit === 'p' ? (cur - prev) : ((cur - prev) / prev * 100);
+    const up = d >= 0;
+    const col = up ? 'var(--success-500)' : 'var(--danger-500)';
+    const sign = up ? '▲' : '▼';
+    return `<span style="color:${col}">${sign} ${Math.abs(d).toFixed(1)}${unit === 'p' ? '%p' : '%'}</span> <span style="color:var(--text-muted);font-weight:500">지난달</span>`;
+  };
+  // 6개월 막대 (이번 달 기준 -3 ~ +2)
+  let _sparkHtml = '';
+  try {
+    const sMon = new Date(today.getFullYear(), today.getMonth() - 3, 1);
+    const eMon = new Date(today.getFullYear(), today.getMonth() + 3, 0);
+    const { data: _ms } = await db.from('bookings')
+      .select('checkin_date, gross_amount, booking_status')
+      .gte('checkin_date', ymd_(sMon)).lte('checkin_date', ymd_(eMon));
+    const buckets = [];
+    for (let k = -3; k <= 2; k++) {
+      const d = new Date(today.getFullYear(), today.getMonth() + k, 1);
+      buckets.push({ ym: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`, label: `${d.getMonth() + 1}월`, v: 0, cur: k === 0 });
+    }
+    (_ms || []).filter(b => b.booking_status !== 'cancelled').forEach(b => {
+      const key = (b.checkin_date || '').slice(0, 7);
+      const t = buckets.find(x => x.ym === key);
+      if (t) t.v += (b.gross_amount || 0);
+    });
+    const mx = Math.max(1, ...buckets.map(b => b.v));
+    _sparkHtml = `<div style="display:flex;align-items:flex-end;gap:6px;height:52px;margin-top:12px;">
+      ${buckets.map(b => `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
+        <div title="${b.label} ${_w(b.v)}" style="width:100%;height:${Math.max(3, Math.round(b.v / mx * 38))}px;border-radius:3px;background:${b.cur ? 'var(--accent)' : 'var(--neutral-200)'};"></div>
+        <div style="font-size:10.5px;color:var(--text-muted);">${b.label}</div>
+      </div>`).join('')}
+    </div>`;
+  } catch (e) { _sparkHtml = ''; }
+  // 다음 달 예약
+  let _nextHtml = '<div class="stat-sub">불러오지 못했습니다</div>', _nextRev = 0;
+  try {
+    const nm = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    const nmEnd = new Date(today.getFullYear(), today.getMonth() + 2, 0);
+    const { data: _nb } = await db.from('bookings')
+      .select('gross_amount, nights, booking_status')
+      .gte('checkin_date', ymd_(nm)).lte('checkin_date', ymd_(nmEnd));
+    const live = (_nb || []).filter(b => b.booking_status !== 'cancelled');
+    _nextRev = live.reduce((a, b) => a + (b.gross_amount || 0), 0);
+    const nNts = live.reduce((a, b) => a + (b.nights || 0), 0);
+    const cap = totalRooms * nmEnd.getDate();
+    const occ = cap > 0 ? Math.round(nNts / cap * 100) : 0;
+    _nextHtml = `<div class="stat-sub" style="margin-top:5px;">가동률 ${occ}% · ${occ >= 80 ? '거의 참' : '차는 중'}</div>
+                 <div class="stat-sub">${nm.getMonth() + 1}월 · ${live.length}건</div>`;
+  } catch (e) {}
+
   $('#kpi-grid').innerHTML = `
-    <div class="stat-card" style="display:flex; align-items:center; gap:14px;">
-      <div style="position:relative; width:74px; height:74px; flex-shrink:0;">
-        <canvas id="kpi-occ-donut" role="img" aria-label="점유율 ${occupancyRate.toFixed(1)}퍼센트"></canvas>
-        <div style="position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700;">${occupancyRate.toFixed(0)}%</div>
+    <div class="stat-card">
+      <div class="stat-label">이번 달 거래액</div>
+      <div class="stat-value">${_w(revenue)}</div>
+      <div class="stat-sub" style="font-weight:600;">${_delta(revenue, lastRevenue)}</div>
+      ${_sparkHtml}
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">가동률</div>
+      <div style="display:flex;align-items:center;gap:16px;margin-top:6px;">
+        <div style="position:relative;width:74px;height:74px;flex-shrink:0;">
+          <canvas id="kpi-occ-donut" role="img" aria-label="가동률 ${occupancyRate.toFixed(1)}퍼센트"></canvas>
+          <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;">${occupancyRate.toFixed(0)}%</div>
+        </div>
+        <div style="font-size:12.5px;line-height:1.75;">
+          <div style="color:var(--text-muted);">판매 <b style="color:var(--text)">${soldNights}박</b></div>
+          <div style="color:var(--text-muted);">가용 <b style="color:var(--text)">${totalAvailableNights}박</b></div>
+          <div style="font-weight:600;">${_delta(occupancyRate, lastOccupancyRate, 'p')}</div>
+        </div>
       </div>
-      <div>
-        <div class="stat-label">점유율 (OCC)</div>
-        <div class="stat-sub" style="margin-top:4px;">${soldNights} / ${totalAvailableNights}박</div>
-      </div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">예약 건수</div>
-      <div class="stat-value">${bookings.length}<span style="font-size:15px;font-weight:600;color:var(--text-muted);"> 건</span></div>
-      <div class="stat-sub">${cancelledCount > 0 ? `취소 ${cancelledCount}건` : '취소 없음'}</div>
+      <div class="stat-label">객단가 (ADR)</div>
+      <div class="stat-value">${_w(adr)}</div>
+      <div class="stat-sub" style="font-weight:600;">${_delta(adr, lastAdr)}</div>
+      <div class="stat-sub" style="margin-top:8px;">RevPAR <b style="color:var(--text)">${_w(revpar)}</b></div>
     </div>
     <div class="stat-card">
-      <div class="stat-label">평균 숙박일수</div>
-      <div class="stat-value">${alos.toFixed(1)}<span style="font-size:15px;font-weight:600;color:var(--text-muted);"> 박</span></div>
-      <div class="stat-sub">총 ${soldNights}박</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">조기예약</div>
-      <div class="stat-value">${earlyPct}<span style="font-size:15px;font-weight:600;color:var(--text-muted);">%</span></div>
-      <div class="stat-sub">체크인 8일 이상 전 예약</div>
+      <div class="stat-label">다음 달 예약</div>
+      <div class="stat-value">${_w(_nextRev)}</div>
+      ${_nextHtml}
     </div>
   `;
   // 점유율 도넛
@@ -6642,6 +6712,8 @@ async function loadDashboard() {
   renderDashCleaningWeek();
   renderDashMonthSummary();
   renderDashMix();          // [2026-09-17] 채널 비중 · 국적별 게스트
+  renderOpsAreaStatus();    // [2026-10-15] 시안 「영역별 상태」
+  renderOpsVacancy();       // [2026-10-15] 시안 「다음 2주 빈방」
   // (점유율 캘린더 제거됨)
 }
 // 🏠 실시간 객실 상태 그리드 — 5객실 한눈에
@@ -6746,7 +6818,7 @@ function renderRoomMiniCards(bookings, periodDays) {
           tooltip: { callbacks: { label: (ctx) => { const i = ctx.dataIndex; return ['점유율 ' + ctx.parsed.y + '%', _cnts[i] + '건 · ' + _nights[i] + '박']; } } },
           datalabels: window.ChartDataLabels ? { anchor: 'end', align: 'end', offset: 2, color: '#1f2937', font: { weight: 700, size: 12 }, formatter: (v) => v + '%' } : undefined
         },
-        scales: { y: { max: 100, ticks: { callback: v => v + '%', font: { size: 11 } }, grid: { color: '#e1e0d9' } }, x: { grid: { display: false } } }
+        scales: { y: { max: 115, ticks: { stepSize: 25, callback: v => v > 100 ? '' : v + '%', font: { size: 11 } }, grid: { color: '#e1e0d9' } }, x: { grid: { display: false } } }
       },
       plugins: window.ChartDataLabels ? [ChartDataLabels] : []
     });
@@ -15188,7 +15260,7 @@ checkAuth();
 .ceo-ch b { font-size: 14.5px; font-weight: 650; }
 .ceo-tag { font-size: 12px; color: var(--text-muted); }
 .ceo-cb { padding: 14px 15px; }
-#view-dashboard .stat-grid { grid-template-columns: repeat(4, 1fr); margin-bottom: 14px; }
+#view-dashboard .stat-grid { grid-template-columns: 1.5fr 1fr 1fr 1fr; margin-bottom: 14px; gap: 12px; }
 @media (max-width: 1100px) { .ceo-g3 { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 900px) {
   .ceo-g2, .ceo-g3 { grid-template-columns: 1fr; }
@@ -15214,6 +15286,27 @@ html:not([data-theme="dark"]) #view-bookings .data-card-header { background: #ff
 #analysis-sheet .as-c > *:nth-child(2) { padding-top: 14px; }
 #analysis-sheet .as-c > *:last-child { padding-bottom: 14px; }
 #analysis-sheet .as-cards { gap: 14px; }
+
+/* [2026-10-15] 시안의 「영역별 상태」·「다음 2주 빈방」 — 시안 .stat / .dot 값 그대로 */
+#ops-area-status .ar { display:flex; align-items:center; gap:10px; padding:12px 15px; border-bottom:1px solid var(--border); }
+#ops-area-status .ar:last-child { border-bottom:0; }
+#ops-area-status .dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; background:var(--text-muted); }
+#ops-area-status .dot.ok { background:var(--success-500); }
+#ops-area-status .dot.warn { background:var(--warning-500); }
+#ops-area-status .dot.bad { background:var(--danger-500); }
+#ops-area-status .nm { font-size:13.5px; font-weight:600; }
+#ops-area-status .ds { font-size:12px; color:var(--text-muted); margin-top:2px; }
+#ops-area-status .rt { margin-left:auto; font-size:12.5px; font-weight:650; color:var(--text-muted); white-space:nowrap; }
+#ops-area-status .rt.warn { color:var(--danger-500); }
+#ops-vacancy table { width:100%; border-collapse:collapse; font-size:13px; }
+#ops-vacancy th { text-align:left; font-size:11.5px; font-weight:600; color:var(--text-muted); padding:9px 15px; border-bottom:1px solid var(--border); }
+#ops-vacancy td { padding:9px 15px; border-bottom:1px solid var(--border); }
+#ops-vacancy tr:last-child td { border-bottom:0; }
+#ops-vacancy .n { text-align:right; color:var(--text-muted); }
+
+/* [2026-10-15] 막대 위 숫자가 잘려서 y축 위에 여유를 줬습니다. 카드도 잘림 방지. */
+#view-dashboard .ceo-card .ceo-cb { overflow: visible; }
+#view-dashboard .ops-room-mini-grid { margin-bottom: 0; }
 </style>
   <script>
     (function () {
@@ -15553,6 +15646,98 @@ html:not([data-theme="dark"]) #view-bookings .data-card-header { background: #ff
   setTimeout(paint, 1200);
   paint();
 })();
+
+/* [2026-10-15] 시안의 「영역별 상태」와 「다음 2주 빈방」.
+   영역별 상태 4줄 = 요금 조정 / 데이터 정합성 / 청소 배정 / PMS 일마감.
+   빈방은 앞으로 14일 동안 예약이 없는 방을 날짜별로 셉니다. */
+async function renderOpsAreaStatus() {
+  const host = document.getElementById('ops-area-status');
+  if (!host || typeof db === 'undefined' || !db) return;
+  const today = new Date();
+  const t0 = ymd_(today);
+  const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7);
+  const rows = [];
+
+  // ① 요금 조정 — pricing_actions 대기 건
+  try {
+    const { data } = await db.from('pricing_actions').select('id, status').eq('status', 'pending');
+    const n = (data || []).length;
+    rows.push({ dot: n ? 'warn' : 'ok', nm: '요금 조정',
+      ds: n ? `D-5 / D-3 규칙에 걸린 건이 있습니다` : '규칙대로 적용 중',
+      rt: n ? `${n}건 대기` : '이상 없음', warn: !!n });
+  } catch (e) {
+    rows.push({ dot: '', nm: '요금 조정', ds: '큐를 읽지 못했습니다', rt: '확인 불가' });
+  }
+
+  // ② 데이터 정합성 — ops_integrity_items
+  try {
+    const { data, error } = await db.rpc('ops_integrity_items');
+    const n = error ? null : (data || []).length;
+    rows.push({ dot: n === null ? '' : (n ? 'bad' : 'ok'), nm: '데이터 정합성',
+      ds: '취소·중복·금액·배정·청소·숙소 6종',
+      rt: n === null ? '확인 불가' : (n ? `${n}건 발견` : '이상 없음'), warn: !!n });
+  } catch (e) {
+    rows.push({ dot: '', nm: '데이터 정합성', ds: '검사하지 못했습니다', rt: '확인 불가' });
+  }
+
+  // ③ 청소 배정 — 이번 주 미배정
+  try {
+    const { data } = await db.from('cleaning_tasks')
+      .select('id, assigned_to')
+      .gte('scheduled_date', t0).lte('scheduled_date', ymd_(weekEnd))
+      .neq('status', 'not_needed');
+    const all = data || [];
+    const un = all.filter(x => !x.assigned_to).length;
+    rows.push({ dot: un ? 'warn' : 'ok', nm: '청소 배정',
+      ds: `이번 주 ${all.length}건`,
+      rt: un ? `미배정 ${un}건` : '배정 완료', warn: !!un });
+  } catch (e) {
+    rows.push({ dot: '', nm: '청소 배정', ds: '읽지 못했습니다', rt: '확인 불가' });
+  }
+
+  // ④ PMS 일마감 — 매일 09:32 자동 실행
+  rows.push({ dot: '', nm: 'PMS 일마감', ds: '매일 09:32 자동 실행', rt: '대기' });
+
+  host.innerHTML = rows.map(r => `
+    <div class="ar">
+      <span class="dot ${r.dot}"></span>
+      <div style="min-width:0;">
+        <div class="nm">${r.nm}</div>
+        <div class="ds">${r.ds}</div>
+      </div>
+      <span class="rt ${r.warn ? 'warn' : ''}">${r.rt}</span>
+    </div>`).join('');
+}
+
+async function renderOpsVacancy() {
+  const host = document.getElementById('ops-vacancy');
+  if (!host || typeof db === 'undefined' || !db) return;
+  const today = new Date();
+  const end = new Date(today); end.setDate(end.getDate() + 14);
+  const { data: rooms } = await db.from('rooms').select('id, room_number').eq('is_active', true);
+  const { data: bks } = await db.from('bookings')
+    .select('room_id, checkin_date, checkout_date, booking_status')
+    .lt('checkin_date', ymd_(end)).gt('checkout_date', ymd_(today));
+  const live = (bks || []).filter(b => b.booking_status !== 'cancelled');
+  const roomList = (rooms || []).sort((a, b) => (a.room_number || '').localeCompare(b.room_number || ''));
+
+  const out = [];
+  for (let i = 0; i < 14; i++) {
+    const d = new Date(today); d.setDate(d.getDate() + i);
+    const ds = ymd_(d);
+    const busy = new Set(live.filter(b => b.checkin_date <= ds && b.checkout_date > ds).map(b => b.room_id));
+    const free = roomList.filter(r => !busy.has(r.id));
+    if (free.length) out.push({ ds, d, names: free.map(r => (r.room_number || '').replace(/호$/, '')).join(', '), dminus: i });
+  }
+  const cnt = document.getElementById('vac-count');
+  if (cnt) cnt.textContent = out.length ? `${out.length}일` : '빈방 없음';
+  if (!out.length) { host.innerHTML = '<div style="padding:16px 15px;color:var(--text-muted);font-size:13px;">앞으로 2주 동안 빈방이 없습니다.</div>'; return; }
+  const dow = ['일','월','화','수','목','금','토'];
+  host.innerHTML = `<table>
+    <tr><th>날짜</th><th>빈방</th><th class="n">D-</th></tr>
+    ${out.map(r => `<tr><td>${r.d.getMonth()+1}/${r.d.getDate()} <span style="color:var(--text-muted)">(${dow[r.d.getDay()]})</span></td><td>${r.names}</td><td class="n">${r.dminus}</td></tr>`).join('')}
+  </table>`;
+}
 </script>
 </body>
 </html>
