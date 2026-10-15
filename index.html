@@ -2568,10 +2568,23 @@
               <div class="page-subtitle">캘린더에서 한눈에 보고, 아래 목록에서 자세히 확인하세요</div>
             </div>
           </div>
+          <!-- 📅 예약 타임라인 (방별 · 한 달) -->
           <div class="ceo-card" style="margin-bottom:14px;">
-            <div class="ceo-ch"><b>오늘 객실 현황</b><span class="ceo-tag" id="bk-rooms-tag"></span></div>
-            <div class="ceo-cb" style="padding:0;"><div id="bk-rooms-today"></div></div>
+          <div class="ceo-ch"><b>예약 타임라인</b><span class="ceo-tag" id="tlbk-span-label">방별 · 한 달</span></div>
+          <div class="ceo-cb">
+          <div style="display:flex; align-items:center; gap:8px; margin:0 0 10px; flex-wrap:wrap;">
+            <button class="btn btn-secondary" onclick="tlBkShift(-30)" style="padding:5px 9px;" title="이전 기간">‹</button>
+            <input type="date" id="tlbk-date" onchange="tlBkGo(this.value)" title="날짜를 클릭해서 원하는 날로 이동"
+                   style="font-size:18px; font-weight:700; letter-spacing:-0.01em; padding:4px 10px; border:1px solid var(--border-strong,#d6d3cd); border-radius:9px; background:var(--surface); color:var(--text,#16161b); cursor:pointer; max-width:190px;">
+            <button class="btn btn-secondary" onclick="tlBkShift(30)" style="padding:5px 9px;" title="다음 기간">›</button>
+            <button class="btn btn-secondary" onclick="tlBkToday()" style="padding:5px 10px; font-size:12px;">오늘</button>
+            <span id="tlbk-range" style="display:none;"></span>
           </div>
+          <div id="timeline-wrap-bk" style="overflow-x:auto; border:1px solid var(--border); border-radius:12px; background:var(--surface);">
+            <div id="timeline-inner-bk" style="min-width:600px;"><div class="empty-state"><span class="sb-spinner"></span><div class="empty-hint">불러오는 중…</div></div></div>
+          </div>
+          <div id="timeline-legend-bk" style="display:flex; gap:14px; margin:8px 0 0; font-size:11.5px; color:var(--text-muted); flex-wrap:wrap;"></div>
+          </div></div><!-- /예약 타임라인 카드 -->
           <!-- 🆕 새로 들어온 예약 (메일 자동 등록, 미확인) -->
           <div class="data-card" id="new-arrivals-card" style="display:none; margin-bottom:18px; border:1.5px solid #1B4480;">
             <div class="data-card-header">
@@ -2607,23 +2620,7 @@
           <!-- 통계바 -->
           <div class="booking-stats-bar" id="bk-stats-bar" style="display: flex; margin-bottom: 16px;"></div>
           <!-- 📅 예약 타임라인은 운영현황(대시보드) 하단으로 이동 -->
-          <!-- 📅 예약 타임라인 (방별 · 한 달) -->
-          <div class="ceo-card" style="margin-bottom:14px;">
-          <div class="ceo-ch"><b>예약 타임라인</b><span class="ceo-tag" id="tlbk-span-label">방별 · 한 달</span></div>
-          <div class="ceo-cb">
-          <div style="display:flex; align-items:center; gap:8px; margin:0 0 10px; flex-wrap:wrap;">
-            <button class="btn btn-secondary" onclick="tlBkShift(-30)" style="padding:5px 9px;" title="이전 기간">‹</button>
-            <input type="date" id="tlbk-date" onchange="tlBkGo(this.value)" title="날짜를 클릭해서 원하는 날로 이동"
-                   style="font-size:18px; font-weight:700; letter-spacing:-0.01em; padding:4px 10px; border:1px solid var(--border-strong,#d6d3cd); border-radius:9px; background:var(--surface); color:var(--text,#16161b); cursor:pointer; max-width:190px;">
-            <button class="btn btn-secondary" onclick="tlBkShift(30)" style="padding:5px 9px;" title="다음 기간">›</button>
-            <button class="btn btn-secondary" onclick="tlBkToday()" style="padding:5px 10px; font-size:12px;">오늘</button>
-            <span id="tlbk-range" style="display:none;"></span>
-          </div>
-          <div id="timeline-wrap-bk" style="overflow-x:auto; border:1px solid var(--border); border-radius:12px; background:var(--surface);">
-            <div id="timeline-inner-bk" style="min-width:600px;"><div class="empty-state"><span class="sb-spinner"></span><div class="empty-hint">불러오는 중…</div></div></div>
-          </div>
-          <div id="timeline-legend-bk" style="display:flex; gap:14px; margin:8px 0 0; font-size:11.5px; color:var(--text-muted); flex-wrap:wrap;"></div>
-          </div></div><!-- /예약 타임라인 카드 -->
+          
           <!-- 📱 모바일 전용: 월 달력 + 그날 체크인·체크아웃(채널별) — 폰에서만 표시 -->
           <div id="bk-mobile" style="display:none;"></div>
           <!-- 📅 기간 조회 바 (캘린더로 대체 — 숨김) -->
@@ -7568,7 +7565,6 @@ async function loadBookings() {
   setupBookingControls();
   applyBookingFilters();
   loadBookingsReview();
-  try { renderBkRoomsToday(); } catch (e) {}
 }
 // 캘린더 날짜 클릭 → 그날 객실별 상세 (체크인/숙박중/체크아웃)
 window.showDayBookings = function(dateStr) {
@@ -15374,6 +15370,49 @@ html:not([data-theme="dark"]) #view-dashboard .today-card-head { background: #ff
 .pill-g { background:var(--success-50); color:var(--success-500); }
 .pill-n { background:var(--neutral-100); color:var(--text-soft); }
 @media (max-width:760px){ .bk-rt { grid-template-columns:58px 100px 1fr; } .bk-rt-meta { display:none; } }
+
+/* [2026-10-15] 예약 관리 — 검정 표 헤더/버튼을 운영현황(시안) 톤으로.
+   되돌리려면 이 블록만 지우세요. */
+#view-bookings table thead th,
+#view-bookings #bk-table thead th,
+#view-bookings #bk-table th {
+  background: var(--surface) !important;
+  color: var(--text-soft) !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid var(--border) !important;
+  border-top: 0 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+#view-bookings table thead th a,
+#view-bookings table thead th span { color: var(--text-soft) !important; }
+/* 정렬 화살표도 같은 톤 */
+#view-bookings table thead th svg { fill: var(--text-muted) !important; }
+/* 검정 버튼(예약 추가 등) → 파란 기본 버튼 */
+#view-bookings .btn:not(.btn-secondary):not(.btn-danger) {
+  background: var(--accent) !important; border-color: var(--accent) !important; color: #fff !important; }
+#view-bookings .btn:not(.btn-secondary):not(.btn-danger):hover {
+  background: var(--accent-hover) !important; border-color: var(--accent-hover) !important; }
+/* 요약 4칸도 카드 톤 통일 */
+#view-bookings .booking-stats-bar { border-radius: 10px; box-shadow: 0 1px 2px rgba(16,24,40,.05); }
+
+/* [2026-10-15] PC에서 스크롤해도 왼쪽 탭이 따라오게 — 화면에 붙여 둡니다.
+   모바일(<=768px)은 기존대로 하단 고정 탭바라 건드리지 않습니다. */
+@media (min-width: 769px) {
+  .app-shell > .sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  /* 사이드바 안쪽 스크롤바를 어둡게 (다크 사이드바라 흰 막대가 튑니다) */
+  .app-shell > .sidebar::-webkit-scrollbar { width: 6px; }
+  .app-shell > .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.16); border-radius: 3px; }
+  .app-shell > .sidebar::-webkit-scrollbar-track { background: transparent; }
+}
 </style>
   <script>
     (function () {
@@ -15842,43 +15881,6 @@ async function renderDashChannelRevenue() {
   </table>`;
 }
 
-/* [2026-10-15] 예약 관리 맨 위 「오늘 객실 현황」 — 방 5칸이 오늘 어떤 상태인지. */
-async function renderBkRoomsToday() {
-  const host = document.getElementById('bk-rooms-today');
-  if (!host || typeof db === 'undefined' || !db) return;
-  const p2 = (n) => String(n).padStart(2, '0');
-  const now = new Date();
-  const t = `${now.getFullYear()}-${p2(now.getMonth() + 1)}-${p2(now.getDate())}`;
-  const { data } = await db.from('bookings')
-    .select('room_id, checkin_date, checkout_date, num_guests, booker_name, guest_code, booking_status, rooms(room_number), channels(name)')
-    .neq('booking_status', 'cancelled')
-    .lte('checkin_date', t).gte('checkout_date', t);
-  const bks = data || [];
-  const rooms = (cachedRooms || []).filter(r => r.is_active !== false)
-    .sort((a, b) => String(a.room_number).localeCompare(String(b.room_number)));
-  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
-  let empty = 0;
-  const rowsHtml = rooms.map(r => {
-    const mine = bks.filter(b => b.room_id === r.id);
-    const out  = mine.find(b => b.checkout_date === t);
-    const inn  = mine.find(b => b.checkin_date === t);
-    const stay = mine.find(b => b.checkin_date < t && b.checkout_date > t);
-    const chips = []; let who = '', meta = '';
-    if (out)  { chips.push('<span class="pill-a">오늘 퇴실</span>'); who = esc(out.booker_name || out.guest_code || ''); meta = `${esc(out.channels?.name || '')} · ~11시`; }
-    if (inn)  { chips.push('<span class="pill-b">오늘 입실</span>'); who = esc(inn.booker_name || inn.guest_code || ''); meta = `${esc(inn.channels?.name || '')} · 16시~ · ${inn.num_guests || '?'}명`; }
-    if (stay) { chips.push('<span class="pill-g">숙박중</span>');   who = esc(stay.booker_name || stay.guest_code || ''); meta = `${esc(stay.channels?.name || '')} · ${esc(stay.checkin_date)}~${esc(stay.checkout_date)}`; }
-    if (!chips.length) { chips.push('<span class="pill-n">빈 방</span>'); empty++; meta = '예약 없음'; }
-    return `<div class="bk-rt">
-      <div class="bk-rt-no">${typeof RH === 'function' ? RH(r.room_number) : r.room_number}</div>
-      <div class="bk-rt-ch">${chips.join(' ')}</div>
-      <div class="bk-rt-who">${who || '<span style="color:var(--text-muted)">—</span>'}</div>
-      <div class="bk-rt-meta">${meta}</div>
-    </div>`;
-  }).join('');
-  const tag = document.getElementById('bk-rooms-tag');
-  if (tag) tag.textContent = `${now.getMonth() + 1}월 ${now.getDate()}일 · 재실 ${rooms.length - empty}/${rooms.length}`;
-  host.innerHTML = rowsHtml;
-}
 </script>
 </body>
 </html>
