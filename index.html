@@ -8454,7 +8454,7 @@ function sheetStyle_() {
   #analysis-sheet .as-chartbox{position:relative;height:220px;}
   #analysis-sheet .as-subtabs{display:flex;gap:6px;flex-wrap:wrap;margin:-6px 0 14px;}
   #analysis-sheet .as-subtab{font-size:12px;font-weight:700;padding:5px 12px;border-radius:8px;background:var(--surface-soft);color:var(--text-muted);border:1px solid var(--border);cursor:pointer;}
-  #analysis-sheet .as-subtab.on{background:var(--text);color:var(--bg);border-color:var(--text);}
+  #analysis-sheet .as-subtab.on{background:var(--accent);color:#fff;border-color:var(--accent);}
   #analysis-sheet .as-basis{display:inline-block;font-size:10.5px;font-weight:700;color:#2e5891;background:#e8f0fa;border-radius:6px;padding:2px 8px;margin-left:6px;vertical-align:middle;}
   #analysis-sheet .as-kpigrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-top:12px;}
   #analysis-sheet .as-note{font-size:12.5px;color:var(--mut);margin-top:8px;line-height:1.7;}
@@ -8788,7 +8788,7 @@ function renderSheet() {
           <div style="font-size:10.5px;color:var(--mut);margin-bottom:4px;">목표 금액</div>
           <div style="display:flex;gap:6px;justify-content:flex-end;flex-wrap:wrap;align-items:center;">
             <input id="as-goal-input" value="${goal.toLocaleString()}" style="width:112px;padding:6px 9px;border:1px solid #d6d3cd;border-radius:8px;font-size:13px;text-align:right;color:#1f2937;">
-            <button onclick="sheetSetGoal()" style="background:#1f1f23;color:#fff;border:0;border-radius:8px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;">설정</button>
+            <button onclick="sheetSetGoal()" style="background:var(--accent);color:#fff;border:0;border-radius:8px;padding:6px 13px;font-size:12px;font-weight:700;cursor:pointer;">설정</button>
           </div>
           <div style="display:flex;gap:5px;justify-content:flex-end;margin-top:6px;">
             <span onclick="sheetSetGoal(20000000)" style="cursor:pointer;font-size:11px;padding:4px 9px;border-radius:7px;background:${goal===20000000?'#1f1f23':'#f5f5f4'};color:${goal===20000000?'#fff':'#57534c'};font-weight:${goal===20000000?'700':'400'};">2,000만</span>
@@ -8798,7 +8798,7 @@ function renderSheet() {
         </div>
       </div>
       <div style="height:9px;background:#e8e6e1;border-radius:6px;overflow:hidden;margin:11px 0 7px;">
-        <div style="width:${Math.min(100, goalPct)}%;height:100%;background:#1f1f23;border-radius:6px;"></div>
+        <div style="width:${Math.min(100, goalPct)}%;height:100%;background:var(--accent);border-radius:6px;"></div>
       </div>
       <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
         <div><div style="font-size:10px;color:var(--mut);font-weight:700;">현재 거래액</div><div style="font-size:13px;font-weight:800;">${KRW(gross)}</div></div>
@@ -9591,9 +9591,9 @@ function analysisRender() {
       <table class="an-table">
         <thead><tr><th>월</th><th>매출</th><th class="an-bar-cell">매출 추이</th><th>전월대비</th><th>건수</th><th>ADR</th><th>점유율</th></tr></thead>
         <tbody>${monthly.map(x => `
-          <tr${x.m === analysisView ? ' style="background:#FAEEC4;"' : ''}><td>${x.label}${x.m === analysisView ? ' <span class="an-chip" style="background:#16161b;color:#FAEEC4;">보는 중</span>' : ''}${bestMonth && x.m === bestMonth.m ? ' <span class="an-chip" style="background:#EAF3DE;color:#3B6D11;">최고매출</span>' : ''}</td>
+          <tr${x.m === analysisView ? ' style="background:var(--accent-soft);"' : ''}><td>${x.label}${x.m === analysisView ? ' <span class="an-chip" style="background:var(--accent);color:#fff;">보는 중</span>' : ''}${bestMonth && x.m === bestMonth.m ? ' <span class="an-chip" style="background:#EAF3DE;color:#3B6D11;">최고매출</span>' : ''}</td>
             <td class="num">${fmtKRW(x.rev)}</td>
-            <td><div class="an-mini"><div style="width:${(x.rev / monthRevMax * 100).toFixed(0)}%; background:#16161b;"></div></div></td>
+            <td><div class="an-mini"><div style="width:${(x.rev / monthRevMax * 100).toFixed(0)}%; background:var(--accent);"></div></div></td>
             <td class="num">${growthCell(x.growth)}</td>
             <td class="num">${x.cnt}건</td>
             <td class="num">${fmtKRW(x.adr)}</td>
@@ -9862,7 +9862,7 @@ function analysisRender() {
       <div class="an-sec-title">🎯 전략 권고안 — 우선순위별 실행안</div>
       <div class="an-sec-sub">${scopeLabel} 실데이터 기반 · 기대효과 원 단위 · 규칙 기반 참고안</div>
       ${_levers || '<div style="color:var(--text-muted);font-size:13px;">전략을 낼 데이터가 부족합니다.</div>'}
-      <div style="margin-top:6px;background:#1f1f23;color:#fff;border-radius:10px;padding:12px 14px;font-size:12.5px;">
+      <div style="margin-top:6px;background:var(--accent);color:#fff;border-radius:10px;padding:12px 14px;font-size:12.5px;">
         <b>결론</b> — 1순위(전 객실 +5%)만으로 거래액 <b>${fmtKRW(revTotal + _allEffect5)}</b> 도달. 2·3순위까지 병행 시 추가 <b>+${fmtKRW(_cancelRecover + _fillEffect)}</b> 여력.
       </div>
     </div>`;
@@ -12247,7 +12247,7 @@ function renderWeekBoard() {
       <div style="${rightDiv} ${isToday ? 'background:rgba(55,138,221,0.06);' : ''}">
         <div style="display:flex; align-items:center; justify-content:space-between; padding:9px 10px; border-bottom:2px solid var(--border-strong); ${headBg}">
           <div style="font-size:15px; font-weight:800; ${isToday ? '' : dowColor}">${dows[i]} <span style="font-weight:600; font-size:14px; ${dateColor}">${d.getMonth()+1}/${d.getDate()}</span></div>
-          ${isToday ? '<span style="font-size:10px; background:rgba(255,255,255,0.25); color:#fff; padding:1px 7px; border-radius:20px;">오늘</span>' : `<span style="display:flex;gap:6px;align-items:center;"><span style="font-size:11px; color:var(--text-soft);">${tasks.length}</span>${tasks.length>=2?`<button onclick="pickCleanerShare_('${dateStr}')" title="업체별 스케줄 다운로드" style="font-size:10px;border:none;background:#16161b;color:#fff;border-radius:5px;padding:3px 7px;cursor:pointer;">📤</button>`:''}</span>`}
+          ${isToday ? '<span style="font-size:10px; background:rgba(255,255,255,0.25); color:#fff; padding:1px 7px; border-radius:20px;">오늘</span>' : `<span style="display:flex;gap:6px;align-items:center;"><span style="font-size:11px; color:var(--text-soft);">${tasks.length}</span>${tasks.length>=2?`<button onclick="pickCleanerShare_('${dateStr}')" title="업체별 스케줄 다운로드" style="font-size:10px;border:none;background:var(--accent);color:#fff;border-radius:5px;padding:3px 7px;cursor:pointer;">📤</button>`:''}</span>`}
         </div>
         <div style="padding:8px; display:flex; flex-direction:column; gap:8px; min-height:120px;">${cards}</div>
         ${dayFee ? `<div style="padding:8px 11px; border-top:1px solid var(--border); font-size:13px; font-weight:600; color:var(--text-soft); text-align:right;">₩${dayFee.toLocaleString('ko-KR')}${dayExtra ? `<br><span style="color:var(--text-warning); font-weight:700;">+₩${dayExtra.toLocaleString('ko-KR')}</span> <span style="color:var(--text-muted);">= ₩${(dayFee + dayExtra).toLocaleString('ko-KR')}</span>` : ''}</div>` : ''}
@@ -12295,7 +12295,7 @@ function renderCleaningMobile_() {
       html += `<div style="background:#1a1815;color:#fff;border-radius:8px;padding:7px 12px;display:flex;justify-content:space-between;align-items:center;margin:12px 0 8px;"><span style="font-size:15px;font-weight:700;">${dows[i]} ${d.getMonth() + 1}/${d.getDate()} · 오늘</span><span style="display:flex;gap:8px;align-items:center;"><span style="font-size:12px;opacity:.9;">${meta}</span>${tasks.length>=2?`<button onclick="event.stopPropagation();pickCleanerShare_('${ds}')" style="font-size:11px;border:none;background:rgba(255,255,255,0.25);color:#fff;border-radius:6px;padding:4px 9px;cursor:pointer;">📤 일괄</button>`:''}</span></div>`;
     } else {
       /* [2026-09-18] 폰 청소 목록도 다크에서 글씨가 안 보였습니다 — 전부 토큰으로. */
-      html += `<div style="border-bottom:1.5px solid var(--border-strong);margin:18px 0 8px;padding-bottom:6px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:16px;font-weight:800;color:var(--text);">${dows[i]} ${d.getMonth() + 1}/${d.getDate()}</span><span style="display:flex;gap:8px;align-items:center;"><span style="font-size:13px;color:var(--text-muted);">${meta}</span>${tasks.length>=2?`<button onclick="event.stopPropagation();pickCleanerShare_('${ds}')" style="font-size:12px;border:none;background:var(--text);color:var(--bg);border-radius:6px;padding:5px 10px;cursor:pointer;">📤 일괄</button>`:''}</span></div>`;
+      html += `<div style="border-bottom:1.5px solid var(--border-strong);margin:18px 0 8px;padding-bottom:6px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:16px;font-weight:800;color:var(--text);">${dows[i]} ${d.getMonth() + 1}/${d.getDate()}</span><span style="display:flex;gap:8px;align-items:center;"><span style="font-size:13px;color:var(--text-muted);">${meta}</span>${tasks.length>=2?`<button onclick="event.stopPropagation();pickCleanerShare_('${ds}')" style="font-size:12px;border:none;background:var(--accent);color:#fff;border-radius:6px;padding:5px 10px;cursor:pointer;">📤 일괄</button>`:''}</span></div>`;
     }
     tasks.forEach(t => {
       const room = t.rooms?.room_number || '?';
@@ -14232,7 +14232,7 @@ function renderSupplyGroups(query) {
   const bar = '';
   const selNames = Array.from(__supSel).map(id => (__supMaster.find(x => x.id === id) || {}).name).filter(Boolean);
   const _oldBar = false ? `
-    <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:10px -14px -14px;padding:11px 14px;background:#1f1f23;color:#fff;border-radius:0 0 12px 12px;">
+    <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:10px -14px -14px;padding:11px 14px;background:var(--accent);color:#fff;border-radius:0 0 12px 12px;">
       <span style="font-size:12px;font-weight:800;">${__supSel.size}개 선택</span>
       <span style="font-size:11px;opacity:.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:38%;">${supEsc_(selNames.join(' · '))}</span>
       <span style="margin-left:auto;display:flex;gap:7px;align-items:center;flex-wrap:wrap;">
@@ -15411,6 +15411,59 @@ html:not([data-theme="dark"]) #view-dashboard .today-card-head { background: #ff
   .app-shell > .sidebar::-webkit-scrollbar { width: 6px; }
   .app-shell > .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.16); border-radius: 3px; }
   .app-shell > .sidebar::-webkit-scrollbar-track { background: transparent; }
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   [2026-10-15] 검정 요소 일괄 통일 — 어드민 전체를 시안(파랑) 톤으로.
+   원인: html:not([data-theme="dark"]) thead th { background:#000 } 이
+   전역이라 예약·매출·청소 모든 표 머리가 검정이었습니다.
+   버튼은 .btn-primary(--primary-700 = #1f1f23)가 검정이었습니다.
+   다크 테마는 건드리지 않습니다. 되돌리려면 이 블록만 지우세요.
+   ══════════════════════════════════════════════════════════════════ */
+html:not([data-theme="dark"]) thead th {
+  background: #fff !important;
+  color: var(--text-soft) !important;
+  border-bottom: 1px solid var(--border) !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+html:not([data-theme="dark"]) thead th a,
+html:not([data-theme="dark"]) thead th span { color: var(--text-soft) !important; }
+html:not([data-theme="dark"]) thead th svg { fill: var(--text-muted) !important; stroke: var(--text-muted) !important; }
+
+/* 기본 버튼 — 검정 → 파랑 */
+html:not([data-theme="dark"]) .btn-primary,
+html:not([data-theme="dark"]) .sup-order-btn.primary,
+html:not([data-theme="dark"]) .analysis-pdf-btn,
+html:not([data-theme="dark"]) .msg-type-tab.active,
+html:not([data-theme="dark"]) .analysis-view-toggle button.active {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #fff !important;
+}
+html:not([data-theme="dark"]) .btn-primary:hover,
+html:not([data-theme="dark"]) .sup-order-btn.primary:hover,
+html:not([data-theme="dark"]) .analysis-pdf-btn:hover {
+  background: var(--accent-hover) !important;
+  border-color: var(--accent-hover) !important;
+}
+
+/* 떠 있는 둥근 버튼(챗봇·검색)도 같은 파랑 */
+html:not([data-theme="dark"]) .chatbot-fab,
+html:not([data-theme="dark"]) .chatbot-send-btn,
+html:not([data-theme="dark"]) .mobile-search-fab,
+html:not([data-theme="dark"]) .chatbot-msg.user {
+  background: var(--accent) !important; color: #fff !important;
+}
+html:not([data-theme="dark"]) .chatbot-fab:hover,
+html:not([data-theme="dark"]) .chatbot-send-btn:hover,
+html:not([data-theme="dark"]) .mobile-search-fab:hover { background: var(--accent-hover) !important; }
+
+/* 채널 「전체」 칩 — 검정 칠 → 파랑 */
+html:not([data-theme="dark"]) .channel-chip--all.active {
+  background: var(--accent) !important; border-color: var(--accent) !important; color: #fff !important;
 }
 </style>
   <script>
