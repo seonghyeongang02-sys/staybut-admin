@@ -1,0 +1,112 @@
+/* ══════════════════════════════════════════════════════════════════
+   STAY BUT · CEO 테마 (admin_ceo.html 시안 값)
+   [2026-10-15] 청소 사진·링크 / 상담 콘솔처럼 index.html 밖에 있는
+   페이지들이 아직 예전 색(베이지 사이드바)을 쓰고 있어서 만들었습니다.
+   각 페이지 <head> 끝에 아래 한 줄만 넣으면 어드민과 같은 톤이 됩니다.
+     <link rel="stylesheet" href="/ceo-theme.css">
+   되돌리려면 그 한 줄만 지우면 됩니다.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── 라이트: 시안 토큰 ────────────────────────────────────────── */
+html:not([data-theme="dark"]) {
+  --bg:        #FFFFFF;
+  --soft:      #F7F8FA;
+  --chat:      #F1F3F5;
+  --line:      #E5E7EB;
+  --line2:     #D1D5DB;
+  --text:      #111827;
+  --soft-text: #6B7280;
+  --muted:     #9CA3AF;
+  --ink:       #111827;
+  --ink2:      #0B1220;
+  --danger:    #DC2626;
+  --ok:        #059669;
+  --accent:       #2563EB;
+  --accent-hover: #1D4ED8;
+  --accent-soft:  #EFF6FF;
+
+  /* 사이드바 — 어드민 B안(다크)과 동일 */
+  --sidebar:           #111827;
+  --sidebar-line:      #1F2937;
+  --sidebar-fg:        #FFFFFF;
+  --sidebar-fg-dim:    #9CA3AF;
+  --sidebar-fg-faint:  #6B7280;
+  --sidebar-hover:     rgba(255,255,255,.08);
+  --sidebar-active-bg: rgba(255,255,255,.14);
+  --sidebar-active-fg: #FFFFFF;
+}
+
+/* ── 다크는 각 페이지 값을 그대로 쓰되 강조색만 맞춥니다 ──────── */
+html[data-theme="dark"] {
+  --accent:       #8FBDE8;
+  --accent-hover: #A8CDEE;
+  --accent-soft:  #22222A;
+}
+
+/* ── 사이드바 ─────────────────────────────────────────────────── */
+.sidebar {
+  background: var(--sidebar) !important;
+  border-right: 1px solid var(--sidebar-line) !important;
+}
+.sidebar .sidebar-brand,
+.sidebar .wmk { color: var(--sidebar-fg) !important; }
+.sidebar .sidebar-brand { border-bottom-color: var(--sidebar-line) !important; }
+.sidebar .wmk-sub { color: var(--sidebar-fg-faint) !important; }
+.sidebar .nav-item { color: var(--sidebar-fg-dim) !important; }
+.sidebar .nav-item:hover { background: var(--sidebar-hover) !important; color: var(--sidebar-fg) !important; }
+.sidebar .nav-item.active {
+  background: var(--sidebar-active-bg) !important;
+  color: var(--sidebar-active-fg) !important;
+}
+.sidebar .user-info { color: var(--sidebar-fg-faint) !important; }
+.sidebar #logoutBtn {
+  color: var(--sidebar-fg-dim) !important;
+  border-color: var(--sidebar-line) !important;
+  background: transparent !important;
+}
+.sidebar #logoutBtn:hover { background: var(--sidebar-hover) !important; color: var(--sidebar-fg) !important; }
+.sidebar-footer { border-top-color: var(--sidebar-line) !important; }
+
+/* 비품관리 탭은 쓰지 않습니다 */
+.sidebar .nav-item[data-view="supplies"] { display: none !important; }
+
+/* PC에서 스크롤해도 왼쪽 탭이 따라오게 */
+@media (min-width: 769px) {
+  .sidebar { position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+  .sidebar::-webkit-scrollbar { width: 6px; }
+  .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.16); border-radius: 3px; }
+  .sidebar::-webkit-scrollbar-track { background: transparent; }
+}
+
+/* ── 본문: 검정 버튼·검정 밑줄을 파랑으로 ────────────────────── */
+.btn:not(.ghost) {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #fff !important;
+}
+.btn:not(.ghost):hover {
+  background: var(--accent-hover) !important;
+  border-color: var(--accent-hover) !important;
+}
+.tabs button.on {
+  color: var(--accent) !important;
+  border-color: var(--accent) !important;
+}
+
+/* ── 표 머리: 검정 배경 → 흰 바탕 + 회색 글씨 ────────────────── */
+html:not([data-theme="dark"]) table thead th,
+html:not([data-theme="dark"]) table th {
+  background: #fff !important;
+  color: var(--soft-text) !important;
+  font-size: 11.5px !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid var(--line) !important;
+  text-transform: none !important;
+  letter-spacing: 0 !important;
+}
+
+/* ── 카드 모서리·그림자를 시안 값으로 ────────────────────────── */
+.note, .card, .data-card {
+  border-radius: 10px !important;
+  box-shadow: 0 1px 2px rgba(16,24,40,.05) !important;
+}
