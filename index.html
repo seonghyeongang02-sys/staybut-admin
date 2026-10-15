@@ -7813,89 +7813,19 @@
         </div>
         <!-- 대시보드 -->
         <section id="view-dashboard">
-          <div class="page-header">
+          <!-- ════════════════════════════════════════════════════════════
+               [2026-10-15] 대시보드를 CEO 시안 배치로 재구성했습니다.
+                 ① 상단: 제목 + 기간 토글 + 새로고침
+                 ② 핵심 지표 4칸
+                 ③ 2단: 오늘 처리할 일 | 이번 주 청소
+                 ④ 3단: 채널 비중 | 요일별 체크인 | 객실별 성과
+               요소 id는 전부 그대로라 기존 렌더러가 그대로 동작합니다.
+               이전 버전은 _index_백업_대시보드재구성전_1015.html 에 있습니다.
+               ════════════════════════════════════════════════════════════ -->
+          <div class="page-header ceo-top">
             <div>
               <div class="page-title">운영 현황</div>
               <div class="page-subtitle" id="dashboard-period">이번 달 운영 데이터를 한눈에</div>
-            </div>
-          </div>
-
-          <!-- [2026-09-12] 확인이 필요한 예약 배너.
-               객실이 안 정해진 채로 들어온 예약은 여기에 강제로 뜹니다.
-               메뉴를 못 찾아도, 폰이어도, 운영 현황만 열면 보입니다.
-               확인할 게 없으면 이 영역은 통째로 사라집니다. -->
-          <div id="needs-attention"></div>
-
-          <!-- 오늘의 현황 + 이번 주 현황 (좌우 나란히) -->
-          <div class="home-cards-row">
-            <div id="today-summary"></div>
-          </div>
-
-          <!-- ════════════════════════════════════════════════════════════
-               [2026-10-02] 운영현황을 「오늘」만 보는 화면으로 정리했습니다.
-               아래 네 덩어리를 감췄습니다 — 전부 다른 탭에 같은 내용이 있어
-               운영현황에서 또 보여줄 이유가 없었습니다.
-                 · 이번 주 청소   → 청소 관리 탭
-                 · 이번 달 요약   → 매출 분석 탭
-                 · 채널 비중      → 매출 분석 탭
-                 · 국적별 게스트  → 매출 분석 탭
-               지우지 않고 display:none 으로 감춥니다. 채우는 코드
-               (renderDashCleaningWeek · renderMonthSummary · 채널/국적)는
-               그대로 돌아가므로, 되살리려면 이 style 한 줄만 지우면 됩니다.
-               ════════════════════════════════════════════════════════════ -->
-          <div id="dash-extras" style="display:none;">
-          <!-- 🧹 이번 주 청소 -->
-          <div class="section-label" style="margin-top:22px;">이번 주 청소 <span id="dash-cleaning-range" style="font-weight:600;text-transform:none;letter-spacing:-0.005em;color:var(--text-muted);margin-left:6px;"></span></div>
-          <div id="dash-cleaning-week" class="data-card" style="padding:14px 16px; margin-bottom:6px;">
-            <div class="empty-state" style="padding:14px 0;"><span class="sb-spinner"></span><div class="empty-hint">불러오는 중…</div></div>
-          </div>
-
-          <!-- 📊 이번 달 요약 -->
-          <div class="section-label" style="margin-top:22px;">이번 달 요약 <span id="dash-month-label" style="font-weight:600;text-transform:none;letter-spacing:-0.005em;color:var(--text-muted);margin-left:6px;"></span></div>
-          <div id="dash-month-summary" class="today-metrics" style="margin-bottom:6px;">
-            <div class="empty-state" style="padding:14px 0;"><span class="sb-spinner"></span><div class="empty-hint">불러오는 중…</div></div>
-          </div>
-
-          <div id="dash-mix" class="dash-mix">
-            <div class="dash-mix-card">
-              <div class="dash-mix-h">채널 비중 <span>건수 기준 · 누르면 예약으로</span></div>
-              <div id="dash-ch-bar" class="dash-stack"></div>
-              <div id="dash-ch-legend" class="dash-mix-legend"></div>
-            </div>
-            <div class="dash-mix-card">
-              <div class="dash-mix-h">국적별 게스트 <span>이번 달</span></div>
-              <div id="dash-nat-rows"></div>
-            </div>
-          </div>
-          </div><!-- /#dash-extras -->
-
-          <!-- 📅 예약 타임라인 → 예약관리 탭으로 이동, 운영현황에서는 숨김 -->
-          <div id="dash-booking-timeline" style="display:none;">
-          <div class="section-label" style="margin-top:22px;">예약 현황 <span style="font-weight:600;text-transform:none;letter-spacing:-0.005em;color:var(--text-muted);margin-left:6px;">방별 · 1주일</span></div>
-          <div style="display:flex; align-items:center; justify-content:space-between; margin: 4px 0 10px; flex-wrap:wrap; gap:8px;">
-            <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-              <button class="btn btn-secondary" id="tl-prev" style="padding:5px 9px;flex:none;">‹</button>
-              <span id="tl-range" style="font-size:24px; font-weight:700; text-align:left; letter-spacing:-0.01em;">—</span>
-              <button class="btn btn-secondary" id="tl-next" style="padding:5px 9px;">›</button>
-              <button class="btn btn-secondary" id="tl-today" style="padding:5px 9px; font-size:12px;">오늘</button>
-            </div>
-          </div>
-          <div id="timeline-wrap" style="overflow-x:auto; border:1px solid var(--border); border-radius:12px; background:var(--surface);">
-            <div id="timeline-inner" style="min-width:600px;"><div class="empty-state"><span class="sb-spinner"></span><div class="empty-hint">불러오는 중…</div></div></div>
-          </div>
-          <div id="timeline-legend" style="display:flex; gap:14px; margin:8px 0 18px; font-size:11.5px; color:var(--text-muted); flex-wrap:wrap;"></div>
-
-          </div><!-- /dash-booking-timeline (예약관리로 이동) -->
-
-          <!-- 아래 분석 섹션들은 '매출 분석' 시트로 이동 → 대시보드에서는 숨김 -->
-          <div style="display:none;">
-
-          <!-- 상단 컨트롤 바: 날짜 / 채널 / 기간 토글 -->
-          <div class="ops-control-bar">
-            <div class="ops-control-left">
-              <span class="ops-control-date" id="ops-today-label">로딩…</span>
-              <span style="color: var(--text-muted);">·</span>
-              <div class="page-channel-filter" id="dashboard-channel-filter" style="margin:0;"></div>
             </div>
             <div class="ops-control-right">
               <div class="ops-period-toggle" id="ops-period-toggle">
@@ -7904,55 +7834,82 @@
                 <button data-period="last-month">지난 달</button>
                 <button data-period="this-year">올해</button>
               </div>
-              <button class="btn btn-secondary" id="ops-analysis-btn" title="AI 매출 분석" style="padding: 8px 14px; font-weight:700; background:#FAEEC4; color:#16161b; border-color:#16161b;">✦ AI 매출분석</button>
               <button class="btn btn-secondary" id="ops-refresh-btn" title="새로고침" style="padding: 8px 12px;">↻</button>
             </div>
           </div>
 
-          <!-- (예약/정산 타임라인은 예약관리로 이동) -->
+          <!-- 객실이 안 정해진 채로 들어온 예약 — 확인할 게 없으면 통째로 사라집니다. -->
+          <div id="needs-attention"></div>
 
+          <!-- ② 핵심 지표 -->
+          <div class="stat-grid" id="kpi-grid"></div>
 
-          <!-- 핵심 지표 (이번 달 + 변화율) -->
-          <div class="section-label">핵심 지표 <span id="ops-period-label" style="font-weight:600; text-transform:none; letter-spacing:-0.005em; color: var(--text-muted); margin-left:6px;"></span></div>
-          <div class="stat-grid" id="kpi-grid">
-            <!-- 동적 채워짐 -->
-          </div>
-
-          <!-- 예약 인사이트 (매출 미사용) -->
-          <div class="section-label">예약 인사이트</div>
-          <div class="insight-2col" style="display:grid; grid-template-columns:1fr 1.4fr; gap:14px; margin-bottom:14px;">
-            <div class="chart-card">
-              <div class="chart-card-header"><div><div class="chart-card-title">채널 비중</div><div class="chart-card-subtitle">예약 건수 기준</div></div></div>
-              <div class="chart-canvas-wrap" style="height:200px; display:flex; align-items:center; gap:16px;">
-                <div style="position:relative; width:140px; height:140px; flex-shrink:0;"><canvas id="insight-channel" role="img" aria-label="채널 비중 도넛"></canvas></div>
-                <div id="insight-channel-legend" style="font-size:12px; display:flex; flex-direction:column; gap:8px;"></div>
+          <!-- ③ 2단 -->
+          <div class="ceo-g2">
+            <div class="ceo-card">
+              <div class="ceo-ch"><b>오늘 처리할 일</b><span class="ceo-tag" id="ops-today-label"></span></div>
+              <div class="ceo-cb"><div class="home-cards-row"><div id="today-summary"></div></div></div>
+            </div>
+            <div class="ceo-card">
+              <div class="ceo-ch"><b>이번 주 청소</b><span class="ceo-tag" id="dash-cleaning-range"></span></div>
+              <div class="ceo-cb">
+                <div id="dash-cleaning-week">
+                  <div class="empty-state" style="padding:14px 0;"><span class="sb-spinner"></span><div class="empty-hint">불러오는 중…</div></div>
+                </div>
               </div>
             </div>
-            <div class="chart-card">
-              <div class="chart-card-header"><div><div class="chart-card-title">예약 리드타임</div><div class="chart-card-subtitle">체크인 며칠 전에 예약하는지</div></div></div>
-              <div class="chart-canvas-wrap" style="height:200px;"><canvas id="insight-lead" role="img" aria-label="예약 리드타임 막대"></canvas></div>
+          </div>
+
+          <!-- ④ 3단 -->
+          <div class="ceo-g3">
+            <div class="ceo-card">
+              <div class="ceo-ch"><b>채널 비중</b><span class="ceo-tag">건수 기준 · 누르면 예약으로</span></div>
+              <div class="ceo-cb">
+                <div id="dash-ch-bar" class="dash-stack"></div>
+                <div id="dash-ch-legend" class="dash-mix-legend"></div>
+              </div>
             </div>
-          </div>
-          <div class="chart-card" style="margin-bottom:14px;">
-            <div class="chart-card-header"><div><div class="chart-card-title">요일별 체크인</div><div class="chart-card-subtitle">무슨 요일에 몰리는지 — 가격·청소 인력 배치 참고</div></div></div>
-            <div class="chart-canvas-wrap" style="height:200px;"><canvas id="insight-dow" role="img" aria-label="요일별 체크인 막대"></canvas></div>
-          </div>
-
-          <!-- 객실별 이번 달 매출/점유율 미니 카드 -->
-          <div class="section-label">객실별 성과 <span id="room-perf-period" style="font-weight:500; color:var(--text-muted); font-size:12px; margin-left:4px;"></span></div>
-          <div class="ops-room-mini-grid" id="ops-room-mini-grid">
-            <!-- 동적 채워짐 -->
-          </div>
-
-          <!-- 국적별 게스트 분포 -->
-          <div class="section-label">국적별 게스트 분포</div>
-          <div class="data-card" style="margin-bottom: 24px;">
-            <div id="ops-country-list" style="padding: 16px 0;">
-              <div class="empty-state" style="padding: 24px;">로딩 중…</div>
+            <div class="ceo-card">
+              <div class="ceo-ch"><b>요일별 체크인</b><span class="ceo-tag">가격·청소 배치 참고</span></div>
+              <div class="ceo-cb"><div style="height:190px;"><canvas id="insight-dow" role="img" aria-label="요일별 체크인 막대"></canvas></div></div>
+            </div>
+            <div class="ceo-card">
+              <div class="ceo-ch"><b>객실별 성과</b><span class="ceo-tag" id="room-perf-period"></span></div>
+              <div class="ceo-cb"><div class="ops-room-mini-grid" id="ops-room-mini-grid"></div></div>
             </div>
           </div>
 
-          </div><!-- /숨김 래퍼 -->
+          <!-- ════════════════════════════════════════════════════════════
+               아래는 화면에서 감춘 덩어리입니다. 같은 내용이 다른 탭에 있어
+               대시보드에서 또 보여줄 이유가 없지만, 채우는 코드가 이 요소들을
+               찾으므로 지우지 않고 숨겨만 둡니다. 되살리려면 style 한 줄만 지우세요.
+                 · 이번 달 요약 / 국적별 게스트 → 매출 분석 탭
+                 · 예약 타임라인                → 예약 관리 탭
+                 · 채널 도넛 / 리드타임         → 매출 분석 탭
+               ════════════════════════════════════════════════════════════ -->
+          <div id="dash-extras" style="display:none;">
+            <div id="dash-month-label"></div>
+            <div id="dash-month-summary" class="today-metrics"></div>
+            <div id="dash-nat-rows"></div>
+          </div>
+
+          <div id="dash-booking-timeline" style="display:none;">
+            <button class="btn btn-secondary" id="tl-prev">‹</button>
+            <span id="tl-range">—</span>
+            <button class="btn btn-secondary" id="tl-next">›</button>
+            <button class="btn btn-secondary" id="tl-today">오늘</button>
+            <div id="timeline-wrap"><div id="timeline-inner"></div></div>
+            <div id="timeline-legend"></div>
+          </div>
+
+          <div style="display:none;">
+            <div class="page-channel-filter" id="dashboard-channel-filter"></div>
+            <button class="btn btn-secondary" id="ops-analysis-btn">✦ AI 매출분석</button>
+            <div style="height:200px;"><canvas id="insight-channel"></canvas></div>
+            <div id="insight-channel-legend"></div>
+            <div style="height:200px;"><canvas id="insight-lead"></canvas></div>
+            <div id="ops-country-list"></div>
+          </div>
         </section>
 
         <!-- 예약 관리 -->
@@ -25274,6 +25231,26 @@ checkAuth();
 :where(main) .section-label { color: #9CA3AF; font-size: 11px; letter-spacing: .02em; }
 
 /* 청소관리 달력 영역은 위 폭 보정 외에 손대지 않습니다. */
+
+/* ===== [2026-10-15] 대시보드 CEO 시안 배치 =====
+   되돌리려면 이 블록과 view-dashboard 섹션을 백업본으로 바꾸세요. */
+.ceo-top { align-items: center; }
+.ceo-g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.ceo-g3 { display: grid; grid-template-columns: 1.1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.ceo-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+            box-shadow: 0 1px 2px rgba(16,24,40,.05); overflow: hidden; }
+.ceo-ch { padding: 13px 15px; border-bottom: 1px solid var(--border);
+          display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ceo-ch b { font-size: 14.5px; font-weight: 650; }
+.ceo-tag { font-size: 12px; color: var(--text-muted); }
+.ceo-cb { padding: 14px 15px; }
+#view-dashboard .stat-grid { grid-template-columns: repeat(4, 1fr); margin-bottom: 14px; }
+@media (max-width: 1100px) { .ceo-g3 { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 900px) {
+  .ceo-g2, .ceo-g3 { grid-template-columns: 1fr; }
+  .ceo-top { flex-direction: column; align-items: stretch; gap: 10px; }
+}
+@media (max-width: 600px) { #view-dashboard .stat-grid { grid-template-columns: repeat(2, 1fr) !important; } }
 </style>
   <script>
     (function () {
