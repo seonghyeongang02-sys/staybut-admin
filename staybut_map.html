@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>STAY BUT 자동화 지도</title>
+<style>
+:root{
+  color-scheme: light;
+  --black:#000; --g1:#373737; --g2:#636363; --g3:#B1B1B1;
+  --coral:#000000; --green:#8A8A8A; --blue:#1295D8; --brown:#7B604B;
+  --paper:#FFFFFF; --paper2:#F2F2F0; --white:#fff; --hair:#D9D7D1;
+  --pill:999px;
+}
+*{box-sizing:border-box}
+html,body{overflow-x:hidden}
+body{margin:0;background:var(--paper);color:var(--black);
+  font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif;
+  font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:760px;margin:0 auto;padding:26px 18px 60px}
+
+.wm{font-size:16px;font-weight:800;letter-spacing:.14em}
+.wm .h{letter-spacing:0}
+.rule{height:1.4px;background:var(--black);margin:13px 0 0}
+h1{font-size:27px;font-weight:800;margin:15px 0 0;letter-spacing:-.9px;line-height:1.05}
+h1 .sm{display:block;font-size:13.5px;font-weight:600;margin-top:7px;color:var(--g1);letter-spacing:.02em}
+
+/* 범례 */
+.leg{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 6px}
+.lg{display:flex;align-items:center;gap:7px;border:1.2px solid var(--black);
+  border-radius:var(--pill);padding:6px 13px;font-size:11.5px;font-weight:700}
+.dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto}
+.dot.auto{background:transparent;border:1.5px solid var(--g3)}
+.dot.pc{background:var(--black)}
+.dot.me{background:transparent;border:1.5px solid var(--black)}
+
+/* 층 */
+.layer{margin-top:22px}
+.lh{display:flex;align-items:baseline;gap:9px;margin-bottom:10px}
+.lh .no{font-size:9.5px;font-weight:800;letter-spacing:.14em;color:var(--g2);
+  border:1.2px solid var(--g3);border-radius:var(--pill);padding:3px 9px}
+.lh b{font-size:16px;font-weight:800;letter-spacing:-.4px}
+.lh .d{font-size:12px;color:var(--g2);font-weight:500}
+
+.node{border:1.4px solid var(--black);background:var(--white);padding:13px 14px;margin-bottom:9px}
+.node.pc{border-color:var(--coral);background:#F2F2F0}
+.nt{display:flex;align-items:center;gap:9px;font-weight:750;font-size:14.5px;letter-spacing:-.3px}
+.nt .dot{margin-right:0}
+.when{margin-left:auto;font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--g2);white-space:nowrap}
+.nd{font-size:12.5px;color:var(--g1);margin-top:6px;line-height:1.6}
+.nd code{background:var(--paper2);padding:1px 5px;font-size:11.5px;font-family:ui-monospace,Menlo,monospace}
+
+.arrow{text-align:center;color:var(--g3);font-size:15px;line-height:1;margin:-3px 0 6px}
+
+.hub{border:2.2px solid var(--black);background:var(--white);padding:16px;margin:4px 0 9px}
+.hub .ht{font-size:17px;font-weight:800;letter-spacing:-.5px;display:flex;align-items:center;gap:9px}
+.hub .hs{font-size:12px;color:var(--g2);margin-top:3px}
+.jobs{margin-top:12px;border:1.2px solid var(--black)}
+.jr{display:flex;align-items:center;gap:9px;padding:9px 11px;font-size:12.5px;border-bottom:1px solid var(--hair)}
+.jr:last-child{border-bottom:none}
+.jr .c1{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jr .c2{flex:0 0 auto;font-size:10.5px;font-weight:700;color:var(--g2);font-variant-numeric:tabular-nums}
+.jh{background:var(--paper);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+  font-weight:700;color:var(--g1);border-bottom:1.2px solid var(--black)}
+
+.note{border-left:3px solid var(--black);padding:2px 0 2px 13px;margin:14px 0 0;
+  font-size:12.5px;color:var(--g1);line-height:1.65}
+.note b{color:var(--black)}
+.foot{margin-top:32px;border-top:1.2px solid var(--black);padding-top:14px;
+  font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--g2);font-weight:700;text-align:center}
+.foot .mo{display:block;margin-top:5px;letter-spacing:.03em;text-transform:none;font-weight:500;font-size:11.5px}
+
+/* 넓은 화면에서는 2열로 — 폰에서는 그대로 1열 */
+@media (min-width:640px){
+  .teams{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .kpis{grid-template-columns:repeat(3,1fr)}
+  .kpi.wide{grid-column:1/-1}
+  .layer .node{margin-bottom:0}
+  .layer .grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px;align-items:start}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="wm">STAY BUT <span class="h">友</span></div>
+  <div class="rule"></div>
+  <h1>자동화 지도<span class="sm">지금 돌아가고 있는 것들, 그리고 무엇이 PC를 묶는가</span></h1>
+
+  <div class="leg">
+    <div class="lg"><span class="dot auto"></span>서버가 혼자 — PC 꺼도 됨</div>
+    <div class="lg"><span class="dot pc"></span>PC 켜져야 함</div>
+    <div class="lg"><span class="dot me"></span>사람이 봄</div>
+  </div>
+
+  <!-- 1 -->
+  <div class="layer">
+    <div class="lh"><span class="no">01</span><b>들어오는 길</b><span class="d">예약이 어떻게 DB로 오나</span></div>
+
+    <div class="node">
+      <div class="nt"><span class="dot auto"></span>OTA 예약 메일 → 파서<span class="when">10분마다</span></div>
+      <div class="nd">부킹닷컴·아고다·에어비앤비·익스피디아가 보내는 예약 메일을 Gmail에서 읽어
+        <code>bookings</code> 에 넣습니다. Apps Script 「스테이벗 자동화메일파싱」의 <code>pollOndaEmails</code>.
+        <br>객실번호를 못 찾으면 <b>자동 배정하지 않고</b> 미배정으로 둡니다 (2026-08-28 변경).</div>
+    </div>
+    <div class="arrow">↓</div>
+
+    <div class="node">
+      <div class="nt"><span class="dot auto"></span>OTA 캘린더 동기화<span class="when">15분마다</span></div>
+      <div class="nd">엣지 함수 <code>ical-sync</code> 가 각 채널 캘린더를 읽어 <code>ical_staging</code> 으로 받습니다.
+        메일 파서가 놓친 건을 잡는 두 번째 그물입니다.</div>
+    </div>
+    <div class="arrow">↓</div>
+
+    <div class="node">
+      <div class="nt"><span class="dot auto"></span>손님 채팅<span class="when">실시간</span></div>
+      <div class="nd">객실 QR → <code>stay.html</code> → 손님이 글을 남기면 <code>chat_guest_send</code>.
+        로그인 없이 열리지만 <b>대화 토큰으로 자기 방 대화만</b> 보게 막혀 있습니다.</div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="layer">
+    <div class="lh"><span class="no">02</span><b>Supabase</b><span class="d">모든 것이 모이는 곳</span></div>
+
+    <div class="hub">
+      <div class="ht"><span class="dot auto"></span>Supabase</div>
+      <div class="hs">예약 · 객실 · 청소 · 채팅 · 파서 로그 — 숙소별로 칸이 나뉘어 있습니다 (성수 / 데모)</div>
+
+      <div class="jobs">
+        <div class="jr jh"><div class="c1">서버가 혼자 도는 작업</div><div class="c2">주기</div></div>
+        <div class="jr"><div class="c1">OTA 캘린더 동기화</div><div class="c2">15분</div></div>
+        <div class="jr"><div class="c1">끝난 대화 닫기</div><div class="c2">매시 05분</div></div>
+        <div class="jr"><div class="c1">오래된 대화 지우기</div><div class="c2">매시 10분</div></div>
+        <div class="jr"><div class="c1">채팅 정리</div><div class="c2">매일 04:00</div></div>
+        <div class="jr"><div class="c1">채팅 사진 정리</div><div class="c2">매일 19:20</div></div>
+      </div>
+
+      <div class="nd" style="margin-top:12px">
+        <b>정합성 점검</b> <code>ops_integrity_check</code> — 취소반쪽 · 중복예약 · 금액0원 ·
+        객실미배정 · 청소누락 · 숙소섞임 6종. 지금은 <b>자동 실행을 걸지 않았습니다.</b>
+        데스크 앱을 열 때마다 돕니다.</div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="layer">
+    <div class="lh"><span class="no">03</span><b>나가는 길</b><span class="d">알림과 메일</span></div>
+
+    <div class="node">
+      <div class="nt"><span class="dot auto"></span>폰 푸시 알림<span class="when">즉시</span></div>
+      <div class="nd"><code>chat-push</code>. 손님 문의가 오거나 점검에서 뭔가 걸리면 폰으로 보냅니다.
+        <br><b>PC가 꺼져 있어도 옵니다.</b> 비밀값 헤더가 있어야 호출되고, 이동 주소는 우리 사이트 안쪽만 허용합니다.</div>
+    </div>
+    <div class="arrow">↓</div>
+
+    <div class="node">
+      <div class="nt"><span class="dot auto"></span>메일 발송<span class="when">필요할 때</span></div>
+      <div class="nd"><code>chat-email</code> · <code>chat-host-mail</code> — 손님·호스트 메일.</div>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="layer">
+    <div class="lh"><span class="no">04</span><b>사람이 보는 화면</b></div>
+
+    <div class="node">
+      <div class="nt"><span class="dot me"></span>데스크 <span class="when">실무</span></div>
+      <div class="nd">오늘 들고남 · 다음 2주 예약 · 빈방 · 이번 주 청소 · 매출.
+        <code>desk_summary()</code> 한 번으로 다 가져옵니다. 로그인한 사람의 <b>자기 숙소만</b>.
+        <br>폰 홈화면에 추가해서 씁니다.</div>
+    </div>
+
+    <div class="node">
+      <div class="nt"><span class="dot me"></span>어드민 <span class="when">수치</span></div>
+      <div class="nd">타임라인 · 매출분석 · 청소관리 · 비품. 자세히 들여다볼 때.</div>
+    </div>
+
+    <div class="node">
+      <div class="nt"><span class="dot me"></span>상담 콘솔 · 청소사 링크</div>
+      <div class="nd">손님 응대, 그리고 실장님들이 토큰 링크로 자기 주간 일정만 봅니다.</div>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="layer">
+    <div class="lh"><span class="no">05</span><b>PC를 묶는 것</b><span class="d">여기만 브라우저를 직접 조작합니다</span></div>
+
+    <div class="node pc">
+      <div class="nt"><span class="dot pc"></span>PMS 일마감 · 그룹체크아웃<span class="when">매일 09:32</span></div>
+      <div class="nd">객실 → 일마감 → 「마감」 → 확인, 이어서 객실현황 → 미결산내역 → 그룹체크아웃.
+        <br>그 뒤에 예약 점검 리포트까지 한 번에 돕니다.
+        <br><b>크롬이 켜져 있고 PMS 로그인이 살아 있어야</b> 합니다.</div>
+    </div>
+
+    <div class="node pc">
+      <div class="nt"><span class="dot pc"></span>CMS 요금 · 재고<span class="when">수시</span></div>
+      <div class="nd">ONDA 채널매니저. 리드타임 프라이싱(D-5 −5% · D-3 −10% · D-1 유지)을
+        여기서 넣습니다. 화면을 직접 눌러야 합니다.</div>
+    </div>
+
+    <div class="node pc">
+      <div class="nt"><span class="dot pc"></span>채널 게스트 화면 확인<span class="when">필요할 때</span></div>
+      <div class="nd">실제 손님에게 얼마로 보이는지는 부킹닷컴 화면을 열어봐야 압니다.</div>
+    </div>
+
+    <div class="note">
+      <b>그래서 이렇게 갈립니다.</b> 읽고 · 점검하고 · 알림 보내는 건 전부 서버가 혼자 합니다.
+      PC가 꺼져 있어도 돕니다. <b>PMS와 CMS만</b> 사람 대신 화면을 눌러야 해서 PC를 묶습니다.
+      ONDA·PMS 쪽 연동 수단이 없으니 이 부분은 당분간 그대로입니다.
+    </div>
+  </div>
+
+  <div class="foot">Stay But 友 &nbsp;·&nbsp; Seongsu, Seoul
+    <span class="mo">2026-10-15 기준 · 실제 설정을 읽어 그렸습니다</span></div>
+</div>
+</body>
+</html>

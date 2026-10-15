@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="STAY BUT">
+<meta name="theme-color" content="#FFFFFF">
+<title>STAY BUT DESK</title>
+<style>
+:root{
+  color-scheme: light;
+  --sb-black:#000; --sb-g1:#373737; --sb-g2:#636363; --sb-g3:#B1B1B1;
+  --sb-coral:#000000; --sb-green:#8A8A8A;
+  --paper:#FFFFFF; --paper-2:#F2F2F0; --white:#fff; --hair:#D9D7D1;
+  --pill:999px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{overflow-x:hidden}
+body{margin:0;background:var(--paper);color:var(--sb-black);
+  font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif;
+  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.app{max-width:760px;margin:0 auto;min-height:100vh;position:relative;overflow:hidden;background:var(--paper)}
+.screen{padding:0 18px calc(44px + env(safe-area-inset-bottom))}
+#home.hide{display:none}
+#view{display:none;position:absolute;inset:0;background:var(--paper);overflow-y:auto;-webkit-overflow-scrolling:touch}
+#view.show{display:block;animation:sl .22s cubic-bezier(.3,.8,.4,1)}
+@keyframes sl{from{transform:translateX(14px);opacity:0}to{transform:none;opacity:1}}
+
+/* 로그인 */
+#login{display:none;padding:calc(60px + env(safe-area-inset-top)) 24px 40px;max-width:420px;margin:0 auto}
+#login.show{display:block}
+#login .wm{font-size:19px;font-weight:800;letter-spacing:.14em;margin-bottom:6px}
+#login h2{font-size:26px;font-weight:800;letter-spacing:-.8px;margin:18px 0 6px}
+#login p{color:var(--sb-g2);font-size:13.5px;margin:0 0 26px}
+#login label{display:block;font-size:9.5px;letter-spacing:.13em;text-transform:uppercase;
+  font-weight:700;color:var(--sb-g2);margin:0 0 6px}
+#login input{width:100%;border:1.4px solid var(--sb-black);background:var(--white);
+  padding:14px;font-size:16px;font-family:inherit;margin-bottom:16px;border-radius:0}
+#login input:focus{outline:2px solid var(--sb-black);outline-offset:-2px}
+.lerr{border:1.6px solid var(--sb-black);background:var(--paper-2);padding:12px;font-size:13px;margin-bottom:16px;display:none}
+.lerr.show{display:block}
+
+.hd{padding:26px 18px 0}
+.mast{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.wm{font-size:17px;font-weight:800;letter-spacing:.14em;line-height:1;white-space:nowrap}
+.wm .hanja{letter-spacing:0}
+.tag{text-align:right;font-size:8.5px;line-height:1.7;color:var(--sb-g1);
+  text-transform:uppercase;letter-spacing:.09em;font-weight:600}
+.rule{height:1.4px;background:var(--sb-black);margin:14px 0 0}
+h1{font-size:30px;font-weight:800;margin:16px 0 0;letter-spacing:-.9px;line-height:1.02}
+h1 .sm{display:block;font-size:14px;font-weight:600;letter-spacing:.03em;margin-top:7px;color:var(--sb-g1)}
+.date{margin-top:12px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--sb-g2);font-weight:650;
+  display:flex;justify-content:space-between;align-items:center;gap:10px}
+.mini{border:1.2px solid var(--sb-g3);background:transparent;border-radius:var(--pill);
+  padding:5px 11px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--sb-g2);cursor:pointer;font-family:inherit}
+.mini:active{background:var(--paper-2)}
+
+.chips{display:flex;gap:7px;flex-wrap:wrap;padding:16px 18px 20px}
+
+.chip{flex:0 0 auto;border:1.2px solid var(--sb-black);border-radius:var(--pill);
+  padding:7px 15px;display:flex;align-items:baseline;gap:7px}
+.chip b{font-size:16px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.4px}
+.chip span{font-size:10.5px;white-space:nowrap;color:var(--sb-g1);font-weight:600}
+.chip.alert{background:var(--sb-black)} .chip.alert b,.chip.alert span{color:#fff}
+
+.teams{display:flex;flex-direction:column;gap:11px}
+.team{display:flex;align-items:center;gap:14px;width:100%;text-align:left;background:var(--white);
+  border:1.4px solid var(--sb-black);padding:16px 15px;font:inherit;color:inherit;cursor:pointer;min-height:84px}
+.team:active{background:var(--paper-2);transform:translateY(1px)}
+.ic{width:46px;height:46px;flex:0 0 auto;border:1.4px solid var(--sb-black);display:grid;place-items:center;background:var(--white)}
+.ic svg{width:24px;height:24px;stroke:var(--sb-black);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.tmid{flex:1;min-width:0}
+.tk{font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--sb-g2);display:block;margin-bottom:3px}
+.tn{font-weight:750;font-size:16px;letter-spacing:-.4px;line-height:1.25}
+.ts{font-size:12px;color:var(--sb-g2);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tst{font-size:12px;font-weight:700;margin-top:7px;display:flex;align-items:center;gap:6px}
+.tst i{width:7px;height:7px;border-radius:50%;flex:0 0 auto}
+.tst.ok{color:var(--sb-g1)} .tst.ok i{background:transparent;border:1.4px solid var(--sb-g3)}
+.tst.warn{color:var(--sb-black)} .tst.warn i{background:var(--sb-black)}
+.bg{flex:0 0 auto;min-width:27px;height:27px;border-radius:var(--pill);padding:0 9px;display:grid;place-items:center;
+  font-size:12.5px;font-weight:800;background:var(--sb-coral);color:#fff}
+.bg.none{background:transparent;color:var(--sb-g2);border:1.2px solid var(--sb-g3);font-size:13px;font-weight:700}
+
+.vbar{position:sticky;top:0;z-index:5;background:var(--paper);border-bottom:1.4px solid var(--sb-black);
+  padding:calc(12px + env(safe-area-inset-top)) 18px 12px;display:flex;align-items:center;gap:12px}
+.back{width:40px;height:40px;flex:0 0 auto;border:1.4px solid var(--sb-black);background:var(--white);
+  cursor:pointer;display:grid;place-items:center;padding:0}
+.back svg{width:17px;height:17px;stroke:var(--sb-black);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.vt .k{font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--sb-g2);display:block}
+.vt b{display:block;font-size:17px;font-weight:800;letter-spacing:-.5px;line-height:1.2}
+
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.kpi{border:1.4px solid var(--sb-black);background:var(--white);padding:13px}
+.kpi.wide{grid-column:1/-1}
+.kpi .lb{font-size:9px;letter-spacing:.13em;text-transform:uppercase;font-weight:700;color:var(--sb-g2)}
+.kpi .vl{font-size:25px;font-weight:800;letter-spacing:-1.1px;margin-top:5px;font-variant-numeric:tabular-nums;line-height:1.05}
+.kpi .vl small{font-size:14px;font-weight:700;letter-spacing:-.2px;margin-left:2px}
+.df{font-size:11.5px;font-weight:700;margin-top:5px;display:block}
+.df.p{color:var(--sb-black)} .df.m{color:var(--sb-g2)} .df.z{color:var(--sb-g2);font-weight:500}
+
+.sec{background:var(--white);border:1.4px solid var(--sb-black);margin-bottom:11px;overflow:hidden}
+.sec>summary{padding:15px 14px;cursor:pointer;display:flex;align-items:flex-start;gap:11px;
+  font-weight:750;font-size:14.5px;line-height:1.42;list-style:none;letter-spacing:-.3px}
+.sec>summary::-webkit-details-marker{display:none}
+.sec[open]>summary{border-bottom:1.2px solid var(--sb-black)}
+.mk{width:22px;height:22px;flex:0 0 auto;border-radius:var(--pill);display:grid;place-items:center;
+  font-size:12px;font-weight:800;color:#fff}
+.mk.warn,.mk.crit{background:var(--sb-coral)} .mk.ok{background:transparent;color:var(--sb-g2);border:1.3px solid var(--sb-g3)}
+.st{flex:1;min-width:0}
+.tg{display:block;font-size:9.5px;color:var(--sb-g2);font-weight:700;margin-top:5px;letter-spacing:.1em;text-transform:uppercase}
+.sb{padding:14px}
+p.n{margin:0 0 12px;font-size:13.5px;color:var(--sb-g1);line-height:1.68}
+p.n:last-child{margin-bottom:0} p.n b{color:var(--sb-black);font-weight:750}
+
+.rows{border:1.2px solid var(--sb-black);margin:4px 0 13px}
+.rh{display:flex;background:var(--paper);padding:8px 11px;font-size:9.5px;color:var(--sb-g1);font-weight:700;
+  border-bottom:1.2px solid var(--sb-black);letter-spacing:.1em;text-transform:uppercase}
+.r{display:flex;align-items:center;padding:10px 11px;font-size:13px;border-bottom:1px solid var(--hair);gap:8px}
+.r:last-child{border-bottom:none}
+.r.hl{background:#F2F2F0}
+.c1{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c2,.c3{flex:0 0 auto;text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.c2{min-width:86px} .c3{min-width:60px}
+.up{color:var(--sb-g2);font-weight:600} .dn{color:var(--sb-black);font-weight:800} .mu{color:var(--sb-g2);font-weight:500}
+.bar{height:5px;background:var(--sb-black);border-radius:3px;min-width:3px}
+
+.btn{width:100%;border:1.4px solid var(--sb-black);background:var(--white);border-radius:var(--pill);
+  padding:14px 16px;font-size:14.5px;font-weight:800;cursor:pointer;color:var(--sb-black);
+  font-family:inherit;min-height:50px}
+.btn:active{background:var(--paper-2)}
+.btn.pri{background:var(--sb-black);color:#fff}
+.hint{margin:18px 2px 0;font-size:11.5px;color:var(--sb-g2);line-height:1.65}
+.foot{text-align:center;padding:26px 10px 0;border-top:1.2px solid var(--sb-black);margin-top:26px;
+  font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--sb-g2);font-weight:700}
+.foot .mo{display:block;margin-top:6px;letter-spacing:.04em;text-transform:none;font-weight:500;font-size:11px}
+.load{padding:40px 18px;text-align:center;color:var(--sb-g2);font-size:13px}
+.err{margin:14px 0;border:1.6px solid var(--sb-black);background:var(--paper-2);padding:13px;font-size:13px;line-height:1.6}
+
+/* 넓은 화면에서는 2열로 — 폰에서는 그대로 1열 */
+@media (min-width:640px){
+  .teams{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .kpis{grid-template-columns:repeat(3,1fr)}
+  .kpi.wide{grid-column:1/-1}
+  .layer .node{margin-bottom:0}
+  .layer .grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px;align-items:start}
+}
+
+/* 체크리스트 */
+.ck{display:flex;align-items:flex-start;gap:12px;padding:14px 13px;
+  border-bottom:1px solid var(--hair);cursor:pointer;background:var(--white)}
+.ck:last-child{border-bottom:none}
+.ck:active{background:var(--paper-2)}
+.box{width:21px;height:21px;flex:0 0 auto;border:1.6px solid var(--black);margin-top:1px;
+  display:grid;place-items:center;font-size:13px;font-weight:800;line-height:1}
+.ck.on .box{background:var(--black);color:#fff}
+.ck.on .ct{color:var(--sb-g3);text-decoration:line-through}
+.cm{flex:1;min-width:0}
+.ct{font-size:14.5px;font-weight:700;letter-spacing:-.3px;line-height:1.4}
+.cs{font-size:12px;color:var(--sb-g2);margin-top:3px;line-height:1.5}
+.cw{margin-left:auto;flex:0 0 auto;font-size:9.5px;font-weight:800;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--sb-g2);border:1.2px solid var(--sb-g3);
+  border-radius:var(--pill);padding:3px 9px;white-space:nowrap}
+.cw.now{background:var(--black);color:#fff;border-color:var(--black)}
+.cklist{border:1.4px solid var(--black);margin-bottom:12px}
+.ckh{background:var(--paper-2);padding:10px 13px;font-size:9.5px;font-weight:800;
+  letter-spacing:.12em;text-transform:uppercase;border-bottom:1.4px solid var(--black);
+  display:flex;justify-content:space-between;align-items:center}
+.empty{border:1.4px dashed var(--sb-g3);padding:26px 16px;text-align:center;
+  color:var(--sb-g2);font-size:13.5px;margin-bottom:12px}
+.empty b{display:block;color:var(--black);font-size:15px;font-weight:800;margin-bottom:4px;letter-spacing:-.3px}
+</style>
+</head>
+<body>
+
+<!-- 로그인 -->
+<div id="login">
+  <div class="wm">STAY BUT <span class="hanja">友</span></div>
+  <h2>Desk</h2>
+  <p>어드민과 같은 계정으로 로그인하세요.</p>
+  <div class="lerr" id="lerr"></div>
+  <form id="lform">
+    <label for="em">Email</label>
+    <input id="em" type="email" autocomplete="username" inputmode="email" required>
+    <label for="pw">Password</label>
+    <input id="pw" type="password" autocomplete="current-password" required>
+    <button class="btn pri" type="submit" id="lbtn">로그인</button>
+  </form>
+  <div class="hint">비밀번호는 저장하지 않습니다. 로그인 후 접속 증표만 이 기기에 남습니다.</div>
+</div>
+
+<!-- 본문 -->
+<div class="app" id="app" style="display:none">
+  <div id="home">
+    <div class="hd">
+      <div class="mast">
+        <div class="wm">STAY BUT <span class="hanja">友</span></div>
+        <div class="tag">Comfortable Stay<br>Friendly Assistance<br>Local Discovery</div>
+      </div>
+      <div class="rule"></div>
+      <h1>Desk<span class="sm">오늘의 운영 — 느낌표 뜬 곳만 보시면 됩니다</span></h1>
+      <div class="date"><span id="today">—</span>
+        <span><button class="mini" id="reload">다시 읽기</button>
+        <button class="mini" id="logout">로그아웃</button></span></div>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="screen">
+      <div class="teams" id="teams"><div class="load">불러오는 중…</div></div>
+      <div class="foot">Stay But 友 &nbsp;·&nbsp; Seongsu, Seoul<span class="mo" id="stamp">—</span></div>
+    </div>
+  </div>
+  <div id="view"></div>
+</div>
+
+<script>
+/* ───── 접속 설정 ─────
+   공개 키(publishable)입니다. 공개되어도 안전하도록 설계된 값이고,
+   실제 데이터는 로그인 + RLS(행 단위 보안)로 막습니다.
+   로그인하지 않으면 이 키만으로는 아무것도 읽히지 않습니다. */
+const SB_URL='https://ijvfwajtotbqfxpdlcal.supabase.co';
+const SB_KEY='sb_publishable_NMLr44iM9YQ7QsswludEqA_QSVes1IE';
+const LS='staybut_desk_session';
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const man=n=>n==null?'—':(Math.round(Number(n)/10000)).toLocaleString('ko-KR');
+
+function getSess(){ try{ return JSON.parse(localStorage.getItem(LS)||'null'); }catch(e){ return null; } }
+function setSess(s){ try{ s?localStorage.setItem(LS,JSON.stringify(s)):localStorage.removeItem(LS); }catch(e){} }
+
+async function login(email,password){
+  const r=await fetch(SB_URL+'/auth/v1/token?grant_type=password',{method:'POST',
+    headers:{'apikey':SB_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({email,password})});
+  const j=await r.json();
+  if(!r.ok) throw new Error(j.error_description||j.msg||j.message||'로그인에 실패했습니다');
+  setSess(j); return j;
+}
+async function refresh(s){
+  const r=await fetch(SB_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',
+    headers:{'apikey':SB_KEY,'Content-Type':'application/json'},
+    body:JSON.stringify({refresh_token:s.refresh_token})});
+  const j=await r.json();
+  if(!r.ok) throw new Error('세션이 만료되었습니다');
+  setSess(j); return j;
+}
+async function rpc(name,retry){
+  let s=getSess(); if(!s) throw new Error('로그인이 필요합니다');
+  const r=await fetch(SB_URL+'/rest/v1/rpc/'+name,{method:'POST',
+    headers:{'apikey':SB_KEY,'Authorization':'Bearer '+s.access_token,'Content-Type':'application/json'},
+    body:'{}'});
+  if(r.status===401 && !retry){ await refresh(s); return rpc(name,true); }
+  const j=await r.json();
+  if(!r.ok) throw new Error(j.message||j.hint||('오류 '+r.status));
+  return j;
+}
+
+const P='<circle cx="8" cy="7.4" r="3"/><path d="M3 20v-1.7a5 5 0 0 1 10 0V20"/>';
+const I={
+ ops:P+'<rect x="15.6" y="8.4" width="6" height="8" rx=".8"/><path d="M17.3 11.9l1.1 1.1 2.1-2.2"/>',
+ price:P+'<path d="M15.6 16.6l2.1-2.4 1.7 1.7 2.1-2.8"/><path d="M20.2 13.1h1.8v1.8"/>',
+ clean:P+'<path d="M18.5 7v5.4"/><path d="M15.9 12.4h5.2l.9 5.6h-7z"/><path d="M17.3 12.4V18M19.7 12.4V18"/>',
+ data:P+'<circle cx="18.2" cy="11.4" r="3"/><path d="M20.5 13.7l1.9 2"/>',
+ back:'<path d="M15 19l-7-7 7-7"/>'
+};
+const svg=k=>`<svg viewBox="0 0 24 24">${I[k]}</svg>`;
+function diff(c,p){ if(c==null||p==null) return '<span class="df z">비교 없음</span>';
+  const d=Math.round((c-p)/p*1000)/10, cls=d>0?'p':(d<0?'m':'z');
+  return `<span class="df ${cls}">${d>0?'▲':(d<0?'▼':'–')} ${Math.abs(d)}% <span class="mu">지난달</span></span>`; }
+
+let D=null,TODO=null,T=[];
+const CK='staybut_desk_checked';
+function ckGet(){ try{return JSON.parse(localStorage.getItem(CK)||'{}')}catch(e){return{}} }
+function ckSet(o){ try{localStorage.setItem(CK,JSON.stringify(o))}catch(e){} }
+function ckPrune(keys){ const o=ckGet(),n={}; keys.forEach(k=>{ if(o[k]) n[k]=o[k]; }); ckSet(n); }
+// 체크리스트 한 줄
+function row(key,title,sub,when,nowFlag){
+  const on=ckGet()[key]?' on':'';
+  return `<div class="ck${on}" data-ck="${key}"><div class="box">${on?'✓':''}</div><div class="cm"><div class="ct">${title}</div>${sub?`<div class="cs">${sub}</div>`:''}</div>${when?`<span class="cw${nowFlag?' now':''}">${when}</span>`:''}</div>`;
+}
+function list(head,rows,emptyTitle,emptyNote){
+  if(!rows.length) return `<div class="empty"><b>${emptyTitle}</b>${emptyNote||''}</div>`;
+  return `<div class="cklist"><div class="ckh"><span>${head}</span><span>${rows.length}건</span></div>${rows.join('')}</div>`;
+}
+function build(){
+  const M=D.months||[], ym=(D.now||'').slice(0,7);
+  const idx=M.findIndex(m=>m.ym===ym), cur=M[idx]||{}, prev=idx>0?M[idx-1]:null, next=M[idx+1];
+  const ch=D.byChannel||[], vac=D.vacant||[], cl=D.cleaning||[], tod=D.today||[],
+        up=D.upcoming||[], ig=D.integrity||[];
+  const igCnt=ig.reduce((a,x)=>a+Number(x.cnt||0),0), unass=Number(D.unassigned||0);
+  const maxRev=Math.max(1,...ch.map(x=>x.rev||0));
+  const cin=tod.filter(x=>x.kind==='체크인'), cout=tod.filter(x=>x.kind==='체크아웃');
+  const pend=cl.filter(x=>x.st!=='completed'), noWho=cl.filter(x=>x.who==='미배정');
+
+  $('today').textContent=(D.now||'').slice(0,10).replace(/-/g,' · ')+' '+(D.dow||'');
+  $('stamp').textContent='업데이트 '+(D.now||'');
+  const issues=igCnt+unass+noWho.length;
+  $('chips').innerHTML=`
+    <div class="chip ${issues?'alert':''}"><b>${issues}</b><span>확인 필요</span></div>
+    <div class="chip"><b>${cur.occ!=null?cur.occ+'%':'—'}</b><span>이번 달 가동률</span></div>
+    <div class="chip"><b>${man(cur.rev)}</b><span>이번 달 매출(만원)</span></div>
+    <div class="chip"><b>${cin.length}·${cout.length}</b><span>오늘 IN·OUT</span></div>`;
+
+  // ── 할 일 목록 만들기 (0건짜리는 아예 안 만든다)
+  const t_ops=[], t_price=[], t_clean=[], t_data=[];
+  const keys=[];
+  const K=k=>{ keys.push(k); return k; };
+
+  (TODO.today||[]).forEach(x=>{
+    const k=K('in-'+x.kind+'-'+x.rm+'-'+(D.now||'').slice(0,10));
+    t_ops.push(row(k, esc(x.rm||'미배정')+'호 '+esc(x.kind),
+      esc(x.ch||'—'), x.kind==='체크인'?'오늘 IN':'오늘 OUT', true));
+  });
+  (TODO.unassigned||[]).forEach(x=>{
+    const k=K('un-'+x.code);
+    t_ops.push(row(k, '객실 배정 — '+esc(x.code),
+      esc(x.ch)+' · 체크인 '+esc(x.ci)+' · 102호/202호 중 선택', '정해야 함', true));
+  });
+
+  (TODO.pricing||[]).forEach(x=>{
+    const k=K('pr-'+x.id);
+    t_price.push(row(k, esc(x.d)+' ('+esc(x.dow)+') '+esc(x.rm)+'호 '+x.pct+'%',
+      'CMS 재고 화면에서 네 채널 모두 반영 · '+esc(x.step)+' 구간',
+      'D-'+x.lead, x.lead<=3));
+  });
+
+  (TODO.cleaning||[]).forEach(x=>{
+    const k=K('cl-'+x.id);
+    t_clean.push(row(k, esc(x.rm)+'호 청소',
+      x.who? esc(x.who) : '<b>담당 미배정 — 지정 필요</b>',
+      x.today?'오늘':esc(x.d), x.today));
+  });
+
+  (TODO.integrity||[]).forEach(x=>{
+    const k=K('ig-'+x.code+'-'+x.cnt);
+    t_data.push(row(k, esc(x.label||x.code)+' '+x.cnt+'건',
+      esc(x.detail), '확인', true));
+  });
+  ckPrune(keys);
+
+  const nOps=t_ops.length, nPr=t_price.length, nCl=t_clean.length, nDt=t_data.length;
+
+  T=[
+  {id:"ops",ic:"ops",kicker:"Operations",name:"운영팀",desc:"오늘 들고남 · 배정 · PMS",
+   state:nOps?`할 일 ${nOps}건`:"할 일 없음", lv:nOps?"warn":"ok", badge:nOps?String(nOps):"✓",
+   secs:[
+   {t:"오늘 할 일",m:nOps?"warn":"ok",tag:"체크하면 지워집니다",open:1,
+    body:list('운영팀 체크리스트',t_ops,'오늘 할 일이 없습니다','들고 나는 방도, 배정할 예약도 없습니다.')},
+   {t:"PMS 일마감 · 그룹체크아웃",m:"ok",tag:"매일 09:32 자동",
+    body:`<p class="n">제가 자동으로 합니다. 순서는 ① 일마감 → 「마감」 → 확인 ② 객실현황 → 미결산내역 → 그룹체크아웃 ③ 예약 점검.</p>
+      <p class="n"><b>그룹체크아웃 전에 목록을 먼저 읽습니다.</b> 아직 묵고 있는 손님이나 진짜 미수금이 섞여 있으면 누르지 않고 멈춥니다.</p>
+      <p class="n">PC 크롬이 켜져 있고 PMS 로그인이 살아 있어야 합니다.</p>`},
+   {t:"다음 2주 예약",m:"ok",tag:"참고",
+    body:(D.upcoming||[]).length?`<div class="rows"><div class="rh"><div class="c1">체크인</div><div class="c3">호실</div><div class="c2">채널</div></div>
+      ${(D.upcoming||[]).map(u=>`<div class="r ${u.today?'hl':''}"><div class="c1">${esc(u.ci)} (${esc(u.dow)}) <span class="mu">${u.nt}박</span></div>
+        <div class="c3">${esc(u.rm)}</div><div class="c2 mu">${esc(u.ch)}</div></div>`).join('')}</div>`
+      :`<p class="n">앞으로 2주 예약이 없습니다.</p>`}]},
+
+  {id:"price",ic:"price",kicker:"Revenue & Pricing",name:"매출분석 · 프라이싱팀",
+   desc:"요금 조정 · 매출 · 빈방",
+   state:nPr?`조정할 것 ${nPr}건`:`${ym.slice(5)}월 ${man(cur.rev)}만원 · ${cur.occ!=null?cur.occ+'%':'—'}`,
+   lv:nPr?"warn":"ok", badge:nPr?String(nPr):"✓",
+   kpi:`<div class="kpis">
+     <div class="kpi wide"><div class="lb">이번 달 매출 · ${esc(ym)}</div>
+       <div class="vl">${man(cur.rev)}<small>만원</small></div>${diff(cur.rev,prev&&prev.rev)}</div>
+     <div class="kpi"><div class="lb">가동률</div><div class="vl">${cur.occ!=null?cur.occ:'—'}<small>%</small></div>${diff(cur.occ,prev&&prev.occ)}</div>
+     <div class="kpi"><div class="lb">객단가</div><div class="vl">${man(cur.adr)}<small>만</small></div>${diff(cur.adr,prev&&prev.adr)}</div></div>`,
+   secs:[
+   {t:"지금 조정할 요금",m:nPr?"warn":"ok",tag:"매시간 자동 감시",open:1,
+    body:list('프라이싱 체크리스트',t_price,'지금 조정할 게 없습니다',
+      '빈방이 D-5 안으로 들어오면 여기에 자동으로 쌓입니다. D-1·당일은 올리지도 내리지도 않습니다.')},
+   {t:"다음 2주 빈방",m:"ok",tag:"참고",
+    body:vac.length?`<div class="rows"><div class="rh"><div class="c1">날짜</div><div class="c2">빈 방</div><div class="c3">D-</div></div>
+      ${vac.map(v=>`<div class="r ${v.lead<=5?'hl':''}"><div class="c1">${esc(v.d)} (${esc(v.dow)})</div>
+        <div class="c2">${v.rooms.map(r=>esc(r)+'호').join(' · ')}</div>
+        <div class="c3 ${v.lead<=5?'dn':'mu'}">D-${v.lead}</div></div>`).join('')}</div>`
+      :`<p class="n">앞으로 2주 빈방이 없습니다. 만실입니다.</p>`},
+   {t:"이번 달 채널별 매출",m:"ok",tag:"참고",
+    body:ch.length?`<div class="rows"><div class="rh"><div class="c1">채널</div><div class="c2">매출(만원)</div><div class="c3">박</div></div>
+      ${ch.map(c=>`<div class="r"><div class="c1">${esc(c.ch)}<div class="bar" style="width:${Math.round(c.rev/maxRev*100)}%;margin-top:5px"></div></div>
+        <div class="c2">${man(c.rev)}</div><div class="c3 mu">${c.sold}</div></div>`).join('')}</div>`
+      :`<p class="n">이번 달 판매 기록이 없습니다.</p>`},
+   {t:"월별 추이",m:"ok",tag:"참고",
+    body:`<div class="rows"><div class="rh"><div class="c1">월</div><div class="c2">매출(만원)</div><div class="c3">가동</div><div class="c3">객단가</div></div>
+      ${M.filter(m=>m.sold>3).map(m=>`<div class="r ${m.ym===ym?'hl':''}"><div class="c1">${esc(m.ym)}</div>
+        <div class="c2">${man(m.rev)}</div><div class="c3 mu">${m.occ}%</div><div class="c3 mu">${man(m.adr)}</div></div>`).join('')}</div>
+      ${next&&next.sold>3?`<p class="n">다음 달(${esc(next.ym)})은 현재까지 <b>${man(next.rev)}만원 · 가동률 ${next.occ}%</b> 예약돼 있습니다.</p>`:''}`},
+   {t:"리드타임 기준",m:"ok",tag:"최근 120일 분석",
+    body:`<div class="rows"><div class="rh"><div class="c1">예약 시점</div><div class="c3">건수</div><div class="c2">평균 단가</div></div>
+      <div class="r"><div class="c1">당일 ~ D-1</div><div class="c3 mu">56</div><div class="c2 dn">150,023</div></div>
+      <div class="r"><div class="c1">D-2 ~ D-5</div><div class="c3 mu">60</div><div class="c2 mu">144,669</div></div>
+      <div class="r"><div class="c1">D-6 ~ D-14</div><div class="c3 mu">74</div><div class="c2">163,946</div></div>
+      <div class="r"><div class="c1">D-15 이상</div><div class="c3 mu">93</div><div class="c2">182,382</div></div></div>
+      <p class="n"><b>D-5 이내가 전체의 41%</b>입니다. 당일~D-1 이 D-2~5 보다 비싸서 <b>막판에는 안 내립니다.</b></p>
+      <p class="n">채널 수수료 — 에어비앤비 15.5% · 익스피디아 18.0% · 아고다 18.7% · 부킹닷컴 20.5%</p>`}]},
+
+  {id:"clean",ic:"clean",kicker:"Housekeeping",name:"청소관리팀",desc:"오늘·내일 청소",
+   state:nCl?`남은 청소 ${nCl}건`:"할 일 없음", lv:nCl?"warn":"ok", badge:nCl?String(nCl):"✓",
+   secs:[
+   {t:"오늘·내일 청소",m:nCl?"warn":"ok",tag:"끝난 건 안 보입니다",open:1,
+    body:list('청소 체크리스트',t_clean,'남은 청소가 없습니다','오늘·내일 잡힌 청소가 모두 끝났거나 없습니다.')},
+   {t:"이번 주 전체",m:"ok",tag:"참고",
+    body:cl.length?`<div class="rows"><div class="rh"><div class="c1">날짜</div><div class="c2">담당</div><div class="c3">호실</div></div>
+      ${cl.map(c=>`<div class="r ${c.today?'hl':''}"><div class="c1">${esc(c.d)} (${esc(c.dow)})${c.st==='completed'?'<span class="mu"> · 완료</span>':''}</div>
+        <div class="c2 mu" style="min-width:94px">${esc(c.who)}</div><div class="c3">${esc(c.rm)}호</div></div>`).join('')}</div>`
+      :`<p class="n">이번 주 잡힌 청소가 없습니다.</p>`}]},
+
+  {id:"data",ic:"data",kicker:"Data Integrity",name:"데이터팀",desc:"어긋난 것만",
+   state:nDt?`${nDt}종 어긋남`:"이상 없음", lv:nDt?"warn":"ok", badge:nDt?String(nDt):"✓",
+   secs:[
+   {t:"확인할 것",m:nDt?"crit":"ok",tag:"열 때마다 다시 검사",open:1,
+    body:list('데이터 체크리스트',t_data,'어긋난 데이터가 없습니다',
+      '취소·중복예약·금액·배정·청소·숙소 6가지를 봤고 전부 맞습니다.')}]}
+  ];
+
+  $('teams').innerHTML=T.map(t=>`
+   <button class="team" data-id="${t.id}"><div class="ic">${svg(t.ic)}</div>
+    <div class="tmid"><span class="tk">${t.kicker}</span><div class="tn">${t.name}</div>
+     <div class="ts">${t.desc}</div><div class="tst ${t.lv}"><i></i>${t.state}</div></div>
+    <div class="bg ${t.badge==='✓'?'none':''}">${t.badge}</div></button>`).join('');
+}
+
+const home=()=>$('home'), view=()=>$('view');
+function openTeam(id){
+  const t=T.find(x=>x.id===id); if(!t) return;
+  view().innerHTML=`<div class="vbar"><button class="back" aria-label="뒤로"><svg viewBox="0 0 24 24">${I.back}</svg></button>
+    <div class="vt"><span class="k">${t.kicker}</span><b>${t.name}</b></div></div>
+   <div class="screen" style="padding-top:16px">${t.kpi||''}
+    ${t.secs.map(s=>`<details class="sec" ${s.open?'open':''}>
+      <summary><span class="mk ${s.m}">${s.m==='ok'?'✓':'!'}</span>
+       <span class="st">${s.t}<span class="tg">${s.tag||''}</span></span></summary>
+      <div class="sb">${s.body}</div></details>`).join('')}
+    <div class="hint">열 때마다 다시 읽습니다. 위쪽 「다시 읽기」로 새로고침하세요.</div></div>`;
+  home().classList.add('hide'); view().classList.add('show'); view().scrollTop=0;
+  view().querySelector('.back').onclick=()=>{view().classList.remove('show');home().classList.remove('hide');};
+}
+
+async function load(){
+  $('teams').innerHTML='<div class="load">불러오는 중…</div>';
+  try{ const [a,b]=await Promise.all([rpc('desk_summary'),rpc('desk_todo')]);
+        D=a; TODO=b; build(); }
+  catch(e){
+    if(/로그인|만료|JWT|권한/.test(e.message||'')){ setSess(null); showLogin(); return; }
+    $('teams').innerHTML=`<div class="err"><b>데이터를 불러오지 못했습니다.</b><br>${esc(e.message)}</div>`;
+  }
+}
+function showLogin(){ $('login').classList.add('show'); $('app').style.display='none'; }
+function showApp(){ $('login').classList.remove('show'); $('app').style.display=''; load(); }
+
+$('lform').addEventListener('submit',async ev=>{
+  ev.preventDefault(); const b=$('lbtn'); b.disabled=true; b.textContent='확인 중…';
+  $('lerr').classList.remove('show');
+  try{ await login($('em').value.trim(),$('pw').value); $('pw').value=''; showApp(); }
+  catch(e){ $('lerr').textContent=e.message; $('lerr').classList.add('show'); }
+  finally{ b.disabled=false; b.textContent='로그인'; }
+});
+$('reload').onclick=load;
+$('logout').onclick=()=>{ setSess(null); location.reload(); };
+document.addEventListener('click',e=>{
+  const ck=e.target.closest('.ck');
+  if(ck){ const k=ck.dataset.ck, o=ckGet();
+    if(o[k]){ delete o[k]; ck.classList.remove('on'); ck.querySelector('.box').textContent=''; }
+    else { o[k]=1; ck.classList.add('on'); ck.querySelector('.box').textContent='✓'; }
+    ckSet(o); return; }
+  const b=e.target.closest('.team'); if(b) openTeam(b.dataset.id);
+});
+
+getSess()? showApp() : showLogin();
+</script>
+</body>
+</html>
