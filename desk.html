@@ -319,12 +319,7 @@ function build(){
       : iso;
   }
   $('stamp').textContent='업데이트 '+(D.now||'');
-  const issues=igCnt+unass+noWho.length;
-  $('chips').innerHTML=`
-    <div class="chip ${issues?'alert':''}"><b>${issues}</b><span>확인 필요</span></div>
-    <div class="chip"><b>${cur.occ!=null?cur.occ+'%':'—'}</b><span>이번 달 가동률</span></div>
-    <div class="chip"><b>${man(cur.gmv)}</b><span>이번 달 거래액(만원)</span></div>
-    <div class="chip"><b>${cin.length}·${cout.length}</b><span>오늘 IN·OUT</span></div>`;
+
 
   // ── 할 일 목록 만들기 (0건짜리는 아예 안 만든다)
   const t_ops=[], t_price=[], t_clean=[], t_data=[];
@@ -365,7 +360,9 @@ function build(){
   });
   ckPrune(keys);
 
-  const nOps=t_ops.length, nPr=t_price.length, nCl=t_clean.length, nDt=t_data.length;
+  // 체크한 건 뺀 '남은 개수' — 카드 배지·요약도 이 숫자를 쓴다
+  const _done=ckGet(), left=a=>a.filter(x=>!_done[x.k]).length;
+  const nOps=left(t_ops), nPr=left(t_price), nCl=left(t_clean), nDt=left(t_data);
 
   T=[
   {id:"ops",ic:"ops",kicker:"Operations",name:"운영팀",desc:"오늘 들고남 · 배정 · PMS",
@@ -439,6 +436,13 @@ function build(){
     body:list('데이터 체크리스트',t_data,'어긋난 데이터가 없습니다',
       '취소·중복예약·금액·배정·청소·숙소 6가지를 봤고 전부 맞습니다.')}]}
   ];
+
+  const ISSUES=nOps+nPr+nCl+nDt;
+  $('chips').innerHTML=`
+    <div class="chip ${ISSUES?'alert':''}"><b>${ISSUES}</b><span>확인 필요</span></div>
+    <div class="chip"><b>${cur.occ!=null?cur.occ+'%':'—'}</b><span>이번 달 가동률</span></div>
+    <div class="chip"><b>${man(cur.gmv)}</b><span>이번 달 거래액(만원)</span></div>
+    <div class="chip"><b>${cin.length}·${cout.length}</b><span>오늘 IN·OUT</span></div>`;
 
   $('teams').innerHTML=T.map(t=>`
    <button class="team" data-id="${t.id}"><div class="ic">${svg(t.ic)}</div>
