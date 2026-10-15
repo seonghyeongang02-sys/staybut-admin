@@ -21,7 +21,7 @@ html,body{overflow-x:hidden}
 body{margin:0;background:var(--paper);color:var(--sb-black);
   font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif;
   font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
-.app{max-width:760px;margin:0 auto;min-height:100vh;position:relative;overflow:hidden;background:var(--paper)}
+.app{max-width:560px;margin:0 auto;min-height:100vh;position:relative;overflow:hidden;background:var(--paper)}
 .screen{padding:0 18px calc(44px + env(safe-area-inset-bottom))}
 #home.hide{display:none}
 #view{display:none;position:absolute;inset:0;background:var(--paper);overflow-y:auto;-webkit-overflow-scrolling:touch}
@@ -51,8 +51,9 @@ body{margin:0;background:var(--paper);color:var(--sb-black);
 .rule{height:1.4px;background:var(--sb-black);margin:14px 0 0}
 h1{font-size:30px;font-weight:800;margin:16px 0 0;letter-spacing:-.9px;line-height:1.02}
 h1 .sm{display:block;font-size:14px;font-weight:600;letter-spacing:.03em;margin-top:7px;color:var(--sb-g1)}
-.date{margin-top:12px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--sb-g2);font-weight:650;
-  display:flex;justify-content:space-between;align-items:center;gap:10px}
+.date{margin-top:14px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.date .dt{font-size:19px;font-weight:800;letter-spacing:-.5px;color:var(--sb-black);font-variant-numeric:tabular-nums}
+.date .dt .dw{font-size:14px;font-weight:700;margin-left:6px;color:var(--sb-g2)}
 .mini{border:1.2px solid var(--sb-g3);background:transparent;border-radius:var(--pill);
   padding:5px 11px;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
   color:var(--sb-g2);cursor:pointer;font-family:inherit}
@@ -141,12 +142,18 @@ p.n:last-child{margin-bottom:0} p.n b{color:var(--sb-black);font-weight:750}
 
 /* 넓은 화면에서는 2열로 — 폰에서는 그대로 1열 */
 @media (min-width:640px){
-  .teams{display:grid;grid-template-columns:1fr 1fr;gap:11px}
   .kpis{grid-template-columns:repeat(3,1fr)}
   .kpi.wide{grid-column:1/-1}
-  .layer .node{margin-bottom:0}
-  .layer .grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px;align-items:start}
 }
+
+/* 완료 영역 */
+.donewrap{margin:-4px 0 12px}
+.donebtn{width:100%;border:1.2px dashed var(--sb-g3);background:transparent;padding:10px;
+  font-size:11.5px;font-weight:700;color:var(--sb-g2);cursor:pointer;font-family:inherit;
+  letter-spacing:.04em}
+.donebtn:active{background:var(--paper-2)}
+.donelist{border:1.2px solid var(--hair);border-top:none}
+.donelist .ck{cursor:pointer}
 
 /* 체크리스트 */
 .ck{display:flex;align-items:flex-start;gap:12px;padding:14px 13px;
@@ -155,7 +162,8 @@ p.n:last-child{margin-bottom:0} p.n b{color:var(--sb-black);font-weight:750}
 .ck:active{background:var(--paper-2)}
 .box{width:21px;height:21px;flex:0 0 auto;border:1.6px solid var(--black);margin-top:1px;
   display:grid;place-items:center;font-size:13px;font-weight:800;line-height:1}
-.ck.on .box{background:var(--black);color:#fff}
+.ck.on .box{background:var(--sb-green);border-color:var(--sb-green);color:#fff}
+.ck.on .box::after{content:'✓'}
 .ck.on .ct{color:var(--sb-g3);text-decoration:line-through}
 .cm{flex:1;min-width:0}
 .ct{font-size:14.5px;font-weight:700;letter-spacing:-.3px;line-height:1.4}
@@ -201,7 +209,7 @@ p.n:last-child{margin-bottom:0} p.n b{color:var(--sb-black);font-weight:750}
       </div>
       <div class="rule"></div>
       <h1>Desk<span class="sm">오늘의 운영 — 느낌표 뜬 곳만 보시면 됩니다</span></h1>
-      <div class="date"><span id="today">—</span>
+      <div class="date"><span class="dt" id="today">—</span>
         <span><button class="mini" id="reload">다시 읽기</button>
         <button class="mini" id="logout">로그아웃</button></span></div>
     </div>
@@ -270,19 +278,29 @@ function diff(c,p){ if(c==null||p==null) return '<span class="df z">비교 없�
   const d=Math.round((c-p)/p*1000)/10, cls=d>0?'p':(d<0?'m':'z');
   return `<span class="df ${cls}">${d>0?'▲':(d<0?'▼':'–')} ${Math.abs(d)}% <span class="mu">지난달</span></span>`; }
 
-let D=null,TODO=null,T=[];
+let D=null,TODO=null,T=[],CUR=null;
 const CK='staybut_desk_checked';
 function ckGet(){ try{return JSON.parse(localStorage.getItem(CK)||'{}')}catch(e){return{}} }
 function ckSet(o){ try{localStorage.setItem(CK,JSON.stringify(o))}catch(e){} }
 function ckPrune(keys){ const o=ckGet(),n={}; keys.forEach(k=>{ if(o[k]) n[k]=o[k]; }); ckSet(n); }
-// 체크리스트 한 줄
+// 체크리스트 한 줄 — {열쇠, html} 로 돌려준다
 function row(key,title,sub,when,nowFlag){
-  const on=ckGet()[key]?' on':'';
-  return `<div class="ck${on}" data-ck="${key}"><div class="box">${on?'✓':''}</div><div class="cm"><div class="ct">${title}</div>${sub?`<div class="cs">${sub}</div>`:''}</div>${when?`<span class="cw${nowFlag?' now':''}">${when}</span>`:''}</div>`;
+  const html=`<div class="ck" data-ck="${key}"><div class="box"></div>`+
+    `<div class="cm"><div class="ct">${title}</div>${sub?`<div class="cs">${sub}</div>`:''}</div>`+
+    (when?`<span class="cw${nowFlag?' now':''}">${when}</span>`:'')+`</div>`;
+  return {k:key, html};
 }
-function list(head,rows,emptyTitle,emptyNote){
-  if(!rows.length) return `<div class="empty"><b>${emptyTitle}</b>${emptyNote||''}</div>`;
-  return `<div class="cklist"><div class="ckh"><span>${head}</span><span>${rows.length}건</span></div>${rows.join('')}</div>`;
+function list(head,items,emptyTitle,emptyNote){
+  const done=ckGet();
+  const todo=items.filter(x=>!done[x.k]), fin=items.filter(x=>done[x.k]);
+  if(!items.length) return `<div class="empty"><b>${emptyTitle}</b>${emptyNote||''}</div>`;
+  if(!todo.length) return `<div class="empty"><b>다 끝냈습니다</b>${fin.length}건 완료</div>`+
+    `<div class="donewrap"><button class="donebtn" data-toggle="1">완료 ${fin.length}건 보기</button>`+
+    `<div class="donelist" hidden>${fin.map(x=>x.html.replace('class="ck"','class="ck on"')).join('')}</div></div>`;
+  return `<div class="cklist"><div class="ckh"><span>${head}</span><span>${todo.length}건</span></div>`+
+    todo.map(x=>x.html).join('')+`</div>`+
+    (fin.length?`<div class="donewrap"><button class="donebtn" data-toggle="1">완료 ${fin.length}건 보기</button>`+
+      `<div class="donelist" hidden>${fin.map(x=>x.html.replace('class="ck"','class="ck on"')).join('')}</div></div>`:'');
 }
 function build(){
   const M=D.months||[], ym=(D.now||'').slice(0,7);
@@ -294,7 +312,13 @@ function build(){
   const cin=tod.filter(x=>x.kind==='체크인'), cout=tod.filter(x=>x.kind==='체크아웃');
   const pend=cl.filter(x=>x.st!=='completed'), noWho=cl.filter(x=>x.who==='미배정');
 
-  $('today').textContent=(D.now||'').slice(0,10).replace(/-/g,' · ')+' '+(D.dow||'');
+  {
+    const iso=(D.now||'').slice(0,10), p=iso.split('-');
+    const KO={MON:'월',TUE:'화',WED:'수',THU:'목',FRI:'금',SAT:'토',SUN:'일'};
+    $('today').innerHTML = p.length===3
+      ? `${Number(p[1])}월 ${Number(p[2])}일<span class="dw">${KO[D.dow]||''}요일</span>`
+      : iso;
+  }
   $('stamp').textContent='업데이트 '+(D.now||'');
   const issues=igCnt+unass+noWho.length;
   $('chips').innerHTML=`
@@ -310,8 +334,10 @@ function build(){
 
   (TODO.today||[]).forEach(x=>{
     const k=K('in-'+x.kind+'-'+x.rm+'-'+(D.now||'').slice(0,10));
-    t_ops.push(row(k, esc(x.rm||'미배정')+'호 '+esc(x.kind),
-      esc(x.ch||'—'), x.kind==='체크인'?'오늘 IN':'오늘 OUT', true));
+    t_ops.push(row(k,
+      esc(x.rm||'미배정')+'호 '+(x.kind==='체크인'?'체크인 메시지 전송':'체크아웃 확인'),
+      esc(x.ch||'—')+(x.kind==='체크인'?' · 입실 안내와 도어락 번호':' · 퇴실 확인 후 청소 연결'),
+      x.kind==='체크인'?'오늘 IN':'오늘 OUT', true));
   });
   (TODO.unassigned||[]).forEach(x=>{
     const k=K('un-'+x.code);
@@ -328,8 +354,8 @@ function build(){
 
   (TODO.cleaning||[]).forEach(x=>{
     const k=K('cl-'+x.id);
-    t_clean.push(row(k, esc(x.rm)+'호 청소',
-      x.who? esc(x.who) : '<b>담당 미배정 — 지정 필요</b>',
+    t_clean.push(row(k, esc(x.rm)+'호 청소 담당 배정',
+      esc(x.d)+' ('+esc(x.dow)+') 청소 — 아직 담당이 없습니다',
       x.today?'오늘':esc(x.d), x.today));
   });
 
@@ -363,7 +389,7 @@ function build(){
    state:nPr?`조정할 것 ${nPr}건`:`${ym.slice(5)}월 ${man(cur.rev)}만원 · ${cur.occ!=null?cur.occ+'%':'—'}`,
    lv:nPr?"warn":"ok", badge:nPr?String(nPr):"✓",
    kpi:`<div class="kpis">
-     <div class="kpi wide"><div class="lb">이번 달 매출 · ${esc(ym)}</div>
+     <div class="kpi wide"><div class="lb">이번 달 객실매출 · ${esc(ym)} <span style="text-transform:none;letter-spacing:0;font-weight:500">숙박일 기준</span></div>
        <div class="vl">${man(cur.rev)}<small>만원</small></div>${diff(cur.rev,prev&&prev.rev)}</div>
      <div class="kpi"><div class="lb">가동률</div><div class="vl">${cur.occ!=null?cur.occ:'—'}<small>%</small></div>${diff(cur.occ,prev&&prev.occ)}</div>
      <div class="kpi"><div class="lb">객단가</div><div class="vl">${man(cur.adr)}<small>만</small></div>${diff(cur.adr,prev&&prev.adr)}</div></div>`,
@@ -396,11 +422,11 @@ function build(){
       <p class="n"><b>D-5 이내가 전체의 41%</b>입니다. 당일~D-1 이 D-2~5 보다 비싸서 <b>막판에는 안 내립니다.</b></p>
       <p class="n">채널 수수료 — 에어비앤비 15.5% · 익스피디아 18.0% · 아고다 18.7% · 부킹닷컴 20.5%</p>`}]},
 
-  {id:"clean",ic:"clean",kicker:"Housekeeping",name:"청소관리팀",desc:"오늘·내일 청소",
-   state:nCl?`남은 청소 ${nCl}건`:"할 일 없음", lv:nCl?"warn":"ok", badge:nCl?String(nCl):"✓",
+  {id:"clean",ic:"clean",kicker:"Housekeeping",name:"청소관리팀",desc:"이번 주 담당 배정",
+   state:nCl?`담당 미배정 ${nCl}건`:"배정 다 됨", lv:nCl?"warn":"ok", badge:nCl?String(nCl):"✓",
    secs:[
-   {t:"오늘·내일 청소",m:nCl?"warn":"ok",tag:"끝난 건 안 보입니다",open:1,
-    body:list('청소 체크리스트',t_clean,'남은 청소가 없습니다','오늘·내일 잡힌 청소가 모두 끝났거나 없습니다.')},
+   {t:"담당 배정이 필요한 청소",m:nCl?"warn":"ok",tag:"이번 주 (월~일)",open:1,
+    body:list('배정 체크리스트',t_clean,'이번 주 배정이 다 끝났습니다','담당자 없는 청소가 없습니다.')},
    {t:"이번 주 전체",m:"ok",tag:"참고",
     body:cl.length?`<div class="rows"><div class="rh"><div class="c1">날짜</div><div class="c2">담당</div><div class="c3">호실</div></div>
       ${cl.map(c=>`<div class="r ${c.today?'hl':''}"><div class="c1">${esc(c.d)} (${esc(c.dow)})${c.st==='completed'?'<span class="mu"> · 완료</span>':''}</div>
@@ -425,6 +451,7 @@ function build(){
 const home=()=>$('home'), view=()=>$('view');
 function openTeam(id){
   const t=T.find(x=>x.id===id); if(!t) return;
+  CUR=id;
   view().innerHTML=`<div class="vbar"><button class="back" aria-label="뒤로"><svg viewBox="0 0 24 24">${I.back}</svg></button>
     <div class="vt"><span class="k">${t.kicker}</span><b>${t.name}</b></div></div>
    <div class="screen" style="padding-top:16px">${t.kpi||''}
@@ -459,11 +486,18 @@ $('lform').addEventListener('submit',async ev=>{
 $('reload').onclick=load;
 $('logout').onclick=()=>{ setSess(null); location.reload(); };
 document.addEventListener('click',e=>{
+  const tg=e.target.closest('.donebtn');
+  if(tg){ const w=tg.nextElementSibling; const on=w.hasAttribute('hidden');
+    if(on){ w.removeAttribute('hidden'); tg.textContent='완료 숨기기'; }
+    else { w.setAttribute('hidden',''); tg.textContent='완료 '+w.children.length+'건 보기'; }
+    return; }
   const ck=e.target.closest('.ck');
   if(ck){ const k=ck.dataset.ck, o=ckGet();
-    if(o[k]){ delete o[k]; ck.classList.remove('on'); ck.querySelector('.box').textContent=''; }
-    else { o[k]=1; ck.classList.add('on'); ck.querySelector('.box').textContent='✓'; }
-    ckSet(o); return; }
+    if(o[k]) delete o[k]; else o[k]=1;
+    ckSet(o);
+    ck.style.transition='opacity .18s'; ck.style.opacity='0';
+    setTimeout(()=>{ build(); if(CUR) openTeam(CUR); },180);
+    return; }
   const b=e.target.closest('.team'); if(b) openTeam(b.dataset.id);
 });
 
