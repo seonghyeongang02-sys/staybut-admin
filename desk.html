@@ -73,17 +73,20 @@ h1{font-size:20px;font-weight:700;margin:0;letter-spacing:-.3px}
 
 /* 목록 */
 .teams{display:flex;flex-direction:column;gap:8px}
-.team{display:flex;align-items:center;gap:12px;width:100%;text-align:left;background:#fff;
-  border:1px solid var(--line);border-radius:var(--r-lg);padding:14px;font:inherit;color:inherit;
-  cursor:pointer;box-shadow:var(--sh)}
+.team{display:flex;align-items:center;gap:13px;width:100%;text-align:left;background:#fff;
+  border:1px solid var(--line);border-radius:var(--r-lg);padding:15px 14px;font:inherit;color:inherit;
+  cursor:pointer;box-shadow:var(--sh);transition:border-color .12s}
+.team:hover{border-color:#D1D5DB}
+.team .chev{flex:0 0 auto;color:var(--tx3);font-size:17px;line-height:1;margin-left:2px}
 .team:active{background:var(--line2)}
-.ic{width:38px;height:38px;flex:0 0 auto;border-radius:var(--r);background:var(--line2);
-  display:grid;place-items:center}
-.ic svg{width:20px;height:20px;stroke:var(--tx2);fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.ic{width:42px;height:42px;flex:0 0 auto;border-radius:var(--r);background:#fff;
+  border:1px solid var(--line);display:grid;place-items:center}
+.ic svg{width:23px;height:23px;stroke:#111827;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
 .tmid{flex:1;min-width:0}
 .tk{display:none}
-.tn{font-weight:650;font-size:15.5px;letter-spacing:-.2px}
-.ts{font-size:13px;color:var(--tx2);margin-top:1px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tn{font-weight:700;font-size:16px;letter-spacing:-.2px;color:#111827}
+
+.ts{font-size:13px;color:var(--tx2);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tst{font-size:13px;font-weight:600;margin-top:5px;display:flex;align-items:center;gap:6px;color:var(--tx2)}
 .tst i{width:6px;height:6px;border-radius:50%;flex:0 0 auto;background:var(--tx3)}
 .tst.warn{color:var(--red)} .tst.warn i{background:var(--red)}
@@ -272,10 +275,16 @@ async function rpc(name,retry){
 
 const P='<circle cx="8" cy="7.4" r="3"/><path d="M3 20v-1.7a5 5 0 0 1 10 0V20"/>';
 const I={
- ops:P+'<rect x="15.6" y="8.4" width="6" height="8" rx=".8"/><path d="M17.3 11.9l1.1 1.1 2.1-2.2"/>',
- price:P+'<path d="M15.6 16.6l2.1-2.4 1.7 1.7 2.1-2.8"/><path d="M20.2 13.1h1.8v1.8"/>',
- clean:P+'<path d="M18.5 7v5.4"/><path d="M15.9 12.4h5.2l.9 5.6h-7z"/><path d="M17.3 12.4V18M19.7 12.4V18"/>',
- data:P+'<circle cx="18.2" cy="11.4" r="3"/><path d="M20.5 13.7l1.9 2"/>',
+ ops:'<path d="M7 21v-1.6a4 4 0 0 1 4-4h.6"/><circle cx="11" cy="7.5" r="3.4"/>'+
+     '<rect x="14" y="13" width="7.2" height="8.2" rx="1.2"/>'+
+     '<path d="M16.2 13v-1.4h2.8V13"/><path d="M15.9 17.1l1.3 1.3 2.3-2.5"/>',
+ price:'<path d="M7 21v-1.6a4 4 0 0 1 4-4h.6"/><circle cx="11" cy="7.5" r="3.4"/>'+
+     '<path d="M14.4 20.4l2.4-3 2 2 2.5-3.6"/><path d="M19.6 15.2h2v2"/>',
+ clean:'<path d="M7 21v-1.6a4 4 0 0 1 4-4h.6"/><circle cx="11" cy="7.5" r="3.4"/>'+
+     '<path d="M18 11v4.4"/><path d="M15.4 15.4h5.2l.8 5.4h-6.8z"/>'+
+     '<path d="M16.8 15.4v5.4M19.2 15.4v5.4"/>',
+ data:'<path d="M7 21v-1.6a4 4 0 0 1 4-4h.6"/><circle cx="11" cy="7.5" r="3.4"/>'+
+     '<circle cx="17.8" cy="15.4" r="3.4"/><path d="M20.3 17.9l1.8 1.9"/>',
  back:'<path d="M15 19l-7-7 7-7"/>'
 };
 const svg=k=>`<svg viewBox="0 0 24 24">${I[k]}</svg>`;
@@ -334,12 +343,10 @@ function build(){
   const keys=[];
   const K=k=>{ keys.push(k); return k; };
 
-  (TODO.today||[]).forEach(x=>{
+  (TODO.today||[]).filter(x=>x.kind==='체크인').forEach(x=>{
     const k=K('in-'+x.kind+'-'+x.rm+'-'+(D.now||'').slice(0,10));
-    t_ops.push(row(k,
-      esc(x.rm||'미배정')+'호 '+(x.kind==='체크인'?'체크인 메시지 전송':'체크아웃 확인'),
-      esc(x.ch||'—')+(x.kind==='체크인'?' · 입실 안내와 도어락 번호':' · 퇴실 확인 후 청소 연결'),
-      x.kind==='체크인'?'오늘 IN':'오늘 OUT', true));
+    t_ops.push(row(k, esc(x.rm||'미배정')+'호 체크인 메시지 전송',
+      esc(x.ch||'—')+' · 입실 안내와 도어락 번호', '오늘', true));
   });
   (TODO.unassigned||[]).forEach(x=>{
     const k=K('un-'+x.code);
@@ -373,11 +380,11 @@ function build(){
   const nOps=left(t_ops), nPr=left(t_price), nCl=left(t_clean), nDt=left(t_data);
 
   T=[
-  {id:"ops",ic:"ops",kicker:"Operations",name:"운영팀",desc:"오늘 체크인·체크아웃 · 배정 · PMS",
+  {id:"ops",ic:"ops",kicker:"Operations",name:"운영팀",desc:"오늘 체크인 · 배정 · PMS",
    state:nOps?`할 일 ${nOps}건`:"할 일 없음", lv:nOps?"warn":"ok", badge:nOps?String(nOps):"✓",
    secs:[
    {t:"오늘 할 일",m:nOps?"warn":"ok",tag:"체크하면 지워집니다",open:1,
-    body:list('운영팀 체크리스트',t_ops,'오늘 할 일이 없습니다','오늘 체크인·체크아웃도, 배정할 예약도 없습니다.')},
+    body:list('운영팀 체크리스트',t_ops,'오늘 할 일이 없습니다','오늘 체크인도, 배정할 예약도 없습니다.')},
    {t:"PMS 일마감 · 그룹체크아웃",m:"ok",tag:"매일 09:32 자동",
     body:`<p class="n">제가 자동으로 합니다. 순서는 ① 일마감 → 「마감」 → 확인 ② 객실현황 → 미결산내역 → 그룹체크아웃 ③ 예약 점검.</p>
       <p class="n"><b>그룹체크아웃 전에 목록을 먼저 읽습니다.</b> 아직 묵고 있는 손님이나 진짜 미수금이 섞여 있으면 누르지 않고 멈춥니다.</p>
@@ -450,13 +457,14 @@ function build(){
     <div class="chip ${ISSUES?'alert':''}"><b>${ISSUES}</b><span>확인 필요</span></div>
     <div class="chip"><b>${cur.occ!=null?cur.occ+'%':'—'}</b><span>이번 달 가동률</span></div>
     <div class="chip"><b>${man(cur.gmv)}</b><span>이번 달 거래액(만원)</span></div>
-    <div class="chip"><b>${cin.length}·${cout.length}</b><span>오늘 IN·OUT</span></div>`;
+    <div class="chip"><b>${cin.length}</b><span>오늘 체크인</span></div>`;
 
   $('teams').innerHTML=T.map(t=>`
    <button class="team" data-id="${t.id}"><div class="ic">${svg(t.ic)}</div>
     <div class="tmid"><span class="tk">${t.kicker}</span><div class="tn">${t.name}</div>
      <div class="ts">${t.desc}</div><div class="tst ${t.lv}"><i></i>${t.state}</div></div>
-    <div class="bg ${t.badge==='✓'?'none':''}">${t.badge}</div></button>`).join('');
+    <div class="bg ${t.badge==='✓'?'none':''}">${t.badge}</div>
+    <span class="chev">›</span></button>`).join('');
 }
 
 const home=()=>$('home'), view=()=>$('view');
