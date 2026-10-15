@@ -3,6 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <title>STAY BUT 자동화 지도</title>
 <style>
 :root{
@@ -15,14 +18,14 @@
 *{box-sizing:border-box}
 html,body{overflow-x:hidden}
 body{margin:0;background:var(--paper);color:var(--black);
-  font-family:"Pretendard",-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif;
+  font-family:"Pretendard Variable","Pretendard",-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans KR",sans-serif;
   font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
-.wrap{max-width:760px;margin:0 auto;padding:26px 18px 60px}
+.wrap{max-width:560px;margin:0 auto;padding:26px 18px 60px}
 
-.wm{font-size:16px;font-weight:800;letter-spacing:.14em}
+.wm{font-size:16px;font-weight:800;letter-spacing:.08em}
 .wm .h{letter-spacing:0}
 .rule{height:1.4px;background:var(--black);margin:13px 0 0}
-h1{font-size:27px;font-weight:800;margin:15px 0 0;letter-spacing:-.9px;line-height:1.05}
+h1{font-size:27px;font-weight:800;margin:15px 0 0;letter-spacing:-.4px;line-height:1.05}
 h1 .sm{display:block;font-size:13.5px;font-weight:600;margin-top:7px;color:var(--g1);letter-spacing:.02em}
 
 /* 범례 */
@@ -37,7 +40,7 @@ h1 .sm{display:block;font-size:13.5px;font-weight:600;margin-top:7px;color:var(-
 /* 층 */
 .layer{margin-top:22px}
 .lh{display:flex;align-items:baseline;gap:9px;margin-bottom:10px}
-.lh .no{font-size:9.5px;font-weight:800;letter-spacing:.14em;color:var(--g2);
+.lh .no{font-size:11px;font-weight:800;letter-spacing:.08em;color:var(--g2);
   border:1.2px solid var(--g3);border-radius:var(--pill);padding:3px 9px}
 .lh b{font-size:16px;font-weight:800;letter-spacing:-.4px}
 .lh .d{font-size:12px;color:var(--g2);font-weight:500}
@@ -46,9 +49,9 @@ h1 .sm{display:block;font-size:13.5px;font-weight:600;margin-top:7px;color:var(-
 .node.pc{border-color:var(--coral);background:#F2F2F0}
 .nt{display:flex;align-items:center;gap:9px;font-weight:750;font-size:14.5px;letter-spacing:-.3px}
 .nt .dot{margin-right:0}
-.when{margin-left:auto;font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
+.when{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;
   color:var(--g2);white-space:nowrap}
-.nd{font-size:12.5px;color:var(--g1);margin-top:6px;line-height:1.6}
+.nd{font-size:13.5px;color:var(--g1);margin-top:6px;line-height:1.6}
 .nd code{background:var(--paper2);padding:1px 5px;font-size:11.5px;font-family:ui-monospace,Menlo,monospace}
 
 .arrow{text-align:center;color:var(--g3);font-size:15px;line-height:1;margin:-3px 0 6px}
@@ -61,23 +64,20 @@ h1 .sm{display:block;font-size:13.5px;font-weight:600;margin-top:7px;color:var(-
 .jr:last-child{border-bottom:none}
 .jr .c1{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .jr .c2{flex:0 0 auto;font-size:10.5px;font-weight:700;color:var(--g2);font-variant-numeric:tabular-nums}
-.jh{background:var(--paper);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+.jh{background:var(--paper);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
   font-weight:700;color:var(--g1);border-bottom:1.2px solid var(--black)}
 
 .note{border-left:3px solid var(--black);padding:2px 0 2px 13px;margin:14px 0 0;
-  font-size:12.5px;color:var(--g1);line-height:1.65}
+  font-size:13.5px;color:var(--g1);line-height:1.65}
 .note b{color:var(--black)}
 .foot{margin-top:32px;border-top:1.2px solid var(--black);padding-top:14px;
-  font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--g2);font-weight:700;text-align:center}
+  font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--g2);font-weight:700;text-align:center}
 .foot .mo{display:block;margin-top:5px;letter-spacing:.03em;text-transform:none;font-weight:500;font-size:11.5px}
 
 /* 넓은 화면에서는 2열로 — 폰에서는 그대로 1열 */
 @media (min-width:640px){
-  .teams{display:grid;grid-template-columns:1fr 1fr;gap:11px}
   .kpis{grid-template-columns:repeat(3,1fr)}
   .kpi.wide{grid-column:1/-1}
-  .layer .node{margin-bottom:0}
-  .layer .grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px;align-items:start}
 }
 </style>
 </head>
