@@ -2503,13 +2503,10 @@
           <!-- ③ 2단 -->
           <!-- 오늘의 StayBUT — 카드 틀 없이 전폭. 안에 이미 제목이 있어 겹치지 않게 합니다. -->
           <span id="ops-today-label" style="display:none;"></span>
-          <div class="ceo-g2" style="grid-template-columns:1.6fr 1fr;">
-            <div class="home-cards-row"><div id="today-summary"></div></div>
-            <div class="ceo-card">
-              <div class="ceo-ch"><b>다음 2주 빈방</b><span class="ceo-tag" id="vac-count"></span></div>
-              <div class="ceo-cb" style="padding:0;"><div id="ops-vacancy"></div></div>
-            </div>
-          </div>
+          <!-- [2026-10-15] 「다음 2주 빈방」 제거 — 오늘 입·퇴실을 전폭으로 봅니다. -->
+          <div class="home-cards-row" style="margin-bottom:14px;"><div id="today-summary"></div></div>
+          <div id="ops-vacancy" style="display:none;"></div>
+          <span id="vac-count" style="display:none;"></span>
           <!-- ④ 3단 -->
           <div class="ceo-g3">
             <div class="ceo-card">
@@ -15464,6 +15461,68 @@ html:not([data-theme="dark"]) .mobile-search-fab:hover { background: var(--accen
 /* 채널 「전체」 칩 — 검정 칠 → 파랑 */
 html:not([data-theme="dark"]) .channel-chip--all.active {
   background: var(--accent) !important; border-color: var(--accent) !important; color: #fff !important;
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   [2026-10-15] 모바일 표준화 — 이번에 새로 만든 카드/표에 폰 규칙이
+   하나도 없어서 PC 값(15px 여백·14.5px 제목)이 그대로 나왔습니다.
+   기존 모바일 규칙과 같은 기준으로 맞춥니다.
+     · 768px 이하 = 폰        · 380px 이하 = 작은 폰(SE 등)
+   되돌리려면 이 블록만 지우세요.
+   ══════════════════════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* 카드 — 여백·모서리를 한 단 줄입니다 */
+  .ceo-card { border-radius: 10px; margin-bottom: 10px; }
+  .ceo-ch   { padding: 11px 12px; gap: 8px; }
+  .ceo-ch b { font-size: 13.5px; }
+  .ceo-tag  { font-size: 11px; }
+  .ceo-cb   { padding: 11px 12px; }
+  .ceo-g2, .ceo-g3 { grid-template-columns: 1fr; gap: 10px; margin-bottom: 10px; }
+
+  /* 카드 안 표 — 좌우 여백을 카드와 맞추고 글씨를 줄입니다 */
+  .ceo-tbl       { font-size: 12.5px; }
+  .ceo-tbl th    { padding: 8px 12px; font-size: 11px; }
+  .ceo-tbl td    { padding: 9px 12px; }
+
+  /* 오늘 4칸 — 폰에서는 2×2 */
+  #view-dashboard .dash-strip { flex-wrap: wrap !important; }
+  #view-dashboard .dash-strip > div {
+    flex: 1 1 50% !important; min-width: 50% !important;
+    padding: 12px !important;
+    border-right: 1px solid var(--border) !important;
+    border-bottom: 1px solid var(--border) !important;
+  }
+  #view-dashboard .dash-strip > div:nth-child(2n) { border-right: 0 !important; }
+  #view-dashboard .dash-strip > div:nth-last-child(-n+2) { border-bottom: 0 !important; }
+
+  /* KPI 4칸 — 폰에서는 2×2 */
+  #view-dashboard .stat-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  #view-dashboard .stat-card { padding: 13px !important; }
+  #view-dashboard .stat-value { font-size: 20px !important; }
+  #view-dashboard .stat-label { font-size: 11.5px !important; }
+
+  /* 오늘 카드 머리 */
+  #view-dashboard .today-card-head { padding: 11px 12px; }
+  #view-dashboard .today-card-title { font-size: 13.5px; }
+  #view-dashboard .today-card-date { font-size: 12px; }
+  #view-dashboard .today-card > *:not(.today-card-head) { padding-left: 12px; padding-right: 12px; }
+
+  /* 매출분석 카드도 같은 기준 */
+  #analysis-sheet .as-c  { border-radius: 10px; }
+  #analysis-sheet .as-ch { padding: 11px 12px; }
+  #analysis-sheet .as-ct { font-size: 13.5px; }
+  #analysis-sheet .as-c > *:not(.as-ch) { padding-left: 12px; padding-right: 12px; }
+  #analysis-sheet .as-cards { gap: 10px; }
+}
+
+@media (max-width: 380px) {
+  .ceo-ch   { padding: 10px 11px; }
+  .ceo-ch b { font-size: 13px; }
+  .ceo-cb   { padding: 10px 11px; }
+  .ceo-tbl  { font-size: 12px; }
+  .ceo-tbl th, .ceo-tbl td { padding: 8px 11px; }
+  #view-dashboard .stat-value { font-size: 18px !important; }
+  #view-dashboard .dash-strip > div { padding: 10px !important; }
 }
 </style>
   <script>
