@@ -15801,8 +15801,8 @@ async function renderOpsVacancy() {
   if (!out.length) { host.innerHTML = '<div style="padding:16px 15px;color:var(--text-muted);font-size:13px;">앞으로 2주 동안 빈방이 없습니다.</div>'; return; }
   const dow = ['일','월','화','수','목','금','토'];
   host.innerHTML = `<table>
-    <tr><th>날짜</th><th>빈방</th><th class="n">D-</th></tr>
-    ${out.map(r => `<tr><td>${r.d.getMonth()+1}/${r.d.getDate()} <span style="color:var(--text-muted)">(${dow[r.d.getDay()]})</span></td><td>${r.names}</td><td class="n">${r.dminus}</td></tr>`).join('')}
+    <tr><th>날짜</th><th>빈방</th><th class="n">남은 기간</th></tr>
+    ${out.map(r => `<tr><td>${r.d.getMonth()+1}/${r.d.getDate()} <span style="color:var(--text-muted)">(${dow[r.d.getDay()]})</span></td><td>${r.names}</td><td class="n">${r.dminus === 0 ? '오늘' : 'D-' + r.dminus}</td></tr>`).join('')}
   </table>`;
 }
 
