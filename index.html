@@ -11,7 +11,10 @@
   <meta name="application-name" content="StayBUT" />
   <link rel="manifest" href="manifest.json" />
   <meta name="mobile-web-app-capable" content="yes" />
-  <title>Stay BUT 성수 · Admin</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" as="style" crossorigin
+  href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<title>Stay BUT 성수 · Admin</title>
 
   <!-- ══════════════════════════════════════════════════════════════
        테마  [2026-09-11]
@@ -145,7 +148,10 @@
     body.viewer-mode #app-view button[onclick*="save"],
     body.viewer-mode #app-view button[onclick*="Save"] { display:none !important; }
     body.viewer-mode .viewer-ribbon { display:flex !important; }
-  </style>
+  
+    /* [2026-10-15] 비품관리 탭 숨김 — 쓰지 않습니다. 되살리려면 이 블록만 지우세요. */
+    .nav-item[data-view="supplies"] { display: none !important; }
+</style>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
@@ -181,25 +187,25 @@
       --primary-900: #0d0d0f;
 
       /* ─── Status colors ─── */
-      --success-50:  #ecf6e9;
-      --success-500: #4a8a3d;
-      --success-600: #3a7030;
-      --warning-50:  #fef6e3;
-      --warning-500: #c89a3f;
-      --warning-600: #a37e2b;
-      --danger-50:   #fbeae3;
-      --danger-500:  #b85c3f;
-      --danger-600:  #9a4a32;
-      --info-50:     #e8f0fa;
-      --info-500:    #3b6db5;
-      --info-600:    #2e5891;
+      --success-50: #ECFDF5;
+      --success-500: #059669;
+      --success-600: #047857;
+      --warning-50: #FFFBEB;
+      --warning-500: #D97706;
+      --warning-600: #B45309;
+      --danger-50: #FEF2F2;
+      --danger-500: #DC2626;
+      --danger-600: #B91C1C;
+      --info-50: #EFF6FF;
+      --info-500: #2563EB;
+      --info-600: #1D4ED8;
 
       /* ─── Semantic aliases (legacy compatibility) ─── */
-      --bg:            #ffffff;
-      --surface:       #ffffff;
+      --bg: #F4F5F7;
+      --surface: #FFFFFF;
       /* [2026-10-02] 회색 바탕을 없앱니다. 구역은 색이 아니라 테두리로 나눕니다. */
-      --surface-soft:  #ffffff;
-      --surface-elevated: #ffffff;
+      --surface-soft: #FAFBFC;
+      --surface-elevated: #FFFFFF;
       /* [2026-09-18] 테두리를 한 단 진하게 올렸습니다.
          전 : --border 가 neutral-200(#e8e6e1) 이라 흰 배경과 거의 같은 밝기였습니다.
               표 줄·카드 테두리·입력칸이 전부 이 값을 쓰는데, 있으나 마나 한 선이라
@@ -208,16 +214,16 @@
               이 두 값만 직접 지정합니다 (다른 곳에서 neutral-200 을 배경으로 쓰기 때문). */
       /* [2026-10-02] 바탕이 전부 흰색이 됐으니 구분은 선이 전부 합니다.
          --border 를 확실히 보이는 밝기로 올리고, 카드·표 바깥선은 검정으로 씁니다. */
-      --border:        #c7c7c7;
-      --border-strong: #000000;
+      --border: #E5E7EB;
+      --border-strong: #D1D5DB;
       /* 타임라인 지난 날짜 — 흰 바탕보다 한 단 어둡게 */
-      --tl-past:       #f2f2f2;
+      --tl-past: #F9FAFB;
       --text:          var(--neutral-900);
       --text-soft:     var(--neutral-600);
       --text-muted:    var(--neutral-500);
-      --accent:        var(--primary-700);
-      --accent-hover:  var(--primary-800);
-      --accent-soft:   var(--primary-50);
+      --accent: #2563EB;
+      --accent-hover: #1D4ED8;
+      --accent-soft: #EFF6FF;
       --danger:        var(--danger-500);
       --warning:       var(--warning-500);
 
@@ -228,14 +234,14 @@
          색을 여기로 빼서 테마를 따라가게 합니다. 마크업과 기능은 그대로입니다.
          ──────────────────────────────────────────────────────────── */
       /* [2026-10-02] 사이드바도 흰 바탕으로. 선택된 메뉴만 검정으로 채웁니다. */
-      --sidebar:           #ffffff;
-      --sidebar-line:      #000000;
-      --sidebar-fg:        var(--neutral-900);
-      --sidebar-fg-dim:    var(--neutral-700);
-      --sidebar-fg-faint:  var(--neutral-400);
-      --sidebar-hover:     #f5f5f5;
-      --sidebar-active-bg: #000000;
-      --sidebar-active-fg: #ffffff;
+      --sidebar: #111827;
+      --sidebar-line: #1F2937;
+      --sidebar-fg: #FFFFFF;
+      --sidebar-fg-dim: #9CA3AF;
+      --sidebar-fg-faint: #6B7280;
+      --sidebar-hover: rgba(255,255,255,.08);
+      --sidebar-active-bg: rgba(255,255,255,.14);
+      --sidebar-active-fg: #FFFFFF;
 
       /* ─── Radius scale ─── */
       --radius-xs: 4px;
@@ -249,8 +255,8 @@
 
       /* ─── Shadow scale (refined for depth) ─── */
       --shadow-xs:  0 1px 2px rgba(26, 24, 21, 0.04);
-      --shadow-sm:  0 1px 3px rgba(26, 24, 21, 0.06), 0 1px 2px rgba(26, 24, 21, 0.04);
-      --shadow:     0 4px 12px -2px rgba(26, 24, 21, 0.08), 0 2px 4px -1px rgba(26, 24, 21, 0.04);
+      --shadow-sm: 0 1px 3px rgba(16,24,40,.08), 0 1px 2px rgba(16,24,40,.04);
+      --shadow: 0 1px 3px rgba(16,24,40,.09), 0 1px 2px rgba(16,24,40,.05);
       --shadow-md:  0 8px 20px -4px rgba(26, 24, 21, 0.10), 0 3px 6px -2px rgba(26, 24, 21, 0.05);
       --shadow-lg:  0 16px 32px -8px rgba(26, 24, 21, 0.12), 0 6px 12px -4px rgba(26, 24, 21, 0.06);
       --shadow-xl:  0 24px 48px -12px rgba(26, 24, 21, 0.18);
@@ -430,7 +436,7 @@
 
     html, body {
       height: 100%;
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
       background: var(--bg);
       color: var(--text);
       font-size: 14px;
@@ -713,7 +719,7 @@
     }
 
     .sidebar-brand {
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
       font-size: 17px;
       font-weight: 800;
       letter-spacing: -0.03em;
@@ -729,7 +735,7 @@
 
     .sidebar-brand small {
       display: block;
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
       font-size: 11px;
       font-weight: 400;
       color: var(--text-muted);
@@ -1736,10 +1742,10 @@
     .ch-logo { display:inline-flex; align-items:center; gap:4px; height:30px; padding:0 10px; border-radius:8px; font-weight:800; font-size:13px; flex-shrink:0; white-space:nowrap; letter-spacing:-0.02em; line-height:1; }
     .ch-logo svg { width:16px; height:16px; display:block; }
     .ch-logo-air { background:#FF385C; color:#ffffff; } .ch-logo-air svg { fill:#ffffff; }
-    .ch-logo-bk { background:#003580; color:#ffffff; font-family:-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif; }
-    .ch-logo-agoda { background:#5C2D91; color:#ffffff; font-family:-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif; letter-spacing:0; }
+    .ch-logo-bk { background:#003580; color:#ffffff; font-family:'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif; }
+    .ch-logo-agoda { background:#5C2D91; color:#ffffff; font-family:'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif; letter-spacing:0; }
         /* [2026-09-01] 익스피디아 — 노랑. 흰 글자는 안 보여서 글자를 익스피디아 남색으로 씁니다. */
-    .ch-logo-expedia { background:#FFC72C; color:#191E3B; font-family:-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif; letter-spacing:0; }
+    .ch-logo-expedia { background:#FFC72C; color:#191E3B; font-family:'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif; letter-spacing:0; }
     .ch-logo-other { background:var(--neutral-200,#eceae6); color:var(--text-secondary,#666); }
     .review-queue-main { min-width: 0; }
     .review-queue-head {
@@ -1963,7 +1969,7 @@
     }
 
     .page-title {
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
       font-size: 22px;
       font-weight: 700;
       letter-spacing: -0.03em;
@@ -2008,7 +2014,7 @@
     }
 
     .stat-value {
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
       font-size: 26px;
       font-weight: 700;
       font-variant-numeric: tabular-nums;
@@ -2182,7 +2188,7 @@
     }
 
     .today-value {
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
       font-size: 22px;
       font-weight: 500;
       font-variant-numeric: tabular-nums;
@@ -2713,7 +2719,7 @@
     }
 
     .room-card-number {
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
       font-size: 22px;
       font-weight: 600;
       letter-spacing: -0.02em;
@@ -2756,7 +2762,7 @@
     }
 
     .room-stat-value {
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
       font-size: 15px;
       font-weight: 600;
       display: block;
@@ -2940,7 +2946,7 @@
       display: inline-flex; align-items: center; gap: 4px;
       height: 22px; padding: 0 8px; border-radius: 6px;
       font-weight: 800; font-size: 12px; letter-spacing: -0.02em; line-height: 1;
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
     }
     .import-tab .tab-logo svg { width: 14px; height: 14px; display: block; }
     .import-tab .tab-fmt { margin-left: 6px; font-size: 12px; font-weight: 700; color: var(--text-soft); }
@@ -3076,7 +3082,7 @@
     }
 
     .cleaning-month-label {
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
       font-size: 20px;
       font-weight: 500;
       letter-spacing: -0.02em;
@@ -4731,7 +4737,7 @@
       background: rgba(255,255,255,0.07) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23999999' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='11' cy='11' r='7'/><path d='m21 21-4.3-4.3'/></svg>") no-repeat 10px center;
       color: #fff;
       transition: all var(--transition);
-    }
+     background:rgba(255,255,255,.07); color:#fff; border-color:rgba(255,255,255,.14); }
     .sidebar-search-input::placeholder {
       color: rgba(255,255,255,0.4);
       font-size: 11.5px;
@@ -5017,7 +5023,7 @@
     /* 비품 검색 */
     .supply-search-wrap { position: relative; margin: 14px 0 6px; }
     .supply-search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; opacity: 0.6; }
-    .supply-search-input { width: 100%; box-sizing: border-box; padding: 10px 14px 10px 34px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif; background: var(--surface); }
+    .supply-search-input { width: 100%; box-sizing: border-box; padding: 10px 14px 10px 34px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif; background: var(--surface); }
     .supply-search-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(24,95,165,0.12); }
     /* 카테고리 그룹 카드 */
     .supply-group { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 14px; background: var(--surface); }
@@ -5961,7 +5967,7 @@
       cursor: pointer;
       border-bottom: 2px solid transparent;
       transition: all 0.15s;
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
     }
     .lang-tab:hover { color: var(--text); }
     .lang-tab.active {
@@ -5981,7 +5987,7 @@
       cursor: pointer;
       border-radius: var(--radius);
       transition: all var(--transition);
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
       flex: 1;
       white-space: nowrap;
     }
@@ -6163,7 +6169,7 @@
       border-bottom: 1px solid var(--border);
     }
     .cleaning-day-detail-title {
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
       font-size: 18px;
       font-weight: 500;
       letter-spacing: -0.02em;
@@ -6275,7 +6281,7 @@
       position: absolute; z-index: 9999; background: var(--surface);
       border: 1px solid var(--border); border-radius: 12px;
       box-shadow: 0 12px 34px rgba(0,0,0,0.16); padding: 12px; width: 272px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
     }
     .dp-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 6px; }
     .dp-title { display: flex; gap: 4px; }
@@ -6622,7 +6628,7 @@
       letter-spacing: -0.03em;
       color: var(--text);
       font-variant-numeric: tabular-nums;
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
     }
     .booking-stat-value .unit {
       font-size: 15px;
@@ -6645,7 +6651,7 @@
       border-bottom: 1px solid var(--border);
     }
     .cleaning-day-title {
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
       font-size: 18px;
       font-weight: 500;
       letter-spacing: -0.02em;
@@ -6654,7 +6660,7 @@
       font-size: 12px;
       color: var(--text-muted);
       margin-left: 6px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
       font-weight: 400;
     }
     .cleaning-day-count {
@@ -6714,7 +6720,7 @@
       justify-content: space-between;
     }
     .cleaning-card-room {
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
       font-size: 22px;
       font-weight: 600;
       letter-spacing: -0.02em;
@@ -6792,7 +6798,7 @@
       border-radius: var(--radius-lg);
     }
     .cleaner-header-title {
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
       font-size: 18px;
       font-weight: 600;
     }
@@ -6884,7 +6890,7 @@
     }
 
     .empty-state h3 {
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
       font-weight: 500;
       font-size: 18px;
       color: var(--text-soft);
@@ -6944,7 +6950,7 @@
     }
 
     .modal-title {
-      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+      font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
       font-size: 18px;
       font-weight: 700;
       letter-spacing: -0.02em;
@@ -8909,10 +8915,6 @@
             <textarea id="booking-notes" class="form-textarea"></textarea>
           </div>
 
-          <div class="form-group">
-            <label class="form-label">채팅 접속코드</label>
-            <input type="text" id="booking-chat-code" class="form-input" readonly placeholder="—" style="background:var(--surface-soft); letter-spacing:2px;" />
-          </div>
         </form>
       </div>
       <div class="modal-footer">
@@ -9049,7 +9051,7 @@
           <input type="text" id="cleaning-share-extra" class="form-input" placeholder="예: 늦은 체크아웃 +1만" />
         </div>
         <label class="form-label" style="margin-top:10px; display:block;">미리보기</label>
-        <pre id="cleaning-share-preview" style="white-space:pre-wrap; word-break:break-word; background: var(--surface-soft, #f5f7f2); border:1px solid var(--border, #e2e6dc); border-radius:10px; padding:14px; font-family:-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', Roboto, sans-serif; font-size:13px; line-height:1.65; margin:6px 0 0; color: var(--text-soft, #333);"></pre>
+        <pre id="cleaning-share-preview" style="white-space:pre-wrap; word-break:break-word; background: var(--surface-soft, #f5f7f2); border:1px solid var(--border, #e2e6dc); border-radius:10px; padding:14px; font-family:'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', Roboto, sans-serif; font-size:13px; line-height:1.65; margin:6px 0 0; color: var(--text-soft, #333);"></pre>
         <div style="display:flex; gap:8px; margin-top:14px;">
           <button class="btn btn-secondary" id="copy-cleaning-share" style="flex:1;">📋 텍스트</button>
           <button class="btn btn-primary" id="save-cleaning-img" style="flex:1;">🖼 이미지 다운로드</button>
@@ -9155,7 +9157,7 @@
           <button class="lang-tab" data-lang="ja">🇯🇵 日本語</button>
         </div>
 
-        <textarea id="checkin-msg-preview" readonly style="width:100%; min-height: 320px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', Roboto, sans-serif; font-size: 13px; line-height: 1.65; resize: vertical; background: #fafafa;"></textarea>
+        <textarea id="checkin-msg-preview" readonly style="width:100%; min-height: 320px; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: 'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', Roboto, sans-serif; font-size: 13px; line-height: 1.65; resize: vertical; background: #fafafa;"></textarea>
 
         <div id="checkin-msg-warning" style="display:none; margin-top: 12px; padding: 10px 12px; background: #fff8e1; border-left: 3px solid var(--warning); border-radius: 4px; font-size: 12px; line-height: 1.5;"></div>
       </div>
@@ -10588,7 +10590,7 @@ function channelLogo_(name, dim) {
     return `<div class="ch-logo ch-logo-air" style="${d}" title="에어비앤비"><svg viewBox="0 0 24 24" fill="#FF385C" aria-hidden="true"><path d="M12 1.5c-1.7 0-2.9 1.2-4 3.4C6.3 8.2 3 15 3 18c0 2.5 1.9 4.5 4.4 4.5 1.6 0 3.1-.9 4.6-2.6 1.5 1.7 3 2.6 4.6 2.6 2.5 0 4.4-2 4.4-4.5 0-3-3.3-9.8-5-13.1-1.1-2.2-2.3-3.4-4-3.4zm0 2c.7 0 1.4.7 2.2 2.3 1.6 3.1 4.8 9.7 4.8 12.2 0 1.4-1 2.5-2.4 2.5-1.1 0-2.3-.8-3.6-2.4 2.2-2.8 3.5-5.3 3.5-7 0-2-1.5-3.6-3.5-3.6S8 9.3 8 11.3c0 1.7 1.3 4.2 3.5 7-1.3 1.6-2.5 2.4-3.6 2.4-1.4 0-2.4-1.1-2.4-2.5 0-2.5 3.2-9.1 4.8-12.2C10.6 4.2 11.3 3.5 12 3.5zm0 5.8c1 0 1.6.7 1.6 1.9 0 1.1-.9 3-1.6 4.1-.7-1.1-1.6-3-1.6-4.1 0-1.2.6-1.9 1.6-1.9z"/></svg>airbnb</div>`;
   }
   if (cb.key === 'booking') {
-    return `<div class="ch-logo ch-logo-bk" style="${d}" title="부킹닷컴">부킹닷컴</div>`;
+    return `<div class="ch-logo ch-logo-bk" style="${d}" title="부킹닷컴">Booking.com</div>`;
   }
   if (cb.key === 'agoda') {
     return `<div class="ch-logo ch-logo-agoda" style="${d}" title="아고다">agoda</div>`;
@@ -12158,6 +12160,16 @@ function applyHashView_() {
   let v = (location.hash || '').replace(/^#/, '').trim();
   v = v.replace(/^view=/, '').replace(/^\/+/, '').trim();
   if (!v) return false;
+
+  // [2026-10-15] 점검 알림을 누르면 '#integrity' 로 들어옵니다.
+  //   이건 사이드바 메뉴가 아니라 모달이라 nav-item 으로는 못 찾습니다.
+  //   (예전에는 chat-push 가 알림 주소를 무조건 /console.html 로 박아서,
+  //    점검 알림을 눌러도 엉뚱하게 상담 콘솔이 열렸습니다.)
+  if (v === 'integrity') {
+    try { checkAndOpenIntegrity_(); } catch (e) {}
+    return true;
+  }
+
   const el = document.querySelector(`.nav-item[data-view="${v}"]`);
   if (!el) return false;
   el.click();
@@ -15833,11 +15845,9 @@ const AS_CARDS = [
   { k: 'dow',   t: '요일별 체크인',    w: 1 },
   { k: 'lead',  t: '예약 리드타임',    w: 1 },
   { k: 'nat',   t: '국적 분포',        w: 1 },
-  /* [2026-09-17] 「판매 일보」카드 제거.
-     화면에서만 뺍니다 — 계산 함수와 엑셀 내보내기의 '판매일보' 시트는 그대로 둡니다.
-     회계팀에 넘기는 엑셀에는 계속 들어갑니다.
-     다시 보시려면 아래 한 줄의 주석만 풀면 됩니다.
-     { k: 'daily', t: '판매 일보',        w: 3 },                                    */
+  /* [2026-10-15] 「판매 일보」 다시 켬 — 아래로 길어져도 수치를 다 보고 싶다고 하셨습니다.
+     숨기려면 아래 한 줄을 다시 주석 처리하면 됩니다. */
+  { k: 'daily', t: '판매 일보',        w: 3 },
 ];
 
 window.sheetSetWeek = function (w) { __sheetWeek = w; renderSheet(); };
@@ -17865,7 +17875,7 @@ function openBookingModal(booking = null) {
     $('#booking-status').value = booking.booking_status;
     $('#booking-payment').value = booking.payment_status;
     $('#booking-notes').value = booking.notes || '';
-    $('#booking-chat-code').value = booking.chat_code || '';
+    /* [2026-10-15] 채팅 접속코드 칸 삭제 — QR 자체가 인증이라 쓰지 않습니다. */
     $('#delete-booking').style.display = 'inline-flex';
   } else {
     $('#booking-modal-title').textContent = '예약 추가';
@@ -18188,6 +18198,23 @@ async function checkDataConsistency_() {
     bookingId: r.booking_code ? (codeToId[r.booking_code] || null) : null,
     detail: `${RH(r.room_number || '?')} · ${r.scheduled_date || ''}${r.booking_code ? ' · 예약 ' + r.booking_code : ''}${r.detail ? ' — ' + r.detail : ''}`,
   }));
+
+  // [2026-10-15] 예약 쪽 정합성도 같이 봅니다.
+  //   위 뷰(v_cleaning_integrity)는 「예약 ↔ 청소」만 봅니다. 그래서
+  //   "상태는 취소인데 취소시각이 비어 매출에 살아있는 것으로 잡히는" 건 같은
+  //   예약 자체의 문제는 아무도 못 보고 있었습니다. (8/27 에 3건 생겨 있었음)
+  //   DB 함수 ops_integrity_items 가 취소반쪽·중복예약·금액0원·객실미배정·숙소섞임을 봅니다.
+  try {
+    const { data: ops, error: opsErr } = await db.rpc('ops_integrity_items');
+    if (!opsErr && Array.isArray(ops)) {
+      ops.filter(r => r.code !== '청소누락')   // 청소 누락은 위 뷰가 이미 보고 있으니 중복 제외
+         .forEach(r => issues.push({
+           type: r.label || r.code,
+           bookingId: r.booking_id || null,
+           detail: r.detail || '',
+         }));
+    }
+  } catch (_) {}
 
   return { count: issues.length, issues };
 }
@@ -21380,7 +21407,7 @@ function buildCleaningCardNode_(task, manager, extra) {
     : { title:'청소 안내', stay:'투숙기간', next:'다음 손님', towel:'수건', water:'생수', bed:'차렵이불', fee:'청소비', extra:'추가요금', unit:`${s.guests}명 · ${s.nights}박`, dow:koDow, week:week };
 
   const node = document.createElement('div');
-  node.style.cssText = "width:340px;box-sizing:border-box;background:var(--surface);border-radius:0;overflow:hidden;font-family:-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;";
+  node.style.cssText = "width:340px;box-sizing:border-box;background:var(--surface);border-radius:0;overflow:hidden;font-family:'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;";
   node.innerHTML = `
     <div style="background:#16161b;color:#fff;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;">
       <span style="font-size:22px;font-weight:800;white-space:nowrap;flex:0 0 auto;">${md} (${L.dow})</span>
@@ -25190,11 +25217,58 @@ checkAuth();
     }
 
     /* ── 사이드바: 흰 바탕, 선택된 메뉴만 검정 ── */
-    html:not([data-theme="dark"]) .sidebar { border-right: 1px solid #000; }
+    html:not([data-theme="dark"]) .sidebar { border-right: 1px solid var(--sidebar-line); }
 
     /* ── 카드가 떠오르는 효과 제거 — 선으로 충분합니다 ── */
     html:not([data-theme="dark"]) .stat-card:hover { transform: none; box-shadow: none; }
-  </style>
+  
+/* [2026-10-15] 청소관리 달력 — 좁은 폭(601~900px)에서 기존 모바일 버전과 동일하게 렌더.
+   모바일(<=600px) 규칙이 안 걸리는 구간이라 실장님 이름이 한 글자씩 쪼개졌습니다.
+   되돌리려면 이 블록만 지우세요. */
+@media (min-width: 601px) and (max-width: 900px){
+  .cleaning-cal-grid, .booking-cal-grid { padding: 8px; gap: 3px; }
+  .cleaning-cal-day, .booking-cal-day { min-height: 60px; padding: 3px 3px 2px; gap: 2px; }
+  .cleaning-cal-date, .booking-cal-date { font-size: 11px; }
+  .cleaning-cal-dow, .booking-cal-dow { font-size: 10px; padding: 2px 0 4px; }
+  .cal-tasks-list, #cleaning-cal-grid .cal-tasks-list, #cleaner-cal-grid .cal-tasks-list { gap: 2px; }
+  .cal-task-line, #cleaning-cal-grid .cal-task-line, #cleaner-cal-grid .cal-task-line { font-size: 9px; padding: 1px 3px; gap: 2px; line-height: 1.2; }
+  .cal-task-room, #cleaning-cal-grid .cal-task-room, #cleaner-cal-grid .cal-task-room { font-size: 9.5px; }
+  .cal-task-meta, #cleaning-cal-grid .cal-task-meta, #cleaner-cal-grid .cal-task-meta { display: none; }
+  .cal-task-dot, #cleaning-cal-grid .cal-task-dot, #cleaner-cal-grid .cal-task-dot { width: 5px; height: 5px; }
+  .cal-task-time-small { display: none; }
+}
+/* 어떤 폭에서도 한글이 한 글자씩 쪼개지지 않게 */
+.cal-task-line, .cal-task-room, .cal-task-meta { white-space: nowrap; }
+.cal-task-meta { overflow: hidden; text-overflow: ellipsis; }
+
+/* ===== [2026-10-15] CEO 시안(admin_ceo.html) 수치 적용 · B 다크 사이드바 유지 =====
+   사이드바는 B안 그대로. 본문 카드/KPI만 시안 값으로 맞춥니다.
+   청소관리(#view-cleaning/#view-cleaner)는 기존 그대로 두므로 여기서 제외합니다.
+   되돌리려면 이 블록만 지우세요. */
+:where(main) .stat-card {
+  border-radius: 10px;
+  padding: 16px;
+  border: 1px solid #E5E7EB;
+  box-shadow: 0 1px 2px rgba(16,24,40,.05);
+}
+:where(main) .stat-card:hover { transform: none; box-shadow: 0 1px 3px rgba(16,24,40,.08),0 1px 2px rgba(16,24,40,.04); }
+:where(main) .stat-label {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #6B7280;
+  text-transform: none;
+  letter-spacing: 0;
+  margin-bottom: 7px;
+}
+:where(main) .stat-value {
+  font-size: 26px; font-weight: 700; letter-spacing: -.8px;
+  font-variant-numeric: tabular-nums; line-height: 1.12;
+}
+:where(main) .page-subtitle { font-size: 13.5px; color: #6B7280; margin-top: 2px; }
+:where(main) .section-label { color: #9CA3AF; font-size: 11px; letter-spacing: .02em; }
+
+/* 청소관리 달력 영역은 위 폭 보정 외에 손대지 않습니다. */
+</style>
   <script>
     (function () {
       let tc = document.getElementById('sb-toast-container');
