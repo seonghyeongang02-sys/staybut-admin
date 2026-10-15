@@ -2506,26 +2506,23 @@
           <div class="ceo-g2" style="grid-template-columns:1.6fr 1fr;">
             <div class="home-cards-row"><div id="today-summary"></div></div>
             <div class="ceo-card">
-              <div class="ceo-ch"><b>영역별 상태</b><span class="ceo-tag">실시간</span></div>
-              <div class="ceo-cb" style="padding:0;"><div id="ops-area-status"></div></div>
+              <div class="ceo-ch"><b>다음 2주 빈방</b><span class="ceo-tag" id="vac-count"></span></div>
+              <div class="ceo-cb" style="padding:0;"><div id="ops-vacancy"></div></div>
             </div>
           </div>
           <!-- ④ 3단 -->
           <div class="ceo-g3">
             <div class="ceo-card">
-              <div class="ceo-ch"><b>채널 비중</b><span class="ceo-tag">건수 기준 · 누르면 예약으로</span></div>
-              <div class="ceo-cb">
-                <div id="dash-ch-bar" class="dash-stack"></div>
-                <div id="dash-ch-legend" class="dash-mix-legend"></div>
-              </div>
+              <div class="ceo-ch"><b>채널별 매출</b><span class="ceo-tag" id="ch-rev-label"></span></div>
+              <div class="ceo-cb" style="padding:0;"><div id="dash-ch-rev"></div></div>
             </div>
             <div class="ceo-card">
               <div class="ceo-ch"><b>요일별 체크인</b><span class="ceo-tag">가격·청소 배치 참고</span></div>
               <div class="ceo-cb"><div style="height:190px;"><canvas id="insight-dow" role="img" aria-label="요일별 체크인 막대"></canvas></div></div>
             </div>
             <div class="ceo-card">
-              <div class="ceo-ch"><b>다음 2주 빈방</b><span class="ceo-tag" id="vac-count"></span></div>
-              <div class="ceo-cb" style="padding:0;"><div id="ops-vacancy"></div></div>
+              <div class="ceo-ch"><b>객실별 성과</b><span class="ceo-tag" id="room-perf-period"></span></div>
+              <div class="ceo-cb"><div class="ops-room-mini-grid" id="ops-room-mini-grid"></div></div>
             </div>
           </div>
           <div class="ceo-card" style="margin-bottom:14px;">
@@ -2533,11 +2530,13 @@
             <div class="ceo-cb"><div id="dash-cleaning-week"></div></div>
           </div>
           <div class="ceo-card" style="margin-bottom:14px;">
-            <div class="ceo-ch"><b>객실별 성과</b><span class="ceo-tag" id="room-perf-period"></span></div>
-            <div class="ceo-cb"><div class="ops-room-mini-grid" id="ops-room-mini-grid"></div></div>
+            <div class="ceo-ch"><b>영역별 상태</b><span class="ceo-tag">실시간</span></div>
+            <div class="ceo-cb" style="padding:0;"><div id="ops-area-status"></div></div>
           </div>
           <!-- 아래는 화면에서 감춘 덩어리입니다. 같은 내용이 다른 탭에 있어 · 대시보드에서 또 보여줄 이유가 없지만, 채우는 코드가 이 요소들을 · 찾으므로 지우지 않고 숨겨만 둡니다. 되살리려면 style 한 줄만 지우세요. · · 이번 달 요약 / 국적별 게스트 → 매출 분석 탭 · · 예약 타임라인                → 예약 관리 탭 · · 채널 도넛 / 리드타임         → 매출 분석 탭 -->
           <div id="dash-extras" style="display:none;">
+            <div id="dash-ch-bar" class="dash-stack"></div>
+            <div id="dash-ch-legend" class="dash-mix-legend"></div>
             <div id="dash-month-label"></div>
             <div id="dash-month-summary" class="today-metrics"></div>
             <div id="dash-nat-rows"></div>
@@ -6714,6 +6713,7 @@ async function loadDashboard() {
   renderDashMix();          // [2026-09-17] 채널 비중 · 국적별 게스트
   renderOpsAreaStatus();    // [2026-10-15] 시안 「영역별 상태」
   renderOpsVacancy();       // [2026-10-15] 시안 「다음 2주 빈방」
+  renderDashChannelRevenue(); // [2026-10-15] 시안 「채널별 매출」
   // (점유율 캘린더 제거됨)
 }
 // 🏠 실시간 객실 상태 그리드 — 5객실 한눈에
@@ -15325,6 +15325,30 @@ html:not([data-theme="dark"]) #view-dashboard .today-card-head { background: #ff
   text-transform: none; letter-spacing: 0; font-size: 12px; font-weight: 500; color: var(--text-muted); }
 #view-dashboard .ops-today-value { font-size: 22px; font-weight: 700; letter-spacing: -.5px; }
 #view-dashboard .ops-today-cell { border-radius: 8px; box-shadow: none; }
+
+/* [2026-10-15] 표 공통(시안 톤) + 연해서 안 보이던 글씨를 진하게. */
+.ceo-tbl { width:100%; border-collapse:collapse; font-size:13px; }
+.ceo-tbl th { text-align:left; font-size:11.5px; font-weight:600; color:var(--text-soft);
+  padding:9px 15px; border-bottom:1px solid var(--border); background:transparent; }
+.ceo-tbl td { padding:10px 15px; border-bottom:1px solid var(--border); color:var(--text); }
+.ceo-tbl tr:last-child td { border-bottom:0; }
+.ceo-tbl .n { text-align:right; color:var(--text-soft); }
+
+/* 「이번 주 청소」 등 작은 글씨가 #9CA3AF 라 흐렸습니다 → 한 단계 진하게. */
+#view-dashboard .ceo-card [style*="var(--text-muted)"] { color: var(--text-soft) !important; }
+#view-dashboard #dash-cleaning-week { color: var(--text); font-size: 12.5px; }
+#view-dashboard #dash-cleaning-week * { color: inherit; }
+#view-dashboard #dash-cleaning-week b { color: var(--text); }
+
+/* 「오늘의 StayBUT」 — 검정 표 헤더와 주황 숫자를 시안 톤으로. */
+#view-dashboard #today-summary table th,
+#view-dashboard #today-summary thead tr { background: transparent !important; color: var(--text-soft) !important; }
+#view-dashboard #today-summary table th { font-size: 11.5px !important; font-weight: 600 !important;
+  border-bottom: 1px solid var(--border) !important; }
+#view-dashboard #today-summary .ops-today-value { color: var(--text) !important; }
+#view-dashboard #today-summary .ops-today-value[style*="B4512C"],
+#view-dashboard #today-summary [style*="#B4512C"] { color: var(--accent) !important; }
+#view-dashboard #today-summary [style*="#16a34a"] { color: var(--success-500) !important; }
 </style>
   <script>
     (function () {
@@ -15754,6 +15778,42 @@ async function renderOpsVacancy() {
   host.innerHTML = `<table>
     <tr><th>날짜</th><th>빈방</th><th class="n">D-</th></tr>
     ${out.map(r => `<tr><td>${r.d.getMonth()+1}/${r.d.getDate()} <span style="color:var(--text-muted)">(${dow[r.d.getDay()]})</span></td><td>${r.names}</td><td class="n">${r.dminus}</td></tr>`).join('')}
+  </table>`;
+}
+
+/* [2026-10-15] 시안의 「채널별 매출」 — 채널 / 매출 / 박. 막대는 매출 비중입니다. */
+async function renderDashChannelRevenue() {
+  const host = document.getElementById('dash-ch-rev');
+  if (!host || typeof db === 'undefined' || !db) return;
+  const today = new Date();
+  const p2 = (n) => String(n).padStart(2, '0');
+  const mStart = `${today.getFullYear()}-${p2(today.getMonth() + 1)}-01`;
+  const mEndD = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  const mEnd = `${mEndD.getFullYear()}-${p2(mEndD.getMonth() + 1)}-${p2(mEndD.getDate())}`;
+  const lbl = document.getElementById('ch-rev-label');
+  if (lbl) lbl.textContent = `${today.getMonth() + 1}월`;
+  const { data } = await db.from('bookings')
+    .select('gross_amount, nights, booking_status, channels(name, code)')
+    .gte('checkin_date', mStart).lte('checkin_date', mEnd);
+  const live = (data || []).filter(b => b.booking_status !== 'cancelled');
+  const map = {};
+  live.forEach(b => {
+    const n = b.channels?.name || '기타';
+    if (!map[n]) map[n] = { n, rev: 0, nts: 0 };
+    map[n].rev += (b.gross_amount || 0);
+    map[n].nts += (b.nights || 0);
+  });
+  const rows = Object.values(map).sort((a, b) => b.rev - a.rev);
+  if (!rows.length) { host.innerHTML = '<div style="padding:16px 15px;color:var(--text-soft);font-size:13px;">이번 달 예약이 없습니다.</div>'; return; }
+  const mx = Math.max(1, ...rows.map(r => r.rev));
+  const w = (v) => Math.round(v || 0).toLocaleString('ko-KR');
+  host.innerHTML = `<table class="ceo-tbl">
+    <tr><th>채널</th><th class="n">매출</th><th class="n">박</th></tr>
+    ${rows.map(r => `<tr>
+      <td><div>${r.n}</div><div style="margin-top:5px;height:4px;border-radius:2px;background:var(--neutral-100);overflow:hidden;"><div style="height:100%;width:${Math.round(r.rev / mx * 100)}%;background:var(--accent);"></div></div></td>
+      <td class="n" style="font-weight:600;color:var(--text);">${w(r.rev)}</td>
+      <td class="n">${r.nts}</td>
+    </tr>`).join('')}
   </table>`;
 }
 </script>
