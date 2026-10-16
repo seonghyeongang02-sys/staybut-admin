@@ -52,9 +52,19 @@ h3 span{font-weight:500;color:var(--sub);font-size:13px}
 .it.on .cb:after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
 .it.on .tx{color:var(--dim)}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 20px 0}
-/* [2026-10-16] 체크리스트 항목 바로 아래 붙는 사진칸 */
-.grid.one{margin:10px 20px 0;padding-bottom:14px;border-bottom:1px solid var(--line)}
-.it:has(+ .grid.one){border-bottom:0}
+/* [2026-10-16] 사진을 항목 오른쪽에 작게 붙입니다. 아래로 길어지지 않게.
+   줄 전체를 누르면 체크, 사진칸을 누르면 카메라/앨범이 열립니다. */
+.it .tx{flex:1;min-width:0}
+.phm{width:56px;height:56px;flex:0 0 auto;margin-left:auto;position:relative;border:1px dashed #cfcfcf;border-radius:9px;
+     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10px;color:var(--sub);
+     overflow:hidden;background:#fff;cursor:pointer}
+.phm svg{width:17px;height:17px;stroke:#9a9a9a}
+.phm img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.phm.has{border:1px solid var(--line)}
+.phm.okonly{background:var(--soft);border:1px solid var(--line);color:var(--ink)}
+.phm.busy{opacity:.5}
+.phm .ck{position:absolute;right:3px;top:3px;width:15px;height:15px;border-radius:50%;background:var(--ink);display:flex;align-items:center;justify-content:center}
+.phm .ck:after{content:"";width:3px;height:7px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
 .it.noc{cursor:default}
 .it.noc .cb{visibility:hidden}
 .ph{position:relative;aspect-ratio:1/1;border:1px dashed #cfcfcf;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--sub);cursor:pointer;overflow:hidden;background:#fff}
@@ -229,9 +239,10 @@ function renderTask(){
      생수를 체크하고 한참 내려가 생수 사진을 찾아야 했습니다. */
   const cell = sl => {
     const th=S.thumbs[t.id+':'+sl], busy=S.busy[t.id+':'+sl];
-    if (th) return `<div class="ph has ${busy?'busy':''}" onclick="shoot('${sl}')"><img src="${th}"><span class="tag">${L.slots[sl]}</span>${busy?'':'<span class="ck"></span>'}</div>`;
-    if (has(sl)) return `<div class="ph okonly" onclick="shoot('${sl}')"><span class="ck"></span>${L.slots[sl]}</div>`;
-    return `<div class="ph" onclick="shoot('${sl}')">${CAM}${L.slots[sl]}</div>`;
+    const tap = `onclick="event.stopPropagation();shoot('${sl}')"`;
+    if (th)      return `<div class="phm has ${busy?'busy':''}" ${tap}><img src="${th}">${busy?'':'<span class="ck"></span>'}</div>`;
+    if (has(sl)) return `<div class="phm okonly" ${tap}><span class="ck"></span></div>`;
+    return `<div class="phm" ${tap}>${CAM}</div>`;
   };
   const req = S.req[t.id] || {items:{}, other:null};
   $app.innerHTML = `
@@ -242,8 +253,8 @@ function renderTask(){
     ${t.memo?`<div class="memo">${L.memo} · ${esc(t.memo)}</div>`:''}
 
     <h3>${L.list}<span>${c} / ${n} · ${L.photos} ${SLOTS.filter(has).length}/${SLOTS.length}</span></h3>
-    ${it.map(([k,label])=>`<div class="it ${t.checklist[k]?'on':''}" onclick="toggle('${k}')"><div class="cb"></div><div class="tx">${esc(label)}</div></div>${SLOTS.indexOf(k)>=0?`<div class="grid one">${cell(k)}</div>`:''}`).join('')}
-    ${SLOTS.filter(sl=>!it.some(([k])=>k===sl)).map(sl=>`<div class="it noc"><div class="cb"></div><div class="tx">${esc(L.slots[sl])}</div></div><div class="grid one">${cell(sl)}</div>`).join('')}
+    ${it.map(([k,label])=>`<div class="it ${t.checklist[k]?'on':''}" onclick="toggle('${k}')"><div class="cb"></div><div class="tx">${esc(label)}</div>${SLOTS.indexOf(k)>=0?cell(k):''}</div>`).join('')}
+    ${SLOTS.filter(sl=>!it.some(([k])=>k===sl)).map(sl=>`<div class="it noc"><div class="cb"></div><div class="tx">${esc(L.slots[sl])}</div>${cell(sl)}</div>`).join('')}
     ${(S.thumbs[t.id+':extra']||[]).length||cntOf('extra') ? `<div class="grid">${(S.thumbs[t.id+':extra']||[]).map(x=>`<div class="ph has ${x.busy?'busy':''}"><img src="${x.url}"><span class="tag">${L.slots.extra}</span></div>`).join('')}</div>` : ''}
     <button class="add" onclick="shoot('extra')">${L.add}</button>
     <div class="hint">${L.hint}</div>
