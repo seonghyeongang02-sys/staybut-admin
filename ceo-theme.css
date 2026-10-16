@@ -131,6 +131,34 @@ html:not([data-theme="dark"]) table th {
   box-shadow: 0 0 0 1px rgba(255,255,255,.12);
 }
 
+/* ══════════════════════════════════════════════════════════════════
+   [2026-10-16] 실장님 화면 — 「청소 전」 사진 칸 제거.
+   청소 후 사진만 받기로 했습니다. 코드는 그대로 두고 칸만 감춥니다
+   (되살리려면 이 두 줄만 지우면 바로 돌아옵니다).
+   renderTask 순서가 「청소 전 → 체크리스트 → 청소 후」라서
+   첫 번째 h3 와 그 바로 뒤 사진칸이 청소 전입니다.
+   ══════════════════════════════════════════════════════════════════ */
+#app h3:first-of-type,
+#app h3:first-of-type + .grid { display: none !important; }
+
+/* ══════════════════════════════════════════════════════════════════
+   [2026-10-16] 상담 콘솔 — 사이드바 「청소 사진·링크」 탭에 글자 조각이
+   섞여 나왔습니다(svg> / span>span>). 편집기 자동완성이 닫는 태그를
+   중복으로 넣은 흔적입니다. 글자 조각만 가리고 아이콘·라벨은 살립니다.
+   ※ 원인 자체(HTML 중복)는 나중에 파일에서 정리해야 합니다.
+   ══════════════════════════════════════════════════════════════════ */
+.sidebar .nav-item[data-view="cleanphotos"] { font-size: 0 !important; }
+.sidebar .nav-item[data-view="cleanphotos"] .nl-full  { font-size: 15px !important; }
+.sidebar .nav-item[data-view="cleanphotos"] .nl-short { font-size: 11px !important; }
+
+/* 상담 콘솔 본문 — 검정 칩을 시안 파랑으로 */
+.wrap button.on {
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
+  color: #fff !important;
+}
+.wrap .rh-t { color: var(--muted) !important; }
+
 /* 실장님 화면(cleaner.html) — 작은 회색 글자 대신 로고 + 워드마크 */
 .brand {
   display: flex !important;
