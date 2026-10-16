@@ -15524,6 +15524,13 @@ html:not([data-theme="dark"]) .channel-chip--all.active {
   #view-dashboard .stat-value { font-size: 18px !important; }
   #view-dashboard .dash-strip > div { padding: 10px !important; }
 }
+
+/* [2026-10-15] 탭을 누를 때마다 화면이 좌우로 흔들리던 문제.
+   원인: 탭마다 내용 길이가 달라 세로 스크롤바가 생겼다 없어졌다 하면서
+   본문이 15px씩 밀렸습니다. 스크롤바 자리를 늘 비워 둡니다.
+   (지원 안 하는 구형 브라우저는 예전과 같이 동작합니다 — 깨지지 않습니다) */
+html { scrollbar-gutter: stable; }
+@media (max-width: 768px) { html { scrollbar-gutter: auto; } }  /* 폰은 겹침 스크롤바라 불필요 */
 </style>
   <script>
     (function () {
