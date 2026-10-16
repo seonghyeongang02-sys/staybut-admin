@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="referrer" content="no-referrer">
 <title>STAY BUT 청소</title>
-   <link rel="stylesheet" href="/ceo-theme.css">
+<link rel="stylesheet" href="/ceo-theme.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <style>
 :root{--ink:#111;--sub:#6b6b6b;--dim:#a3a3a3;--line:#ececec;--soft:#f6f6f6;--ok:#111;--accent:#111;--warn:#c2410c}
@@ -52,6 +52,11 @@ h3 span{font-weight:500;color:var(--sub);font-size:13px}
 .it.on .cb:after{content:"";width:6px;height:11px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg) translate(-1px,-1px)}
 .it.on .tx{color:var(--dim)}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 20px 0}
+/* [2026-10-16] 체크리스트 항목 바로 아래 붙는 사진칸 */
+.grid.one{margin:10px 20px 0;padding-bottom:14px;border-bottom:1px solid var(--line)}
+.it:has(+ .grid.one){border-bottom:0}
+.it.noc{cursor:default}
+.it.noc .cb{visibility:hidden}
 .ph{position:relative;aspect-ratio:1/1;border:1px dashed #cfcfcf;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--sub);cursor:pointer;overflow:hidden;background:#fff}
 .ph svg{width:20px;height:20px;stroke:#9a9a9a}
 .ph.has{border:1px solid var(--line);color:#fff}
@@ -98,7 +103,7 @@ const DEMO = location.hash.includes('demo');
 const KO = {sfx:'호',before:'청소 전',after:'청소 후',shoot:'촬영',supReq:'비품 신청',sup:{water:'생수',tissue:'휴지',wipes:'물티슈',shampoo:'샴푸',rinse:'린스',other:'기타'},otherPh:'필요한 비품을 적어주세요',reqSend:'비품 신청하기',reqDone:'비품 신청이 접수됐어요',reqEmpty:'신청할 비품을 골라주세요',clean:'청소',pay:'정산',week:(m,w)=>`${m}월 ${w}주차`,today:'오늘',all:'전체',none:'이 주에는 배정된 청소가 없어요',
   rooms:n=>`청소 ${n}건`,next:'다음 손님',vacant:'기본세팅 (공실)',ppl:(g,n)=>`${g}명 · ${n}박`,done:'업로드됨',
   towel:'수건',water:'생수',bedding:'차렵이불',list:'체크리스트',photos:'사진',add:'+ 사진 추가 촬영',
-  hint:'칸을 누르면 바로 카메라가 켜져요. 사진은 카톡으로 보내셔도 괜찮아요.',finish:'업로드하기',
+  hint:'칸을 누르면 카메라나 앨범을 고를 수 있어요. 사진은 카톡으로 보내셔도 괜찮아요.',finish:'업로드하기',
   reopen:'업로드했어요 · 고칠 게 있으면 항목을 다시 눌러주세요',weekPay:'정산 금액',payAmt:'이번 주 정산 금액',
   cnt:n=>`${n}건`,saved:'업로드했어요. 수고하셨습니다',uploaded:'사진을 올렸어요',fail:'저장하지 못했어요. 다시 눌러주세요',
   bad:'링크가 올바르지 않거나 만료되었어요.<br>관리자에게 새 링크를 요청해 주세요.',memo:'특이사항',
@@ -108,7 +113,7 @@ const KO = {sfx:'호',before:'청소 전',after:'청소 후',shoot:'촬영',supR
 const EN = {...KO,sfx:'',before:'Before cleaning',after:'After cleaning',shoot:'Take',supReq:'Request supplies',sup:{water:'Water',tissue:'Toilet paper',wipes:'Wet wipes',shampoo:'Shampoo',rinse:'Conditioner',other:'Other'},otherPh:'What do you need?',reqSend:'Send request',reqDone:'Request sent',reqEmpty:'Please choose an item',clean:'Cleaning',pay:'Payout',week:(m,w)=>`${['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m]} week ${w}`,today:'Today',all:'All',
   none:'No cleaning assigned this week',rooms:n=>`${n} room(s)`,next:'Next guests',vacant:'Default (vacant)',ppl:(g,n)=>`${g} ppl · ${n} night(s)`,done:'Done',
   towel:'Towels',water:'Water',bedding:'Duvet',list:'Checklist',photos:'Photos',add:'+ Take extra photo',
-  hint:'Tap a box to open the camera. You can still send photos on KakaoTalk.',finish:'Upload',
+  hint:'Tap a box to use the camera or pick from your album. You can still send photos on KakaoTalk.',finish:'Upload',
   reopen:'Uploaded · tap an item to edit',weekPay:'Payout',payAmt:'This week',cnt:n=>`${n}`,saved:'Uploaded',uploaded:'Photo uploaded',
   fail:'Could not save. Please try again',bad:'This link is invalid or expired.<br>Please ask for a new link.',memo:'Note',
   items:{towel:n=>`Towels × ${n}`,water:n=>`Water × ${n}`,bedding:n=>`Extra duvet × ${n}`,bed:'Bedding & lint roller',bath:'Bathroom dry · drain',laundry:'Dryer running (filter cleaned)',trash:'Outdoor trash area'},
@@ -116,7 +121,7 @@ const EN = {...KO,sfx:'',before:'Before cleaning',after:'After cleaning',shoot:'
 const JA = {...KO,before:'清掃前',after:'清掃後',shoot:'撮影',supReq:'備品の申請',sup:{water:'水',tissue:'トイレットペーパー',wipes:'ウェットティッシュ',shampoo:'シャンプー',rinse:'リンス',other:'その他'},otherPh:'必要な備品を入力してください',reqSend:'備品を申請する',reqDone:'申請を受け付けました',reqEmpty:'申請する備品を選んでください',clean:'清掃',pay:'精算',week:(m,w)=>`${m}月 第${w}週`,today:'今日',all:'すべて',none:'今週の清掃予定はありません',
   rooms:n=>`清掃 ${n}件`,next:'次のお客様',vacant:'基本セット（空室）',ppl:(g,n)=>`${g}名 · ${n}泊`,done:'アップロード済み',
   towel:'タオル',water:'水',bedding:'掛け布団',list:'チェックリスト',photos:'写真',add:'+ 写真を追加撮影',
-  hint:'枠をタップするとカメラが起動します。写真はカカオトークで送っても大丈夫です。',finish:'アップロード',
+  hint:'枠をタップするとカメラかアルバムを選べます。写真はカカオトークで送っても大丈夫です。',finish:'アップロード',
   reopen:'アップロードしました · 修正する場合は項目をもう一度タップしてください',weekPay:'精算金額',payAmt:'今週の精算金額',
   cnt:n=>`${n}件`,saved:'アップロードしました。お疲れさまでした',uploaded:'写真をアップロードしました',fail:'保存できませんでした。もう一度お試しください',
   bad:'リンクが無効か期限切れです。<br>管理者に新しいリンクを依頼してください。',memo:'特記事項',
@@ -126,7 +131,7 @@ const JA = {...KO,before:'清掃前',after:'清掃後',shoot:'撮影',supReq:'�
 const ZH = {...KO,before:'清洁前',after:'清洁后',shoot:'拍照',supReq:'申请用品',sup:{water:'矿泉水',tissue:'卫生纸',wipes:'湿巾',shampoo:'洗发水',rinse:'护发素',other:'其他'},otherPh:'请填写需要的用品',reqSend:'提交申请',reqDone:'申请已提交',reqEmpty:'请选择需要的用品',clean:'清洁',pay:'结算',week:(m,w)=>`${m}月 第${w}周`,today:'今天',all:'全部',none:'本周没有安排清洁',
   rooms:n=>`清洁 ${n}间`,next:'下一位客人',vacant:'基本布置（空房）',ppl:(g,n)=>`${g}人 · ${n}晚`,done:'已上传',
   towel:'毛巾',water:'矿泉水',bedding:'被子',list:'检查清单',photos:'照片',add:'+ 追加拍照',
-  hint:'点击方框即可打开相机。照片也可以通过KakaoTalk发送。',finish:'上传',
+  hint:'点击方框可以拍照或从相册选择。照片也可以通过KakaoTalk发送。',finish:'上传',
   reopen:'已上传 · 如需修改请再次点击项目',weekPay:'结算金额',payAmt:'本周结算金额',
   cnt:n=>`${n}间`,saved:'已上传，辛苦了',uploaded:'照片已上传',fail:'保存失败，请重试',
   bad:'链接无效或已过期。<br>请向管理员索取新链接。',memo:'特别事项',
@@ -219,10 +224,15 @@ function renderTask(){
   const t=S.task, s=supplies(t), it=items(t), [c,n]=progress(t);
   const has = slot => (t.photos||[]).some(p=>p.slot===slot);
   const cntOf = slot => (t.photos||[]).filter(p=>p.slot===slot).length;
-  const multi = slot => { const th=S.thumbs[t.id+':'+slot]||[], saved=Math.max(0,cntOf(slot)-th.filter(x=>!x.busy).length);
-    return th.map(x=>`<div class="ph has ${x.busy?'busy':''}"><img src="${x.url}">${x.busy?'':'<span class="ck"></span>'}</div>`).join('')
-      + Array.from({length:saved}).map(()=>`<div class="ph okonly"><span class="ck"></span>${L.done}</div>`).join('')
-      + `<div class="ph" onclick="shoot('${slot}')">${CAM}${L.shoot}</div>`; };
+  /* [2026-10-16] 사진 한 칸 — 체크리스트 항목 바로 아래에 붙입니다.
+     전에는 「청소 전」 / 「체크리스트」 / 「청소 후」 가 따로 떨어져 있어서
+     생수를 체크하고 한참 내려가 생수 사진을 찾아야 했습니다. */
+  const cell = sl => {
+    const th=S.thumbs[t.id+':'+sl], busy=S.busy[t.id+':'+sl];
+    if (th) return `<div class="ph has ${busy?'busy':''}" onclick="shoot('${sl}')"><img src="${th}"><span class="tag">${L.slots[sl]}</span>${busy?'':'<span class="ck"></span>'}</div>`;
+    if (has(sl)) return `<div class="ph okonly" onclick="shoot('${sl}')"><span class="ck"></span>${L.slots[sl]}</div>`;
+    return `<div class="ph" onclick="shoot('${sl}')">${CAM}${L.slots[sl]}</div>`;
+  };
   const req = S.req[t.id] || {items:{}, other:null};
   $app.innerHTML = `
     <header><button class="back" onclick="S.task=null;render()">‹ ${md(t.date)}</button>
@@ -231,19 +241,9 @@ function renderTask(){
     <div class="sup"><div><b>${s.towels}</b><span>${L.towel}</span></div><div><b>${s.water}</b><span>${L.water}</span></div>${s.bedding?`<div><b>${s.bedding}</b><span>${L.bedding}</span></div>`:''}</div>
     ${t.memo?`<div class="memo">${L.memo} · ${esc(t.memo)}</div>`:''}
 
-    <h3>${L.before}<span>${cntOf('before')}</span></h3>
-    <div class="grid">${multi('before')}</div>
-
-    <h3>${L.list}<span>${c} / ${n}</span></h3>
-    ${it.map(([k,label])=>`<div class="it ${t.checklist[k]?'on':''}" onclick="toggle('${k}')"><div class="cb"></div><div class="tx">${esc(label)}</div></div>`).join('')}
-
-    <h3>${L.after}<span>${SLOTS.filter(has).length} / ${SLOTS.length}</span></h3>
-    <div class="grid">${SLOTS.map(sl=>{
-      const th=S.thumbs[t.id+':'+sl], busy=S.busy[t.id+':'+sl];
-      if (th) return `<div class="ph has ${busy?'busy':''}" onclick="shoot('${sl}')"><img src="${th}"><span class="tag">${L.slots[sl]}</span>${busy?'':'<span class="ck"></span>'}</div>`;
-      if (has(sl)) return `<div class="ph okonly" onclick="shoot('${sl}')"><span class="ck"></span>${L.slots[sl]}</div>`;
-      return `<div class="ph" onclick="shoot('${sl}')">${CAM}${L.slots[sl]}</div>`;
-    }).join('')}</div>
+    <h3>${L.list}<span>${c} / ${n} · ${L.photos} ${SLOTS.filter(has).length}/${SLOTS.length}</span></h3>
+    ${it.map(([k,label])=>`<div class="it ${t.checklist[k]?'on':''}" onclick="toggle('${k}')"><div class="cb"></div><div class="tx">${esc(label)}</div></div>${SLOTS.indexOf(k)>=0?`<div class="grid one">${cell(k)}</div>`:''}`).join('')}
+    ${SLOTS.filter(sl=>!it.some(([k])=>k===sl)).map(sl=>`<div class="it noc"><div class="cb"></div><div class="tx">${esc(L.slots[sl])}</div></div><div class="grid one">${cell(sl)}</div>`).join('')}
     ${(S.thumbs[t.id+':extra']||[]).length||cntOf('extra') ? `<div class="grid">${(S.thumbs[t.id+':extra']||[]).map(x=>`<div class="ph has ${x.busy?'busy':''}"><img src="${x.url}"><span class="tag">${L.slots.extra}</span></div>`).join('')}</div>` : ''}
     <button class="add" onclick="shoot('extra')">${L.add}</button>
     <div class="hint">${L.hint}</div>
@@ -289,7 +289,7 @@ let shootSlot=null;
 function shoot(slot){ shootSlot=slot; const c=document.getElementById('cam'); c.value=''; c.click(); }
 document.getElementById('cam').addEventListener('change', async e=>{
   const f=e.target.files[0], t=S.task, slot=shootSlot; if(!f||!t) return;
-  const blob=await shrink(f), url=URL.createObjectURL(blob), key=t.id+':'+slot, many=(slot==='extra'||slot==='before');
+  const blob=await shrink(f), url=URL.createObjectURL(blob), key=t.id+':'+slot, many=(slot==='extra');
   let item=null;
   if (many){ item={url,busy:true}; (S.thumbs[key]=S.thumbs[key]||[]).push(item); } else { S.thumbs[key]=url; S.busy[key]=true; }
   render();
@@ -337,7 +337,7 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{ S.tab=b.datas
 function demoRpc(fn, body){
   const today=ymd(new Date()), ws0=(()=>{const d=new Date(); d.setDate(d.getDate()-((d.getDay()+6)%7)); return ymd(d);})();
   if(!window.__demo){ window.__demo={staff_name:'김실장님', tasks:[
-    {id:'a1',date:addDays(ws0,0),room:'102',checklist:{towel:1,water:1,bed:1,bath:1,laundry:1,trash:1},done_at:'x',photos:[{slot:'before'}],fee:20000,paid:true,next_guests:null},
+    {id:'a1',date:addDays(ws0,0),room:'102',checklist:{towel:1,water:1,bed:1,bath:1,laundry:1,trash:1},done_at:'x',photos:[{slot:'towel'}],fee:20000,paid:true,next_guests:null},
     {id:'a2',date:today,room:'301',checklist:{},photos:[],fee:30000,paid:false,next_guests:5,next_in:today,next_nights:2,memo:'엑스트라베드 이불 챙겨주세요'},
     {id:'a3',date:today,room:'201',checklist:{towel:1,water:1},photos:[],fee:25000,paid:false,next_guests:null},
     {id:'a4',date:addDays(today,1),room:'202',checklist:{},photos:[],fee:20000,paid:false,next_guests:2,next_in:addDays(today,1),next_nights:3}]}; }
