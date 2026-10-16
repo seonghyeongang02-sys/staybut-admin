@@ -110,3 +110,42 @@ html:not([data-theme="dark"]) table th {
   border-radius: 10px !important;
   box-shadow: 0 1px 2px rgba(16,24,40,.05) !important;
 }
+
+/* ══════════════════════════════════════════════════════════════════
+   [2026-10-16] 브랜드 로고
+   index.html 은 이미 <img class="sidebar-logo-img"> 를 갖고 있어서
+   거기엔 넣지 않습니다(:not(:has(img)) 로 걸러냅니다).
+   console.html / cleaning-photos.html 사이드바와
+   cleaner.html(실장님 화면) 머리에 로고를 띄웁니다.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* 사이드바 — 워드마크 왼쪽에 로고 */
+.sidebar-brand-left:not(:has(img))::before {
+  content: '';
+  width: 26px; height: 26px;
+  margin-right: 9px;
+  flex: none;
+  align-self: center;
+  border-radius: 6px;
+  background: url('/logo.jpg') center/cover no-repeat;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.12);
+}
+
+/* 실장님 화면(cleaner.html) — 작은 회색 글자 대신 로고 + 워드마크 */
+.brand {
+  display: flex !important;
+  align-items: center;
+  gap: 9px;
+  font-size: 15px !important;
+  font-weight: 800 !important;
+  letter-spacing: .01em !important;
+  color: #111827 !important;
+}
+.brand::before {
+  content: '';
+  width: 28px; height: 28px;
+  flex: none;
+  border-radius: 7px;
+  background: url('/logo.jpg') center/cover no-repeat;
+  box-shadow: 0 0 0 1px rgba(17,24,39,.08);
+}
