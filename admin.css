@@ -1,0 +1,103 @@
+/* ══════════════════════════════════════════════════════════════════
+   STAY BUT 어드민 — 바깥 스타일 파일
+   index.html 맨 아래에서 <link> 한 줄로 불러옵니다.
+   앞으로 index.html 안의 CSS를 조금씩 이쪽으로 옮길 자리입니다.
+   되돌리려면 index.html 의 <link> 한 줄만 지우면 원래대로 돌아옵니다.
+   ══════════════════════════════════════════════════════════════════ */
+
+
+/* ──────────────────────────────────────────────────────────────────
+   [2026-10-23] ① 스크롤바가 화면 안쪽에 달리던 문제
+
+   증상
+     · 폰에서 화면 오른쪽에 스크롤 막대가 붙어 내용 위를 덮었습니다.
+     · PC에서는 탭을 바꿀 때마다 본문이 좌우로 15px쯤 흔들렸습니다.
+
+   원인
+     index.html 에 이런 두 줄이 있습니다.
+        html, body { height: 100%; }
+        html, body { overflow-x: hidden; }
+     body 키를 화면 높이에 묶어 놓고 가로를 hidden 으로 막으면,
+     CSS 규칙상 세로가 저절로 'auto' 가 됩니다. 그 결과 페이지가
+     html 이 아니라 body 안쪽에서 스크롤되고, 스크롤 막대도
+     body 안쪽(=내용 위)에 그려집니다. body 가 16px 좁아지면서
+     화면이 깨져 보였습니다.
+
+     지난번에 넣은 html { scrollbar-gutter: stable } 이 들지 않았던 것도
+     같은 이유입니다. 실제로 스크롤되는 건 html 이 아니라 body 였습니다.
+
+   고친 방법
+     · height 를 풀어 body 가 내용만큼 자라게 합니다.
+     · 가로 막기를 hidden 대신 clip 으로 바꿉니다.
+       clip 은 가로만 자르고 세로를 건드리지 않아서, body 가
+       스크롤 상자가 되지 않습니다.
+     · 그러면 페이지는 html 이 스크롤하고, 막대는 화면 바깥 가장자리에
+       그려집니다. scrollbar-gutter 도 비로소 제대로 동작합니다.
+
+   구형 브라우저
+     clip 을 모르는 브라우저는 이 줄을 그냥 무시하고 예전처럼
+     동작합니다. 새로 깨지는 건 없습니다.
+   ────────────────────────────────────────────────────────────────── */
+html, body {
+  height: auto !important;
+  min-height: 100% !important;
+}
+html { overflow-x: clip !important; }
+body {
+  overflow-x: clip !important;
+  overflow-y: visible !important;
+}
+
+
+/* ──────────────────────────────────────────────────────────────────
+   [2026-10-23] ② 폰에서 「오늘」 카드 — 재실을 맨 위로
+
+   그전에는 퇴실·청소·입실이 한 줄(3칸)을 채우고 재실만 다음 줄로
+   혼자 떨어져서, 제일 중요한 만실 여부가 아래에 숨었습니다.
+
+   바꾼 모양
+     ┌──────────────────────────┐
+     │ ● 재실  5/5          만실 │  ← 맨 위 한 줄
+     ├──────────────────────────┤
+     │ ● 퇴실   ● 청소   ● 입실  │  ← 작게 3칸
+     └──────────────────────────┘
+
+   카드 높이가 448px → 393px 로 줄어 스크롤이 덜 필요합니다.
+   PC 화면은 건드리지 않습니다(768px 이하에서만 적용).
+   ────────────────────────────────────────────────────────────────── */
+@media (max-width: 768px) {
+
+  #today-summary .dash-strip {
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px 8px !important;
+  }
+
+  /* 네 번째 칸(재실)을 맨 위 한 줄로 끌어올립니다 */
+  #today-summary .dash-strip > .dash-cell:nth-child(4) {
+    order: -1 !important;
+    grid-column: 1 / -1 !important;
+    flex-direction: row !important;
+    align-items: baseline !important;
+    gap: 8px !important;
+    padding: 0 0 9px !important;
+    border-bottom: 1px solid var(--line, #E5E7EB) !important;
+  }
+  /* 재실 숫자는 크게, 「만실」 글자는 오른쪽 끝으로 */
+  #today-summary .dash-strip > .dash-cell:nth-child(4) > span:nth-child(2) {
+    font-size: 22px !important;
+  }
+  #today-summary .dash-strip > .dash-cell:nth-child(4) > span:nth-child(3) {
+    margin-left: auto !important;
+  }
+
+  /* 퇴실·청소·입실은 한 줄에 셋이 들어가도록 조금 작게 */
+  #today-summary .dash-strip > .dash-cell > span:nth-child(1) { font-size: 11.5px !important; }
+  #today-summary .dash-strip > .dash-cell > span:nth-child(2) {
+    font-size: 19px !important;
+    line-height: 1.15 !important;
+  }
+  #today-summary .dash-strip > .dash-cell > span:nth-child(3) {
+    font-size: 10.5px !important;
+    line-height: 1.3 !important;
+  }
+}
