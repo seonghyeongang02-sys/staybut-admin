@@ -2341,7 +2341,98 @@
       .sidebar #nav-console { font-size: 13px !important; padding: 14px 1px !important; }
       .sidebar #logout-btn { flex: 0 0 32px !important; width: 32px !important; min-width: 32px !important; }
     }
-  </style>
+      /* 📱 [2026-10-22] 모바일 리디자인 레이어 — 스타일시트 맨 끝
+       · 앞의 기능·마크업·자바스크립트는 하나도 바꾸지 않고, 768px 이하 화면의 겉모양만 덮어씁니다.
+       · 색은 전부 기존 테마 변수(var(--bg), var(--surface), var(--text) …)라 라이트·다크 둘 다 따라갑니다.
+       · 되돌리려면 이 블록만 지우면 됩니다. */
+    @media (max-width: 768px) {
+      /* ── 바탕·여백 ── */
+      body:not(.cleaner-mode) main { background: var(--bg) !important; padding: 16px 14px calc(104px + env(safe-area-inset-bottom)) !important; }
+
+      /* ── 하단 탭바 → 떠 있는 둥근 바 (탭 5개·순서·동작은 그대로) ── */
+      body:not(.cleaner-mode) .sidebar { left: 12px !important; right: 12px !important; top: auto !important; bottom: calc(10px + env(safe-area-inset-bottom)) !important;
+        padding: 6px !important; gap: 2px !important; border: 1px solid var(--border) !important; border-radius: 30px !important;
+        background: var(--surface) !important; box-shadow: 0 10px 28px -6px rgba(16,24,40,.18), 0 2px 6px rgba(16,24,40,.06) !important; z-index: 900 !important; }
+      body:not(.cleaner-mode) .sidebar .nav-item[data-view],
+      body:not(.cleaner-mode) .sidebar #nav-console { border: 0 !important; background: transparent !important; box-shadow: none !important; border-radius: 24px !important;
+        min-height: 54px !important; padding: 6px 2px !important; gap: 3px !important; font-size: 10.5px !important; font-weight: 700 !important; color: var(--text-soft) !important; }
+      body:not(.cleaner-mode) .sidebar .nav-item[data-view].active,
+      body:not(.cleaner-mode) .sidebar #nav-console.active { background: var(--text) !important; color: var(--bg) !important; }
+      body:not(.cleaner-mode) .sidebar .nav-item .nav-ico { width: 20px !important; height: 20px !important; }
+
+      /* ── 화면 제목 ── */
+      .page-header { margin-bottom: 14px !important; }
+      .page-title { font-size: 26px !important; font-weight: 800 !important; letter-spacing: -0.02em !important; }
+      .page-subtitle { font-size: 13px !important; color: var(--text-soft) !important; }
+
+      /* ── 카드 — 둥글고 가벼운 그림자 ── */
+      .ceo-card, .data-card, .stat-card { border-radius: 20px !important; border: 1px solid var(--border) !important;
+        box-shadow: 0 1px 3px rgba(16,24,40,.06) !important; background: var(--surface) !important; overflow: hidden; }
+      .stat-grid { gap: 8px !important; }
+      .stat-card { padding: 14px !important; }
+      .stat-value { font-size: 22px !important; font-weight: 800 !important; }
+      .btn { min-height: 40px; border-radius: 20px !important; }
+
+      /* ── 예약 타임라인 — 가로 스크롤은 원래대로, 테두리만 ── */
+      #timeline-wrap-bk { border-radius: 16px !important; -webkit-overflow-scrolling: touch; }
+
+      /* ── 예약 목록(예약건별) — 표를 카드로 ──
+         · 예약건별 보기에만 행에 data-booking-id 가 붙습니다. 일자별·객실별 표는 그대로 둡니다.
+         · 칸 순서: 1 선택 · 2 고객번호 · 3 채널 · 4 객실 · 5 체크인 · 6 체크아웃 · 7 박 · 8 인원 · 9 거래액 · 10 수수료 · 11 정산액 · 12 상태 */
+      #bk-table:has(tr[data-booking-id]) thead { display: none; }
+      #bk-table:has(tr[data-booking-id]), #bk-table:has(tr[data-booking-id]) tbody { display: block; width: 100%; min-width: 0 !important; }
+      #bk-table tr[data-booking-id] { display: grid; grid-template-columns: 22px auto auto minmax(0, 1fr) auto; column-gap: 8px; row-gap: 6px; align-items: center;
+        padding: 12px 14px; margin: 0 0 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; box-shadow: 0 1px 2px rgba(16,24,40,.05); }
+      #bk-table tr[data-booking-id] > td { display: block; padding: 0 !important; border: 0 !important; background: transparent !important; text-align: left !important; white-space: nowrap; min-width: 0; font-size: 13px; }
+      #bk-table tr[data-booking-id] > td:nth-child(1)  { grid-column: 1; grid-row: 1 / 4; }
+      #bk-table tr[data-booking-id] > td:nth-child(4)  { grid-column: 2; grid-row: 1; font-size: 15px; font-weight: 800; }
+      #bk-table tr[data-booking-id] > td:nth-child(3)  { grid-column: 3; grid-row: 1; font-size: 12px; font-weight: 700; color: var(--text-soft); }
+      #bk-table tr[data-booking-id] > td:nth-child(2)  { grid-column: 4; grid-row: 1; font-size: 12px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; }
+      #bk-table tr[data-booking-id] > td:nth-child(2) > div { display: none; }
+      #bk-table tr[data-booking-id] > td:nth-child(12) { grid-column: 5; grid-row: 1; justify-self: end; }
+      #bk-table tr[data-booking-id] > td:nth-child(5)  { grid-column: 2; grid-row: 2; color: var(--text-soft); }
+      #bk-table tr[data-booking-id] > td:nth-child(6)  { grid-column: 3; grid-row: 2; color: var(--text-soft); }
+      #bk-table tr[data-booking-id] > td:nth-child(6)::before { content: '→ '; }
+      #bk-table tr[data-booking-id] > td:nth-child(7)  { grid-column: 4; grid-row: 2; color: var(--text-soft); }
+      #bk-table tr[data-booking-id] > td:nth-child(7)::after { content: '박'; }
+      #bk-table tr[data-booking-id] > td:nth-child(8)  { grid-column: 5; grid-row: 2; justify-self: end; color: var(--text-soft); }
+      #bk-table tr[data-booking-id] > td:nth-child(8)::after { content: '명'; }
+      #bk-table tr[data-booking-id] > td:nth-child(9)  { grid-column: 2 / 4; grid-row: 3; font-size: 15px; font-weight: 800; }
+      #bk-table tr[data-booking-id] > td:nth-child(9)::after { content: '원'; font-size: 12px; }
+      #bk-table tr[data-booking-id] > td:nth-child(10) { grid-column: 4; grid-row: 3; font-size: 11px; }
+      #bk-table tr[data-booking-id] > td:nth-child(11) { grid-column: 5; grid-row: 3; justify-self: end; }
+      #bk-table tr[data-booking-id] > td:nth-child(11)::before { content: '정산 '; font-size: 11px; font-weight: 500; color: var(--text-muted); }
+      #bk-table:has(tr[data-booking-id]) tr.bk-total { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 12px; padding: 12px 14px; border-radius: 16px; background: var(--surface-soft); border: 1px solid var(--border); }
+      #bk-table:has(tr[data-booking-id]) tr.bk-total > td { display: block; padding: 0 !important; border: 0 !important; background: transparent !important; }
+      #bk-table:has(tr[data-booking-id]) tr.bk-total > td:empty { display: none; }
+    }
+        /* 📱 [2026-10-23] 폰 전용 요약 카드 (매출 분석 위쪽) */
+    .m-only { display: none; }
+    @media (max-width: 600px) {
+      .m-only { display: block; margin-bottom: 18px; }
+      .m-hello { font-size: 28px; font-weight: 800; letter-spacing: -0.02em; color: var(--text); }
+      .m-sub { font-size: 11px; color: var(--text-muted); }
+      .m-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 16px; margin-top: 12px; box-shadow: 0 1px 3px rgba(16,24,40,.06); color: var(--text); }
+      .m-grid3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+      .m-grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-top: 14px; }
+      .m-grid3 .m-card, .m-grid2 .m-card { margin-top: 0; padding: 12px 14px; }
+      .m-k { font-size: 11px; color: var(--text-muted); font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .m-v { font-size: 22px; font-weight: 800; margin-top: 2px; font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+      .m-v small { font-size: 12px; color: var(--text-muted); font-weight: 700; margin-left: 1px; }
+      .m-dl { font-size: 11px; font-weight: 800; margin-top: 2px; }
+      .m-num { font-variant-numeric: tabular-nums; }
+      .m-row { display: flex; justify-content: space-between; font-size: 13px; }
+      .m-row b { font-variant-numeric: tabular-nums; }
+      .m-dot { display: inline-block; width: 8px; height: 8px; border-radius: 4px; margin-right: 6px; vertical-align: 1px; }
+      .m-next { margin-top: 12px; padding: 14px; border-radius: 16px; background: var(--surface-soft, #f7f8fa); border: 1px solid var(--border); }
+      .m-next-k { font-size: 11px; font-weight: 800; color: var(--text-soft); }
+      .m-next-t { font-size: 17px; font-weight: 800; margin-top: 4px; }
+      .m-rm { display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 24px; padding: 0 6px; border-radius: 12px; color: #fff; font-size: 11px; font-weight: 800; }
+      .m-tr { display: grid; grid-template-columns: 72px repeat(3, minmax(0, 1fr)); gap: 6px; align-items: center; font-size: 12.5px; padding: 9px 0; border-top: 1px solid var(--border); }
+      .m-tr > span:not(:first-child) { text-align: right; }
+      .m-th { color: var(--text-muted); font-size: 11px; border-top: 0; margin-top: 8px; }
+    }
+    </style>
 </head>
 <body>
   <!-- 로그인 화면                                                      -->
@@ -2556,6 +2647,7 @@
         </section>
         <!-- 예약 관리 -->
         <section id="view-analysis" style="display:none;">
+          <div id="m-insight" class="m-only"></div><!-- 📱 [2026-10-23] 폰 전용 요약 -->
           <div id="analysis-sheet"></div>
         </section>
         <section id="view-bookings" style="display:none;">
@@ -2729,7 +2821,7 @@
                 <button class="btn btn-danger" id="bk-bulk-delete" style="font-size:12px; padding:6px 12px;" disabled>🗑 선택 삭제 (<span id="bk-sel-count">0</span>)</button>
               </div>
             </div>
-            <div id="bk-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;margin:0 0 12px;"></div>
+            <div id="bk-summary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:0 0 14px;"></div>
             <div style="overflow-x:auto;">
               <table id="bk-table">
                 <thead id="bookings-thead"></thead>
@@ -4647,9 +4739,42 @@ async function finalizeConfirmedBooking_(id, roomId) {
     }
   }
 }
-window.confirmReviewBooking = () => {};;
-window.rejectReviewBooking = () => {};;
-window.editReviewBooking = () => {};;
+/* [2026-10-20] 수락·거절·수정 버튼이 아무 반응이 없던 문제 수정.
+   세 함수가 빈 함수(() => {})로 덮여 있어서, 객실을 골라도 수락이 눌리지 않았습니다.
+   admin_B.html 의 원래 구현을 되살렸습니다. */
+window.confirmReviewBooking = async (id) => {
+  const sel = document.getElementById(`review-room-${id}`);
+  let roomId = null;
+  if (sel) {
+    if (!sel.value) { alert('객실을 먼저 선택해주세요.\n(102·202처럼 메일로 자동 매칭이 안 되는 예약이에요)'); return; }
+    roomId = sel.value;
+  }
+  if (!(await showConfirm('이 예약을 확정하시겠어요?\n\n확정하면 예약 관리에 등록되고 청소 작업이 자동으로 생성됩니다.'))) return;
+  try {
+    await finalizeConfirmedBooking_(id, roomId);
+  } catch (e) { alert('확정 실패: ' + (e.message || e)); return; }
+  if (typeof logEvent === 'function') logEvent('booking_confirmed', '자동 파싱 예약 검토 확정', { targetType: 'booking', targetId: id });
+  refreshReviewViews();
+  if (typeof refreshAfterBookingChange_ === 'function') refreshAfterBookingChange_();
+  else if (typeof loadBookings === 'function') loadBookings();
+};
+window.rejectReviewBooking = async (id) => {
+  if (!(await showConfirm('이 예약을 거절하시겠어요?\n\n잘못된 자동 파싱이라 판단되면 거절하세요. 예약은 cancelled 상태가 됩니다.'))) return;
+  const { error } = await db.from('bookings').update({
+    review_status: 'rejected',
+    booking_status: 'cancelled',
+  }).eq('id', id);
+  if (error) { alert('거절 실패: ' + error.message); return; }
+  if (typeof logEvent === 'function') logEvent('booking_rejected', '자동 파싱 예약 검토 거절', { targetType: 'booking', targetId: id });
+  refreshReviewViews();
+  if (typeof refreshAfterBookingChange_ === 'function') refreshAfterBookingChange_();
+  else if (typeof loadBookings === 'function') loadBookings();
+};
+window.editReviewBooking = async (id) => {
+  const { data, error } = await db.from('bookings').select('*').eq('id', id).single();
+  if (error || !data) { alert('예약 로딩 실패'); return; }
+  openBookingModal(data);
+};
 window.viewOriginalEmail = async (emailId) => {
   const { data, error } = await db.from('email_parse_log').select('*')
     .eq('email_id', emailId).limit(1).single();
@@ -6004,26 +6129,23 @@ function tlGuestName_(b) {
   return '예약';
 }
 function tlBarLabel_(b, px, nights, clipL, clipR, staying) {
-  /* [2026-09-18] 이름을 다 적으므로(booking·expedia 등) 그만큼 자리가 필요합니다. · 88px 아래에서는 한 글자로 줄이고, 120px 아래에서는 인원·박수를 뺍니다. */
-  const tiny = px < 88, narrow = px < 120;
-  const nm = tlGuestName_(b);
+  /* [2026-10-23] 막대 라벨 — 채널 이름을 막대에 바로 씁니다 (모바일 시안 방식).
+     · 예전: 색 네모칸(칩) 안에 Booking + 예약번호 + 인원·박수.
+     · 지금: 칩 없이 흰 글씨로 Booking · Airbnb · agoda · Expedia.
+       막대가 넓을 때만 예약번호(150px~)와 인원·박수(230px~)를 덧붙입니다.
+     · 아주 좁으면(44px 미만) 머리글자 한 글자(B·A·G·E)만 씁니다.
+     · 번호·인원은 막대에 마우스를 올리면 뜨는 상세(툴팁)와 클릭 상세에 그대로 있습니다. */
   const p = tlChPrefix_(b, staying);
-  /* [2026-09-18] 막대 안 채널 표시 · · 평소  : 네모칸(칩) 안에 Booking · Airbnb · Agoda · Expedia. · 칩 배경은 같은 계열 한 단 진한 색이라 막대 위에서 도드라집니다. · · 숙박중: 막대가 초록 한 색인데 거기에 파란 칩까지 얹으니 지저분했습니다. · ★ 칩 배경을 없애고 흰 글씨만 남깁니다. ★ · 글자 「Booking」만으로도 채널은 충분히 알 수 있습니다. · 막대가 아주 좁을 때만 자리가 없어 한 글자로 줄입니다. */
-  /* [2026-09-18] 채널 칩 — 색 네모칸 안에 Booking · Airbnb · Agoda · Expedia. · 한때 「번호에 B- 가 붙으니 중복」이라고 판단해 지웠는데 잘못이었습니다. · 칩이 있어야 한눈에 채널이 보입니다. 번호는 읽어야 알 수 있습니다. · · 평소  : 칩 배경 = 같은 계열 한 단 진한 색 · · 숙박중: 막대가 초록이라 칩 배경을 채널 원색으로 — 초록 위에서 도드라집니다 · · 아주 좁으면 한 글자만 */
-  const dot = tiny
-    ? `<b style="flex:none;background:${p.chip};color:${p.c};font-weight:900;font-size:9px;`
-      + `width:16px;height:16px;line-height:16px;text-align:center;border-radius:5px;`
-      + `margin-right:5px;">${p.s}</b>`
-    : `<b style="flex:none;background:${p.chip};color:${p.c};font-weight:800;font-size:10px;`
-      + `letter-spacing:.01em;padding:3px 8px;border-radius:6px;margin-right:7px;`
-      + `line-height:1.4;">${p.t}</b>`;
+  const name = px < 44 ? p.s : p.t;
+  let html = `<b style="flex:none;font-weight:800;letter-spacing:.01em;">${name}</b>`;
+  if (px >= 150) {
+    html += `<i style="font-style:normal;font-weight:600;opacity:.78;margin-left:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums;">${tlEsc_(tlGuestName_(b))}</i>`;
+  }
   const g = b.num_guests;
-  const meta = (!narrow && (g || nights))
-    ? `<u style="text-decoration:none;margin-left:auto;padding-left:6px;opacity:.6;font-weight:800;font-size:10px;white-space:nowrap;flex:none;">${g ? g + '명' : ''}${g && nights ? ' · ' : ''}${nights ? nights + '박' : ''}</u>` : '';
-  // ◂ ▸ 화살표 제거 — 좁은 막대에서 이름·인원 자리를 잡아먹어 오히려 헷갈렸습니다.
-  return dot
-    + `<i style="font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-variant-numeric:tabular-nums;">${tlEsc_(nm)}</i>`
-    + (tiny ? '' : meta);
+  if (px >= 230 && (g || nights)) {
+    html += `<u style="text-decoration:none;margin-left:auto;padding-left:8px;opacity:.7;font-weight:800;font-size:10.5px;white-space:nowrap;flex:none;">${g ? g + '명' : ''}${g && nights ? ' · ' : ''}${nights ? nights + '박' : ''}</u>`;
+  }
+  return html;
 }
 function tlBookingStatus(b) {
   const now = new Date();
@@ -6155,7 +6277,9 @@ function renderTimeline(cfg) {
   for (let i = 0; i < _days; i++) {
     const d = new Date(_start); d.setDate(d.getDate() + i);
     const we = (d.getDay() === 0 || d.getDay() === 6);
-    hdr += `<div style="width:${DAYW}px;text-align:center;padding:6px 0;border-left:${d.getDate()===1?'2px solid '+TL_MSTART:'1px solid '+TL_BD};${i===todayIdx?`background:${TL_TODAY};`:(i<todayIdx?`background:${TL_PAST};`:'')}"><div style="font-size:10px;color:${we?TL_WK:TL_MUT};">${dows[d.getDay()]}</div><div style="font-size:13.5px;font-weight:700;color:${TL_TXT};">${d.getDate()}</div></div>`;
+    /* [2026-10-23] 오늘은 칸 전체를 칠하는 대신 날짜를 검정 알약으로 (모바일 시안 방식) */
+    const isT = (i === todayIdx);
+    hdr += `<div style="width:${DAYW}px;text-align:center;padding:5px 0;border-left:${d.getDate()===1?'2px solid '+TL_MSTART:'1px solid '+TL_BD};${(i<todayIdx)?`background:${TL_PAST};`:''}"><div style="${isT ? 'margin:0 auto;max-width:44px;border-radius:10px;padding:3px 0;background:var(--text);' : ''}"><div style="font-size:10px;color:${isT ? 'var(--bg)' : (we?TL_WK:TL_MUT)};">${dows[d.getDay()]}</div><div style="font-size:13.5px;font-weight:800;color:${isT ? 'var(--bg)' : TL_TXT};">${d.getDate()}</div></div></div>`;
   }
   hdr += `</div></div>`;
   let rows = '';
@@ -6166,6 +6290,22 @@ function renderTimeline(cfg) {
       track += `<div style="position:absolute;top:0;bottom:0;width:${DAYW}px;left:${i*DAYW}px;border-left:1px solid ${TL_BD};${i===todayIdx?`background:${TL_TODAY};`:(i<todayIdx?`background:${TL_PAST};`:'')}"></div>`;
     }
     if (tlMode === 'booking') {
+      /* [2026-10-23] 빈 방 — 오늘부터 앞으로 비어 있는 밤을 점선 칸으로 보여줍니다.
+         · 지난 날짜는 이미 못 파는 밤이라 표시하지 않습니다.
+         · 수리 막대가 있는 밤도 「찬 밤」으로 칩니다. */
+      const _occ = new Array(_days).fill(false);
+      (window._tlBookings || []).filter(b => String(b.room_id) === String(rm.id)).forEach(b => {
+        const a = Math.max(0, _dayIndex(b.checkin_date)), z = Math.min(_days, _dayIndex(b.checkout_date));
+        for (let k = a; k < z; k++) _occ[k] = true;
+      });
+      let _k = Math.max(0, todayIdx);
+      while (_k < _days) {
+        if (_occ[_k]) { _k++; continue; }
+        let _n = 0; while (_k + _n < _days && !_occ[_k + _n]) _n++;
+        const _w = _n * DAYW - 4;
+        track += `<div style="position:absolute;top:9px;height:40px;left:${_k * DAYW + 2}px;width:${_w}px;border:1.5px dashed var(--border-strong, #d1d5db);border-radius:10px;display:flex;align-items:center;justify-content:center;box-sizing:border-box;font-size:11px;font-weight:700;color:var(--text-muted);pointer-events:none;">${_w >= 52 ? '빈 방' : ''}</div>`;
+        _k += _n;
+      }
       (window._tlBookings || []).filter(b => String(b.room_id) === String(rm.id)).forEach(b => {
         let s = _dayIndex(b.checkin_date), e = _dayIndex(b.checkout_date);
         s = Math.max(0, s); e = Math.min(_days, e);
@@ -6184,7 +6324,7 @@ function renderTimeline(cfg) {
         const totalN = Math.max(1, Math.round((new Date(b.checkout_date + 'T00:00:00') - new Date(b.checkin_date + 'T00:00:00')) / 86400000));
         const staying = staying0;   // 수리 막대는 숙박중으로 취급하지 않습니다
         _rendered++;
-        track += `<div onclick="${isFix ? `tlFixRemove('${b.id}')` : `editBooking('${b.id}')`}" onmouseenter="tlShowTip(event,'${b.id}')" onmousemove="tlShowTip(event,'${b.id}')" onmouseleave="tlHideTip()" style="position:absolute;top:11px;height:36px;left:${s*DAYW}px;width:${barW}px;background:${th.bg};color:${th.fg};border:1px solid ${th.bd};${(staying || isFix) ? 'border-left:0;' : `border-left:3.5px solid ${th.ac};`}border-radius:7px;font-size:12.5px;font-weight:700;display:flex;align-items:center;padding:0 9px 0 ${(staying || isFix) ? '11px' : '8px'};white-space:nowrap;overflow:hidden;cursor:pointer;${isPast ? 'opacity:.42;' : ''}" title="${isFix ? `객실수리 · ${(b.rooms && b.rooms.room_number) || ''}호 · ${b.checkin_date}~${b.checkout_date} (${totalN}일)${b.notes ? ' · ' + tlEsc_(String(b.notes).replace(/^\[수리\]\s*/, '')) : ''}` : `${tlEsc_(tlGuestName_(b))} · ${(b.channels && b.channels.name) || '-'} · ${b.checkin_date}~${b.checkout_date} (${totalN}박)${b.num_guests ? ' · ' + b.num_guests + '명' : ''}${staying ? ' · 숙박중' : ''}`}">${isFix ? tlFixLabel_(b, barW) : tlBarLabel_(b, barW, totalN, clipL, clipR, staying)}</div>`;
+        track += `<div onclick="${isFix ? `tlFixRemove('${b.id}')` : `editBooking('${b.id}')`}" onmouseenter="tlShowTip(event,'${b.id}')" onmousemove="tlShowTip(event,'${b.id}')" onmouseleave="tlHideTip()" style="position:absolute;top:9px;height:40px;left:${s*DAYW + (clipL ? 0 : 2)}px;width:${barW - (clipL ? 0 : 2) - (clipR ? 0 : 2)}px;background:${th.bg};color:${th.fg};border:${isFix ? '1px solid ' + th.bd : '0'};border-radius:${clipL ? '0' : '10px'} ${clipR ? '0 0' : '10px 10px'} ${clipL ? '0' : '10px'};box-sizing:border-box;font-size:12.5px;font-weight:700;display:flex;align-items:center;padding:0 10px;white-space:nowrap;overflow:hidden;cursor:pointer;${isPast ? 'opacity:.42;' : ''}" title="${isFix ? `객실수리 · ${(b.rooms && b.rooms.room_number) || ''}호 · ${b.checkin_date}~${b.checkout_date} (${totalN}일)${b.notes ? ' · ' + tlEsc_(String(b.notes).replace(/^\[수리\]\s*/, '')) : ''}` : `${tlEsc_(tlGuestName_(b))} · ${(b.channels && b.channels.name) || '-'} · ${b.checkin_date}~${b.checkout_date} (${totalN}박)${b.num_guests ? ' · ' + b.num_guests + '명' : ''}${staying ? ' · 숙박중' : ''}`}">${isFix ? tlFixLabel_(b, barW) : tlBarLabel_(b, barW, totalN, clipL, clipR, staying)}</div>`;
       });
     } else {
       (window._tlTasks || []).filter(t => String(t.room_id) === String(rm.id)).forEach(t => {
@@ -7896,6 +8036,42 @@ window.bkSortBy = (key) => {
   else __bkSort = { key, dir: (key === 'gross' || key === 'fee' || key === 'net' || key === 'nights') ? 'desc' : 'asc' };
   applyBookingFilters();
 };
+/* [2026-10-23] 상단 요약의 「전월 대비」용 — 직전 비교 기간 구하기 */
+function bkPrevRange_(from, to) {
+  if (!from || !to || !/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to) || to < from) return null;
+  const iso = (d) => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const f = new Date(from + 'T00:00:00'), t = new Date(to + 'T00:00:00');
+  const tNext = new Date(t); tNext.setDate(tNext.getDate() + 1);
+  if (f.getDate() === 1 && tNext.getDate() === 1) {          // 달 단위 조회 (1일 ~ 말일)
+    const months = (t.getFullYear() - f.getFullYear()) * 12 + (t.getMonth() - f.getMonth()) + 1;
+    const pf = new Date(f.getFullYear(), f.getMonth() - months, 1);
+    const pt = new Date(f.getFullYear(), f.getMonth(), 0);
+    return { from: iso(pf), to: iso(pt), label: months === 1 ? '전월 대비' : `직전 ${months}개월 대비` };
+  }
+  const days = Math.round((tNext - f) / 86400000);
+  const pt = new Date(f); pt.setDate(pt.getDate() - 1);
+  const pf = new Date(pt); pf.setDate(pf.getDate() - days + 1);
+  return { from: iso(pf), to: iso(pt), label: `직전 ${days}일 대비` };
+}
+/* 지금 조회 조건(예약상태·채널·검색어·기준일자)은 그대로, 날짜만 바꿔서 다시 셉니다 */
+function bkFilterRange_(from, to) {
+  const q = ($('#bk-search')?.value || '').trim().toLowerCase();
+  const status = bkStatus_();
+  const boxes = document.querySelectorAll('.bk-ch');
+  const chSel = [...document.querySelectorAll('.bk-ch:checked')].map(x => x.value);
+  const chAll = (boxes.length === 0) || (chSel.length === boxes.length);
+  return (bookingsCache || []).filter(b => {
+    if (status === 'confirmed' && (b.booking_status === 'cancelled' || b.booking_status === 'no_show')) return false;
+    if (status === 'cancelled' && b.booking_status !== 'cancelled') return false;
+    const d = bkDateOf_(b);
+    if (!d || d < from || d > to) return false;
+    if (!chAll && !chSel.includes(b.channel_id || '__none')) return false;
+    if (!q) return true;
+    const hay = [b.guest_code, b.channel_booking_code, b.rooms?.room_number, b.guest_country, b.channels?.name, b.notes]
+      .map(x => (x || '').toString().toLowerCase()).join(' ');
+    return hay.includes(q);
+  });
+}
 function getFilteredBookings() {
   const q = ($('#bk-search')?.value || '').trim().toLowerCase();
   const status = bkStatus_();
@@ -7946,73 +8122,128 @@ function bkChBorderColor_(b) {
   return (typeof TL_CH !== 'undefined' && TL_CH[k]) ? TL_CH[k].bg : 'var(--border)';
 }
 function renderBookingsMobile_() {
+  /* [2026-10-23] 폰 예약 화면 — 시안 방식으로 다시 그렸습니다.
+     · 데이터(bookingsCache)와 동작(날짜 누르기 · ‹ › 이동 · 예약 누르면 수정창)은 그대로입니다.
+     · 달력 칸: 체크인 주황 점 · 체크아웃 파랑 점(개수만큼, 최대 3) · 빈 방이 있는 밤은 칸 아래 회색 줄
+     · 고른 날: 체크아웃 12:00 → 청소 → 체크인 16:00 순서의 타임라인 + 예약 카드 목록 */
   const host = document.getElementById('bk-mobile');
   if (!host) return;
   const esc = (v) => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const bks = (bookingsCache || []).filter(b => b.booking_status !== 'cancelled');
+  const bks = (bookingsCache || []).filter(b => b.booking_status !== 'cancelled' && b.booking_status !== 'no_show');
+  const guestsOnly = bks.filter(b => String(b.source || '') !== 'maintenance');
   const y = bkMobileMonth.getFullYear(), m = bkMobileMonth.getMonth();
   const pad = (n) => String(n).padStart(2, '0');
   const ym = `${y}-${pad(m + 1)}`;
   const startDow = new Date(y, m, 1).getDay();
   const daysInMonth = new Date(y, m + 1, 0).getDate();
   const todayStr = ymd_(new Date());
-  const ci = {}, co = {};
-  bks.forEach(b => {
-    if ((b.checkin_date || '').startsWith(ym)) ci[b.checkin_date] = 1;
-    if ((b.checkout_date || '').startsWith(ym)) co[b.checkout_date] = 1;
+  const R = (typeof cachedRooms !== 'undefined' && cachedRooms) ? (cachedRooms.filter(r => r.is_active).length || 5) : 5;
+  const ciN = {}, coN = {}, occN = {};
+  guestsOnly.forEach(b => {
+    if ((b.checkin_date || '').startsWith(ym)) ciN[b.checkin_date] = (ciN[b.checkin_date] || 0) + 1;
+    if ((b.checkout_date || '').startsWith(ym)) coN[b.checkout_date] = (coN[b.checkout_date] || 0) + 1;
+  });
+  bks.forEach(b => {   // 수리 막대도 「찬 밤」
+    for (let d = 1; d <= daysInMonth; d++) { const ds = `${ym}-${pad(d)}`; if (b.checkin_date <= ds && b.checkout_date > ds) occN[ds] = (occN[ds] || 0) + 1; }
   });
   let sel = window.bkMobileSelDay;
   if (!sel || !sel.startsWith(ym)) { sel = todayStr.startsWith(ym) ? todayStr : `${ym}-01`; window.bkMobileSelDay = sel; }
   const dows = ['일', '월', '화', '수', '목', '금', '토'];
+  const dot = (c) => `<span style="width:5px;height:5px;border-radius:3px;background:${c};display:inline-block;"></span>`;
   let cells = '';
   for (let i = 0; i < startDow; i++) cells += '<div></div>';
   for (let d = 1; d <= daysInMonth; d++) {
     const ds = `${ym}-${pad(d)}`;
-    const isSel = ds === sel, isToday = ds === todayStr;
+    const isSel = ds === sel, isToday = ds === todayStr, past = ds < todayStr;
     let dots = '';
-    if (ci[ds]) dots += '<span style="width:5px;height:5px;border-radius:50%;background:#1B5FA8;display:inline-block;"></span>';
-    if (co[ds]) dots += '<span style="width:5px;height:5px;border-radius:50%;background:#c9ccd1;display:inline-block;"></span>';
-    cells += `<div onclick="bkMobilePickDay('${ds}')" style="text-align:center;padding:5px 0;border-radius:8px;cursor:pointer;${isSel ? 'background:#1B5FA8;color:#fff;font-weight:700;' : isToday ? 'color:#1B5FA8;font-weight:700;' : ''}">${d}<div style="height:7px;display:flex;gap:2px;justify-content:center;align-items:center;">${dots}</div></div>`;
+    for (let k = 0; k < Math.min(ciN[ds] || 0, 3); k++) dots += dot('#D97706');
+    for (let k = 0; k < Math.min(coN[ds] || 0, 3); k++) dots += dot('#2563EB');
+    const vacant = !past && (occN[ds] || 0) < R;
+    const st = isSel
+      ? 'background:var(--text);color:var(--bg);'
+      : (isToday ? 'background:var(--surface);border:2px solid var(--text);' : 'background:var(--surface-soft, #f7f8fa);')
+        + (past ? 'color:var(--text-muted);' : '');
+    cells += `<div onclick="bkMobilePickDay('${ds}')" style="height:50px;border-radius:13px;display:flex;flex-direction:column;align-items:center;gap:5px;padding-top:6px;box-sizing:border-box;cursor:pointer;font-size:13px;font-weight:${isSel || isToday ? 800 : 700};font-variant-numeric:tabular-nums;${st}${vacant && !isSel ? 'box-shadow:inset 0 -3px 0 var(--border-strong, #9ca3af);' : ''}">${d}<div style="display:flex;gap:2px;flex-wrap:wrap;justify-content:center;max-width:32px;min-height:5px;">${dots}</div></div>`;
   }
   const rn = (b) => (b.rooms?.room_number || '');
-  const dayCi = bks.filter(b => b.checkin_date === sel).sort((a, b) => rn(a).localeCompare(rn(b)));
-  const dayCo = bks.filter(b => b.checkout_date === sel).sort((a, b) => rn(a).localeCompare(rn(b)));
-  const dayStay = bks.filter(b => b.checkin_date < sel && b.checkout_date > sel);
+  const dayCi = guestsOnly.filter(b => b.checkin_date === sel).sort((a, b) => rn(a).localeCompare(rn(b)));
+  const dayCo = guestsOnly.filter(b => b.checkout_date === sel).sort((a, b) => rn(a).localeCompare(rn(b)));
+  const dayStay = guestsOnly.filter(b => b.checkin_date < sel && b.checkout_date > sel);
   const nights = (b) => { try { return Math.max(1, Math.round((new Date(b.checkout_date) - new Date(b.checkin_date)) / 86400000)); } catch (e) { return '?'; } };
-  const card = (b) => `
-    <div onclick="editBooking('${b.id}')" style="border:1px solid ${bkChBorderColor_(b)};border-left:4px solid ${bkChColor_(b)};border-radius:8px;padding:9px 11px;cursor:pointer;margin-bottom:6px;">
-      <div style="display:flex;justify-content:space-between;align-items:baseline;">
-        <span style="font-size:15px;font-weight:600;min-width:0;">${RH(esc(rn(b) || '?'))} · ${esc(b.guest_code || b.channel_booking_code || '게스트')}</span>
-        <span style="flex-shrink:0;margin-left:8px;">${channelChipInner_(b.channels?.name || '직접')}</span>
+  const badge = (b) => `<span style="display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:24px;padding:0 6px;border-radius:12px;font-size:11px;font-weight:800;color:#fff;background:${bkChColor_(b)};border:2px solid var(--surface);margin-left:-6px;">${esc(rn(b) || '?')}</span>`;
+  const chs = (list) => [...new Set(list.map(b => b.channels?.name || '직접'))].join(' · ');
+  const ev = (time, sub, color, title, desc, list, tag) => `
+    <div style="display:flex;gap:12px;">
+      <div style="width:50px;flex:none;"><div style="font-size:14px;font-weight:800;font-variant-numeric:tabular-nums;">${time}</div><div style="font-size:11px;color:var(--text-muted);">${sub}</div></div>
+      <div style="flex:1;min-width:0;padding-left:12px;border-left:3px solid ${color};">
+        <div style="font-size:15px;font-weight:800;">${title}</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${desc}</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:8px;">
+          <div style="display:flex;padding-left:6px;">${list.map(badge).join('')}</div>
+          <span style="font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px;color:${color};background:var(--surface-soft, #f1f3f5);">${tag}</span>
+        </div>
       </div>
-      <div style="font-size:12px;color:#888;margin-top:3px;">${b.checkin_date} ~ ${b.checkout_date} · ${nights(b)}박 · ${b.num_guests || 1}명</div>
+    </div>`;
+  let tl = '';
+  if (sel === todayStr) {
+    const now = new Date(), hh = pad(now.getHours()) + ':' + pad(now.getMinutes());
+    tl += `<div style="display:flex;align-items:center;gap:8px;margin:0 0 4px;"><span style="font-size:11px;font-weight:800;color:var(--danger-600, #dc2626);width:50px;font-variant-numeric:tabular-nums;">${hh}</span><span style="flex:1;height:2px;background:var(--danger-600, #dc2626);"></span></div>`;
+  }
+  if (dayCo.length) tl += ev('12:00', '퇴실', '#2563EB', `체크아웃 ${dayCo.length}건`, esc(chs(dayCo)), dayCo, '체크아웃');
+  if (dayCo.length) tl += ev('12:00', '청소', 'var(--text)', `청소 ${dayCo.length}건`, '16:00 전 완료', dayCo, '청소');
+  if (dayCi.length) tl += ev('16:00', '입실', '#D97706', `체크인 ${dayCi.length}건`, esc(dayCi.map(b => `${b.channels?.name || '직접'} ${nights(b)}박`).join(' · ')), dayCi, '체크인');
+  if (!tl.replace(/<div style="display:flex;align-items:center;gap:8px;margin:0 0 4px;">[\s\S]*?<\/div>/, '').trim()) tl += '<div style="text-align:center;color:var(--text-muted);font-size:13px;padding:18px 0;">이 날 체크인·체크아웃 없음</div>';
+  const card = (b) => `
+    <div onclick="editBooking('${b.id}')" style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--border);cursor:pointer;">
+      <span style="display:inline-flex;align-items:center;justify-content:center;min-width:38px;height:26px;border-radius:13px;background:var(--surface-soft, #f1f3f5);font-size:12px;font-weight:800;">${RH(esc(rn(b) || '?'))}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:center;gap:6px;">${channelChipInner_(b.channels?.name || '직접')}<span style="font-size:12px;color:var(--text-muted);font-variant-numeric:tabular-nums;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(b.guest_code || b.channel_booking_code || '게스트')}</span></div>
+        <div style="font-size:12px;color:var(--text-soft);margin-top:3px;">${b.checkin_date.slice(5).replace('-', '/')} → ${b.checkout_date.slice(5).replace('-', '/')} · ${nights(b)}박 · ${b.num_guests || 1}명</div>
+      </div>
     </div>`;
   let list = '';
-  if (dayCi.length) {
-    list += `<div style="font-size:13px;font-weight:700;color:#1B5FA8;margin:2px 0 8px;">→ 체크인 <span style="color:#aaa;font-weight:500;">${dayCi.length}</span></div>`;
-    dayCi.forEach(b => list += card(b));
-  }
-  if (dayCo.length) {
-    list += `<div style="border-top:1px solid #e5e5e2;margin:${dayCi.length ? '16px' : '2px'} 0 12px;"></div><div style="font-size:13px;font-weight:700;color:#666;margin:0 0 8px;">↩ 체크아웃 <span style="color:#aaa;font-weight:500;">${dayCo.length}</span></div>`;
-    dayCo.forEach(b => list += card(b));
-  }
-  if (!list) list = '<div style="text-align:center;color:#aaa;font-size:13px;padding:24px 0;">이 날 체크인·체크아웃 없음</div>';
+  if (dayCi.length) list += `<div style="font-size:12px;font-weight:800;color:#B45309;margin:14px 0 2px;">체크인 ${dayCi.length}</div>` + dayCi.map(card).join('');
+  if (dayCo.length) list += `<div style="font-size:12px;font-weight:800;color:#1D4ED8;margin:14px 0 2px;">체크아웃 ${dayCo.length}</div>` + dayCo.map(card).join('');
+  const sd = new Date(sel + 'T00:00:00');
+  const selTitle = sel === todayStr ? '오늘' : `${sd.getMonth() + 1}월 ${sd.getDate()}일`;
+  const mCi = Object.values(ciN).reduce((s, v) => s + v, 0), mCo = Object.values(coN).reduce((s, v) => s + v, 0);
+  const btn = 'min-height:40px;min-width:40px;padding:0 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;';
   host.innerHTML = `
-    <div class="section-label" style="margin-top:4px;">이 달 달력 <span style="font-weight:600;text-transform:none;letter-spacing:-0.005em;color:var(--text-muted);margin-left:6px;">날짜를 누르면 아래에 상세</span></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:2px 4px 10px;">
-      <button onclick="bkMobileNav(-1)" aria-label="이전 달" style="border:none;background:none;font-size:22px;color:#888;cursor:pointer;padding:0 8px;">‹</button>
-      <span style="font-size:15px;font-weight:700;">${y}년 ${m + 1}월</span>
-      <button onclick="bkMobileNav(1)" aria-label="다음 달" style="border:none;background:none;font-size:22px;color:#888;cursor:pointer;padding:0 8px;">›</button>
+    <div style="margin:2px 0 0;">
+      <div style="font-size:30px;font-weight:800;letter-spacing:-0.02em;">${y}년 ${m + 1}월</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-top:4px;">이 달 체크인 ${mCi} · 체크아웃 ${mCo}</div>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:11px;color:#999;margin-bottom:3px;">${dows.map(d => `<div>${d}</div>`).join('')}</div>
-    <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;font-size:13px;">${cells}</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);text-align:center;margin:12px 0;padding:12px 0;border-top:1px solid #eee;border-bottom:1px solid #eee;">
-      <div><div style="font-size:13px;color:#666;margin-bottom:3px;">체크인</div><div style="font-size:25px;font-weight:800;color:#1B5FA8;line-height:1;">${dayCi.length}</div></div>
-      <div><div style="font-size:13px;color:#666;margin-bottom:3px;">숙박중</div><div style="font-size:25px;font-weight:800;color:#2d5040;line-height:1;">${dayStay.length}</div></div>
-      <div><div style="font-size:13px;color:#666;margin-bottom:3px;">체크아웃</div><div style="font-size:25px;font-weight:800;color:#C0392B;line-height:1;">${dayCo.length}</div></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 0;gap:8px;">
+      <div style="display:flex;gap:6px;">
+        <button onclick="bkMobileNav(-1)" aria-label="이전 달" style="${btn}">‹</button>
+        <button onclick="bkMobileToday()" style="${btn}">오늘</button>
+        <button onclick="bkMobileNav(1)" aria-label="다음 달" style="${btn}">›</button>
+      </div>
+      <button onclick="document.getElementById('open-booking-modal') && document.getElementById('open-booking-modal').click()" style="${btn}background:var(--text);color:var(--bg);border-color:var(--text);font-weight:800;">+ 예약 추가</button>
     </div>
-    <div>${list}</div>`;
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:12px 10px;margin-top:12px;box-shadow:0 1px 3px rgba(16,24,40,.06);">
+      <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;text-align:center;font-size:10px;font-weight:700;color:var(--text-muted);margin-bottom:6px;">${dows.map(d => `<div>${d}</div>`).join('')}</div>
+      <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;">${cells}</div>
+      <div style="display:flex;gap:14px;justify-content:center;margin-top:10px;font-size:11px;color:var(--text-muted);">
+        <span style="display:flex;align-items:center;gap:5px;">${dot('#D97706')}체크인</span>
+        <span style="display:flex;align-items:center;gap:5px;">${dot('#2563EB')}체크아웃</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:3px;background:var(--border-strong, #9ca3af);display:inline-block;"></span>빈 방 있음</span>
+      </div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:16px;margin-top:12px;box-shadow:0 1px 3px rgba(16,24,40,.06);">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px;">
+        <div><div style="font-size:20px;font-weight:800;">${selTitle}</div><div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${sd.getMonth() + 1}월 ${sd.getDate()}일 ${dows[sd.getDay()]}요일</div></div>
+        <div style="display:flex;gap:12px;text-align:center;font-variant-numeric:tabular-nums;">
+          <div><div style="font-size:10px;color:var(--text-muted);">체크인</div><div style="font-size:18px;font-weight:800;color:#B45309;">${dayCi.length}</div></div>
+          <div><div style="font-size:10px;color:var(--text-muted);">숙박중</div><div style="font-size:18px;font-weight:800;">${dayStay.length}</div></div>
+          <div><div style="font-size:10px;color:var(--text-muted);">체크아웃</div><div style="font-size:18px;font-weight:800;color:#1D4ED8;">${dayCo.length}</div></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px;">${tl}</div>
+      ${list}
+    </div>`;
 }
+window.bkMobileToday = function () { const t = new Date(); bkMobileMonth = new Date(t.getFullYear(), t.getMonth(), 1); window.bkMobileSelDay = ymd_(t); renderBookingsMobile_(); };
 window.bkMobilePickDay = function (d) { window.bkMobileSelDay = d; renderBookingsMobile_(); };
 window.bkMobileNav = function (delta) { bkMobileMonth = new Date(bkMobileMonth.getFullYear(), bkMobileMonth.getMonth() + delta, 1); window.bkMobileSelDay = null; renderBookingsMobile_(); };
 function renderBookingList(bookings) {
@@ -8044,19 +8275,53 @@ function renderBookingList(bookings) {
         return sum + (n > 0 ? n : 0);
       }, 0);
   }
-  const kpi = (l, v, c, d) => `<div style="border:1.5px solid var(--border);border-radius:10px;padding:8px 10px;"><div style="font-size:10px;font-weight:700;color:var(--text-muted);white-space:nowrap;">${l}</div><div style="font-size:16px;font-weight:800;margin-top:2px;font-variant-numeric:tabular-nums;${c ? 'color:' + c + ';' : ''}">${v}</div><div style="font-size:9.5px;color:var(--neutral-400);margin-top:1px;">${d || ''}</div></div>`;
+  /* [2026-10-23] 상단 요약 카드 — 크게 + 「전월(직전 기간) 대비」 한 줄 추가.
+     · 비교 기간: 조회 기간이 달 단위(1일~말일)면 바로 앞 같은 개월 수, 아니면 같은 일수만큼 앞.
+     · 비교 대상은 지금 조회와 같은 조건(기준일자·채널·예약상태·검색어)으로 다시 셉니다. */
+  const kpi = (l, v, c, d, dl) => `<div style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:12px 14px;box-shadow:0 1px 2px rgba(16,24,40,.04);min-width:0;"><div style="font-size:11px;font-weight:700;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${l}</div><div style="font-size:22px;font-weight:800;letter-spacing:-0.01em;margin-top:3px;font-variant-numeric:tabular-nums;${c ? 'color:' + c + ';' : ''}">${v}</div>${dl || ''}<div style="font-size:10.5px;color:var(--text-muted);margin-top:2px;">${d || ''}</div></div>`;
+  const _prev = bkPrevRange_(dFrom, dTo);
+  let _pv = null;
+  if (_prev) {
+    const pl = bkFilterRange_(_prev.from, _prev.to).filter(b => b.booking_status !== 'cancelled' && b.booking_status !== 'no_show');
+    const pg = pl.reduce((x, b) => x + Number(b.gross_amount || 0), 0);
+    const pn = pl.reduce((x, b) => x + Number(b.nights || 0), 0);
+    let pOcc = null;
+    if (saleable) {
+      const s1 = new Date(_prev.from + 'T00:00:00'), e1 = new Date(_prev.to + 'T00:00:00'); e1.setDate(e1.getDate() + 1);
+      const pDays = Math.max(1, Math.round((e1 - s1) / 86400000));
+      const rms = (typeof cachedRooms !== 'undefined' && cachedRooms) ? cachedRooms.filter(r => r.is_active).length : 5;
+      const pSale = pDays * (rms || 5);
+      const pOccN = (bookingsCache || []).filter(b => b.booking_status !== 'cancelled' && b.checkin_date && b.checkout_date)
+        .reduce((sum, b) => {
+          const ci = new Date(b.checkin_date + 'T00:00:00'), co = new Date(b.checkout_date + 'T00:00:00');
+          const a = ci > s1 ? ci : s1, z = co < e1 ? co : e1;
+          const n = Math.round((z - a) / 86400000);
+          return sum + (n > 0 ? n : 0);
+        }, 0);
+      pOcc = pOccN / pSale * 100;
+    }
+    _pv = { gross: pg, nts: pn, cnt: pl.length, adr: pn > 0 ? pg / pn : null, occ: pOcc };
+  }
+  const _lbl = _prev ? _prev.label : '';
+  const delta = (cur, prev, pp) => {
+    if (!_prev || prev == null || cur == null) return '';
+    let txt, up;
+    if (pp) { const d0 = cur - prev; if (Math.abs(d0) < 0.05) return `<div style="font-size:11px;font-weight:700;color:var(--text-muted);margin-top:2px;">– ${_lbl}</div>`; up = d0 > 0; txt = `${Math.abs(d0).toFixed(1)}%p`; }
+    else { if (!prev) return `<div style="font-size:11px;font-weight:700;color:var(--text-muted);margin-top:2px;">${_lbl} 없음</div>`; const r = (cur - prev) / prev * 100; if (Math.abs(r) < 0.5) return `<div style="font-size:11px;font-weight:700;color:var(--text-muted);margin-top:2px;">– ${_lbl}</div>`; up = r > 0; txt = `${Math.abs(r).toFixed(0)}%`; }
+    return `<div style="font-size:11px;font-weight:700;margin-top:2px;color:${up ? 'var(--success, #047857)' : 'var(--danger, #dc2626)'};">${up ? '▲' : '▼'} ${txt} <span style="color:var(--text-muted);font-weight:600;">${_lbl}</span></div>`;
+  };
   // 정산은 아직 확정 단계가 아니라 '정산액'은 표시하지 않습니다 (표의 컬럼으로만 참고)
   const occPct  = (occN != null && saleable) ? (occN / saleable * 100) : null;
   const bkOccPct = saleable ? (nts / saleable * 100) : null;
   const sumEl = $('#bk-summary');
   if (sumEl) sumEl.innerHTML =
-      kpi('거래액', won(gross), '', `${bkBasisLabel_()} 기준`)
+      kpi('거래액', won(gross), '', `${bkBasisLabel_()} 기준`, delta(gross, _pv && _pv.gross))
     + kpi('수수료', '−' + won(fee), '#b85c3f', gross > 0 ? `평균 ${(fee / gross * 100).toFixed(1)}%` : '')
-    + kpi('예약 건수', act.length + '건', '', bookings.length !== act.length ? `취소 ${bookings.length - act.length}건 제외` : '')
-    + kpi('예약 박수', nts + '박', '', bkBasisLabel_() + ' 예약')
+    + kpi('예약 건수', act.length + '건', '', bookings.length !== act.length ? `취소 ${bookings.length - act.length}건 제외` : '', delta(act.length, _pv && _pv.cnt))
+    + kpi('예약 박수', nts + '박', '', bkBasisLabel_() + ' 예약', delta(nts, _pv && _pv.nts))
     + (occN != null ? kpi('실제 숙박', occN + '박', '', `공실 ${Math.max(0, saleable - occN)}박 / 판매가능 ${saleable}박`) : '')
-    + kpi('ADR (박당)', nts > 0 ? won(gross / nts) : '—', '', `예약 ${nts}박 기준`)
-    + (occPct != null ? kpi('점유율 (OCC)', occPct.toFixed(0) + '%', '', `${occN} / ${saleable}박 실제${bkOccPct != null && Math.abs(bkOccPct - occPct) >= 0.5 ? ` · 예약기준 ${bkOccPct.toFixed(0)}%` : ''}`) : '');
+    + kpi('ADR (박당)', nts > 0 ? won(gross / nts) : '—', '', `예약 ${nts}박 기준`, delta(nts > 0 ? gross / nts : null, _pv && _pv.adr))
+    + (occPct != null ? kpi('점유율 (OCC)', occPct.toFixed(1) + '%', '', `${occN} / ${saleable}박 실제${bkOccPct != null && Math.abs(bkOccPct - occPct) >= 0.5 ? ` · 예약기준 ${bkOccPct.toFixed(0)}%` : ''}`, delta(occPct, _pv && _pv.occ, true)) : '');
   const summaryEl = $('#bk-list-summary');
   if (summaryEl) summaryEl.textContent = `· ${bkBasisLabel_()} 기준 · ${bookings.length}건`;
   if (!bookings.length) {
@@ -16000,5 +16265,140 @@ async function renderDashChannelRevenue() {
 }
 
 </script>
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   📱 [2026-10-23] 폰 전용 화면 — 시안 방식 (매출 분석)
+   · 폭 600px 이하에서만 그립니다. PC 화면에는 아무것도 바꾸지 않습니다.
+   · 기존 화면 내용은 그대로 아래에 남아 있고, 그 위에 요약 카드만 얹습니다.
+   · 청소·상담 화면은 손대지 않습니다.
+   · 되돌리려면 이 <script> 블록과 m-insight 자리 한 줄만 지우면 됩니다.
+   ═══════════════════════════════════════════════════════════════════ */
+(function () {
+  const isPhone = () => window.innerWidth <= 600;
+  const pad = (n) => String(n).padStart(2, '0');
+  const iso = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+  const man = (v) => Math.round((v || 0) / 10000).toLocaleString('ko-KR');
+  const esc = (v) => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const roomsN = () => {
+    try { const r = (typeof cachedRooms !== 'undefined' && cachedRooms) ? cachedRooms.filter(x => x.is_active).length : 0; return r || 5; } catch (e) { return 5; }
+  };
+  const rn = (b) => (b.rooms && b.rooms.room_number) || '';
+  const isFix = (b) => String(b.source || '') === 'maintenance';
+  const chName = (b) => (b.channels && b.channels.name) || '직접';
+  const chColor = (b) => { try { return bkChColor_(b); } catch (e) { return 'var(--text-muted)'; } };
+  const nightsIn = (b, from, toExcl) => {   // from ~ toExcl(제외) 사이에 걸친 박수
+    const a = b.checkin_date > from ? b.checkin_date : from;
+    const z = b.checkout_date < toExcl ? b.checkout_date : toExcl;
+    return Math.max(0, Math.round((new Date(z + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000));
+  };
+  const totalNights = (b) => Math.max(1, Math.round((new Date(b.checkout_date + 'T00:00:00') - new Date(b.checkin_date + 'T00:00:00')) / 86400000));
+  const delta = (cur, prev, pp) => {
+    if (prev == null || cur == null) return '';
+    let up, txt;
+    if (pp) { const d = cur - prev; if (Math.abs(d) < 0.05) return '<div class="m-dl" style="color:var(--text-muted)">– 전월과 같음</div>'; up = d > 0; txt = Math.abs(d).toFixed(1) + '%p'; }
+    else { if (!prev) return ''; const r = (cur - prev) / prev * 100; if (Math.abs(r) < 0.5) return '<div class="m-dl" style="color:var(--text-muted)">– 전월과 같음</div>'; up = r > 0; txt = Math.abs(r).toFixed(0) + '%'; }
+    return `<div class="m-dl" style="color:${up ? 'var(--success-600, #047857)' : 'var(--danger-600, #dc2626)'}">${up ? '▲' : '▼'} ${txt} <span style="color:var(--text-muted);font-weight:600">전월 대비</span></div>`;
+  };
+
+  /* ── 매출 분석 상단 ───────────────────────────────────── */
+  async function mInsightRender_() {
+    const host = document.getElementById('m-insight');
+    if (!host || !isPhone() || typeof db === 'undefined') return;
+    const now = new Date();
+    const mStart = (k) => new Date(now.getFullYear(), now.getMonth() + k, 1);
+    const S = iso(mStart(-2)), E = iso(mStart(2));
+    let bks = [];
+    try {
+      const { data } = await db.from('bookings')
+        .select('id, rooms(room_number), channels(name), checkin_date, checkout_date, gross_amount, channel_commission, booking_status, source')
+        .neq('booking_status', 'cancelled').lte('checkin_date', E).gt('checkout_date', iso(mStart(-2))).limit(2000);
+      bks = (data || []).filter(b => b.booking_status !== 'no_show' && !isFix(b));
+    } catch (e) { return; }
+    const R = roomsN();
+    const mon = (k) => {
+      const a = iso(mStart(k)), z = iso(mStart(k + 1));
+      const days = new Date(mStart(k).getFullYear(), mStart(k).getMonth() + 1, 0).getDate();
+      let n = 0, rev = 0, fee = 0;
+      bks.forEach(b => { const x = nightsIn(b, a, z); if (!x) return; const t = totalNights(b); n += x; rev += Number(b.gross_amount || 0) * x / t; fee += Number(b.channel_commission || 0) * x / t; });
+      const ck = bks.filter(b => b.checkin_date >= a && b.checkin_date < z);
+      return { label: (mStart(k).getMonth() + 1) + '월', n, rev, fee, occ: n / (days * R) * 100, adr: n ? rev / n : 0,
+               gmv: ck.reduce((s, b) => s + Number(b.gross_amount || 0), 0), cfee: ck.reduce((s, b) => s + Number(b.channel_commission || 0), 0), a, z };
+    };
+    const M = [mon(-2), mon(-1), mon(0), mon(1)];
+    const cur = M[2], prev = M[1];
+    const maxRev = Math.max(1, ...M.map(m => m.rev));
+    // 채널별 (이번 달, 숙박일 기준)
+    const ch = {};
+    bks.forEach(b => { const x = nightsIn(b, cur.a, cur.z); if (!x) return; const t = totalNights(b); const k = chName(b);
+      const o = ch[k] || (ch[k] = { rev: 0, fee: 0, col: chColor(b) }); o.rev += Number(b.gross_amount || 0) * x / t; o.fee += Number(b.channel_commission || 0) * x / t; });
+    const chs = Object.entries(ch).sort((p, q) => q[1].rev - p[1].rev);
+    const chTot = chs.reduce((s, [, o]) => s + o.rev, 0) || 1;
+    // 객실별 평일·주말 단가 (금·토 숙박 = 주말)
+    const rm = {};
+    bks.forEach(b => {
+      const t = totalNights(b), per = Number(b.gross_amount || 0) / t;
+      for (let i = 0; i < t; i++) {
+        const d = new Date(b.checkin_date + 'T00:00:00'); d.setDate(d.getDate() + i);
+        const ds = iso(d); if (ds < cur.a || ds >= cur.z) continue;
+        const we = d.getDay() === 5 || d.getDay() === 6;
+        const o = rm[rn(b)] || (rm[rn(b)] = { wd: 0, wdn: 0, we: 0, wen: 0 });
+        if (we) { o.we += per; o.wen++; } else { o.wd += per; o.wdn++; }
+      }
+    });
+    const rms = Object.entries(rm).filter(([k]) => k).map(([k, o]) => ({ k, wd: o.wdn ? o.wd / o.wdn : null, we: o.wen ? o.we / o.wen : null }))
+      .sort((p, q) => (q.wd || 0) - (p.wd || 0));
+    const minWd = Math.min(...rms.filter(r => r.wd).map(r => r.wd));
+    const f1 = (v) => v == null ? '—' : (v / 10000).toFixed(1);
+    host.innerHTML = `
+      <div class="m-hello">매출 인사이트</div>
+      <div class="m-sub" style="font-size:13px;margin-top:4px">${cur.label} · 수수료 차감 전 · 전월 대비</div>
+      <div class="m-grid2">
+        <div class="m-card m-kpi"><div class="m-k">거래액 · 체크인 기준</div><div class="m-v">${man(cur.gmv)}<small>만</small></div>${delta(cur.gmv, prev.gmv)}</div>
+        <div class="m-card m-kpi"><div class="m-k">정산 예상 · 수수료 후</div><div class="m-v">${man(cur.gmv - cur.cfee)}<small>만</small></div><div class="m-sub">수수료 ${man(cur.cfee)}만 · ${cur.gmv ? (cur.cfee / cur.gmv * 100).toFixed(1) : 0}%</div></div>
+        <div class="m-card m-kpi"><div class="m-k">OCC</div><div class="m-v">${cur.occ.toFixed(1)}<small>%</small></div>${delta(cur.occ, prev.occ, true)}</div>
+        <div class="m-card m-kpi"><div class="m-k">ADR</div><div class="m-v">${(cur.adr / 10000).toFixed(1)}<small>만</small></div>${delta(cur.adr, prev.adr)}</div>
+      </div>
+      <div class="m-card">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:14px">월별 추이</b><span class="m-sub">숙박일 기준 · ${M[3].label}은 확정분</span></div>
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;align-items:end;height:140px;margin-top:14px">
+          ${M.map((m, i) => `<div style="display:flex;flex-direction:column;align-items:center;gap:6px"><div class="m-num" style="font-size:12px;font-weight:700">${man(m.rev)}</div><div style="width:100%;border-radius:10px 10px 4px 4px;height:${Math.max(4, Math.round(m.rev / maxRev * 100))}px;background:${i === 2 ? 'var(--text)' : i === 3 ? 'repeating-linear-gradient(135deg, rgba(37,99,235,.55) 0 6px, rgba(37,99,235,.22) 6px 12px)' : 'var(--border-strong, #d1d5db)'}"></div></div>`).join('')}
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-top:8px;text-align:center">
+          ${M.map(m => `<div><div style="font-size:12px;font-weight:700">${m.label}</div><div class="m-sub m-num">OCC ${m.occ.toFixed(0)}% · ${(m.adr / 10000).toFixed(1)}만</div></div>`).join('')}
+        </div>
+      </div>
+      <div class="m-card">
+        <div style="display:flex;justify-content:space-between;align-items:baseline"><b style="font-size:14px">객실별 평일·주말 단가</b><span class="m-sub">만원 · 금·토 = 주말</span></div>
+        <div class="m-tr m-th"><span>객실</span><span>평일</span><span>주말</span><span>차이</span></div>
+        ${rms.map(r => { const low = r.wd && r.wd === minWd; const gap = (r.wd && r.we) ? Math.round((r.we - r.wd) / r.wd * 100) : null;
+          return `<div class="m-tr"${low ? ' style="color:#B45309"' : ''}><span style="font-weight:800">${esc(r.k)}</span><span class="m-num"${low ? ' style="font-weight:800"' : ''}>${f1(r.wd)}</span><span class="m-num">${f1(r.we)}</span><span class="m-num" style="${low ? 'font-weight:800' : 'color:var(--text-muted)'}">${gap == null ? '—' : (gap >= 0 ? '+' : '') + gap + '%'}</span></div>`; }).join('')}
+      </div>
+      <div class="m-card">
+        <b style="font-size:14px">채널별 매출·수수료</b>
+        <div style="height:10px;border-radius:5px;overflow:hidden;display:flex;margin:12px 0 4px">${chs.map(([, o]) => `<div style="width:${(o.rev / chTot * 100).toFixed(1)}%;background:${o.col}"></div>`).join('')}</div>
+        <div class="m-tr m-th"><span>채널</span><span>매출</span><span>수수료율</span><span>정산</span></div>
+        ${chs.map(([k, o]) => `<div class="m-tr"><span><i class="m-dot" style="background:${o.col}"></i>${esc(k)}</span><span class="m-num">${man(o.rev)}만</span><span class="m-num">${o.rev ? (o.fee / o.rev * 100).toFixed(1) : '0.0'}%</span><span class="m-num" style="font-weight:800">${man(o.rev - o.fee)}만</span></div>`).join('')}
+      </div>`;
+  }
+
+  window.mInsightRender_ = mInsightRender_;
+  // 화면을 그릴 때마다 같이 그립니다 (기존 함수는 그대로 실행)
+  try {
+    if (typeof loadAnalysisSheet === 'function') {
+      const _la = loadAnalysisSheet;
+      loadAnalysisSheet = function () { const r = _la.apply(this, arguments); try { mInsightRender_(); } catch (e) {} return r; };
+      window.loadAnalysisSheet = loadAnalysisSheet;
+    }
+  } catch (e) {}
+  document.addEventListener('click', (ev) => {
+    const it = ev.target.closest && ev.target.closest('.nav-item[data-view]');
+    if (!it) return;
+    setTimeout(() => {
+      if (it.dataset.view === 'analysis') mInsightRender_();
+    }, 60);
+  });
+})();
+</script>
+
 </body>
 </html>
