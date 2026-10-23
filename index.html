@@ -4771,63 +4771,30 @@ async function renderPricingBoard() {
     const { data, error } = await db.rpc('pricing_board');
     if (error) throw error;
     rows = data || [];
-  } catch (e) {
-    host.innerHTML = '';
-    return;
-  }
+  } catch (e) { host.innerHTML = ''; return; }
 
-  if (!rows.length) {
-    host.innerHTML = '<div class="ceo-card"><div class="ceo-cb" style="padding:11px 15px;display:flex;align-items:center;gap:8px;">'
-      + '<span style="width:7px;height:7px;border-radius:50%;background:#059669;"></span>'
-      + '<span style="font-size:13.5px;color:var(--text-soft);">요금 조정 — 지금 손볼 날짜가 없습니다</span>'
-      + '</div></div>';
-    return;
-  }
+  if (!rows.length) { host.innerHTML = ''; return; }
 
-  const RED = '#E24B4A', AMB = '#EF9F27';
-  const reds = rows.filter(r => r.level === 'red').length;
+  const esc2 = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const line = r => {
-    const col = r.level === 'red' ? RED : AMB;
-    const cur = Math.max(0, Math.min(100, Math.round(Number(r.cur_pct) || 0)));
-    const exp = Math.max(0, Math.min(100, Math.round(Number(r.exp_pct) || 0)));
     const d = new Date(r.stay_date + 'T00:00:00');
-    const label = (d.getMonth() + 1) + '/' + d.getDate() + ' (' + r.dow + ')';
-    return '<div style="display:flex;align-items:center;gap:12px;padding:11px 15px;border-bottom:1px solid var(--border);">'
-      + '<div style="width:7px;height:7px;border-radius:50%;background:' + col + ';flex:none;"></div>'
-      + '<div style="width:92px;flex:none;">'
-      +   '<div style="font-size:13.5px;font-weight:600;">' + label + '</div>'
-      +   '<div style="font-size:11.5px;color:var(--text-muted);">D-' + r.dn + '</div>'
-      + '</div>'
-      + '<div style="flex:1;min-width:0;">'
-      +   '<div style="height:5px;background:#F1F3F5;border-radius:3px;position:relative;overflow:hidden;">'
-      +     '<div style="position:absolute;left:0;top:0;bottom:0;width:' + cur + '%;background:' + col + ';"></div>'
-      +     '<div style="position:absolute;left:' + exp + '%;top:-3px;bottom:-3px;width:1.5px;background:var(--text-muted);"></div>'
-      +   '</div>'
-      +   '<div style="font-size:11.5px;color:var(--text-soft);margin-top:5px;">'
-      +     cur + '% · 기대 ' + exp + '% <span style="color:' + col + ';">' + r.gap + '%p</span>'
-      +   '</div>'
-      + '</div>'
-      + '<div style="width:122px;flex:none;text-align:right;">'
-      +   '<div style="font-size:12.5px;color:var(--text-soft);">빈방 ' + r.rooms_free + '</div>'
-      +   '<div style="font-size:11.5px;color:var(--text-muted);">' + (r.free_list || '') + '</div>'
-      + '</div>'
+    const when = (d.getMonth() + 1) + '월 ' + d.getDate() + '일 (' + r.dow + ')';
+    return '<div style="display:flex;align-items:center;padding:14px 15px;border-bottom:1px solid var(--border);">'
+      + '<div style="width:9px;height:9px;border-radius:50%;background:#E24B4A;flex:none;margin-right:11px;"></div>'
+      + '<div style="font-size:14px;font-weight:600;width:112px;flex:none;">' + when + '</div>'
+      + '<div style="font-size:13px;color:var(--text-muted);width:66px;flex:none;">' + r.dn + '일 뒤</div>'
+      + '<div style="font-size:14px;width:66px;flex:none;"><b>' + r.rooms_sold + '</b><span style="color:var(--text-muted);">/' + r.rooms_total + '실</span></div>'
+      + '<div style="font-size:13px;color:var(--text-soft);flex:1;min-width:0;">빈방 ' + esc2(r.free_list || '') + '</div>'
+      + '<div style="font-size:13.5px;font-weight:600;color:#E24B4A;flex:none;">요금 내리기</div>'
       + '</div>';
   };
 
   host.innerHTML = '<div class="ceo-card">'
     + '<div class="ceo-ch" style="display:flex;align-items:center;justify-content:space-between;">'
-    +   '<div style="display:flex;align-items:center;gap:8px;">'
-    +     '<span class="ceo-ct">요금 조정</span>'
-    +     '<span style="background:' + (reds ? 'rgba(226,75,74,.12)' : 'rgba(239,159,39,.14)') + ';color:' + (reds ? RED : AMB) + ';font-size:11.5px;padding:2px 8px;border-radius:8px;">' + rows.length + '건</span>'
-    +   '</div>'
-    +   '<span style="font-size:12px;color:var(--text-muted);">목표 가동률 95% · D-14 이내</span>'
+    +   '<span class="ceo-ct">예약이 덜 찬 날</span>'
+    +   '<span style="font-size:12px;color:var(--text-muted);">' + rows.length + '일</span>'
     + '</div>'
-    + '<div class="ceo-cb" style="padding:4px 0;">' + rows.map(line).join('') + '</div>'
-    + '<div style="display:flex;align-items:center;gap:14px;padding:9px 15px;border-top:1px solid var(--border);">'
-    +   '<span style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-soft);"><span style="width:7px;height:7px;border-radius:50%;background:' + RED + ';"></span>지금 내릴 것</span>'
-    +   '<span style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-soft);"><span style="width:7px;height:7px;border-radius:50%;background:' + AMB + ';"></span>지켜볼 것</span>'
-    +   '<span style="font-size:11.5px;color:var(--text-muted);margin-left:auto;">세로선 = 과거 같은 시점 평균</span>'
-    + '</div>'
+    + '<div class="ceo-cb" style="padding:0;">' + rows.map(line).join('') + '</div>'
     + '</div>';
 }
 
