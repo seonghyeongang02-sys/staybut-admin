@@ -220,6 +220,7 @@
           <!-- 오늘의 StayBUT — 카드 틀 없이 전폭. 안에 이미 제목이 있어 겹치지 않게 합니다. -->
           <span id="ops-today-label" style="display:none;"></span>
           <!-- [2026-10-15] 「다음 2주 빈방」 제거 — 오늘 입·퇴실을 전폭으로 봅니다. -->
+          <div id="pricing-board" style="margin-bottom:14px;"></div>
           <div class="home-cards-row" style="margin-bottom:14px;"><div id="today-summary"></div></div>
           <div id="ops-vacancy" style="display:none;"></div>
           <span id="vac-count" style="display:none;"></span>
@@ -4467,6 +4468,7 @@ async function loadDashboard() {
   renderCountryBreakdown(bookings);
   // ===== 오늘의 현황 =====
   renderTodaySummary();
+  renderPricingBoard();   /* [2026-10-23] 요금 조정 카드 */
   // ===== 이번 주 현황 =====
   // renderWeeklySummary();   // [2026-08-20] 이번 주 현황 카드 제거 — 매출 인사이트와 중복
   // ===== 이번 주 청소 · 이번 달 요약 =====
@@ -4746,6 +4748,89 @@ async function renderDashMonthSummary() {
     box.innerHTML = `<div class="empty-hint" style="padding:10px 0;">월 요약을 불러오지 못했어요</div>`;
   }
 }
+/* ══════════════════════════════════════════════════════════════════
+   [2026-10-23] 요금 조정 카드
+
+   판매 진도가 「과거 같은 시점 평균」보다 뒤진 날짜만 띄웁니다.
+   기대 진도는 임의로 정한 값이 아니라 6~10월 실제 예약 326건에서
+   뽑은 픽업 곡선입니다 (DB 함수 pricing_board 안에 적어 뒀습니다).
+
+     D-0 ~ D-14  : 10%p 이상 뒤지면 표시, 20%p 이상이면 빨강
+     D-15 ~ D-28 : 20%p 이상 뒤진 것만 미리 알림 (주황)
+     D-29 이상   : 표시 안 함 — 너무 일러서 내리면 손해입니다
+
+   금액은 일부러 띄우지 않습니다. 「11월 토요일처럼 내리면 안 되는 날」을
+   기계가 가려내지 못해서, 날짜까지만 알리고 판단은 사람이 합니다.
+   방이 팔리면 목록에서 저절로 빠집니다.
+   ══════════════════════════════════════════════════════════════════ */
+async function renderPricingBoard() {
+  const host = document.getElementById('pricing-board');
+  if (!host || typeof db === 'undefined' || !db) return;
+  let rows = [];
+  try {
+    const { data, error } = await db.rpc('pricing_board');
+    if (error) throw error;
+    rows = data || [];
+  } catch (e) {
+    host.innerHTML = '';
+    return;
+  }
+
+  if (!rows.length) {
+    host.innerHTML = '<div class="ceo-card"><div class="ceo-cb" style="padding:11px 15px;display:flex;align-items:center;gap:8px;">'
+      + '<span style="width:7px;height:7px;border-radius:50%;background:#059669;"></span>'
+      + '<span style="font-size:13.5px;color:var(--text-soft);">요금 조정 — 지금 손볼 날짜가 없습니다</span>'
+      + '</div></div>';
+    return;
+  }
+
+  const RED = '#E24B4A', AMB = '#EF9F27';
+  const reds = rows.filter(r => r.level === 'red').length;
+  const line = r => {
+    const col = r.level === 'red' ? RED : AMB;
+    const cur = Math.max(0, Math.min(100, Math.round(Number(r.cur_pct) || 0)));
+    const exp = Math.max(0, Math.min(100, Math.round(Number(r.exp_pct) || 0)));
+    const d = new Date(r.stay_date + 'T00:00:00');
+    const label = (d.getMonth() + 1) + '/' + d.getDate() + ' (' + r.dow + ')';
+    return '<div style="display:flex;align-items:center;gap:12px;padding:11px 15px;border-bottom:1px solid var(--border);">'
+      + '<div style="width:7px;height:7px;border-radius:50%;background:' + col + ';flex:none;"></div>'
+      + '<div style="width:92px;flex:none;">'
+      +   '<div style="font-size:13.5px;font-weight:600;">' + label + '</div>'
+      +   '<div style="font-size:11.5px;color:var(--text-muted);">D-' + r.dn + '</div>'
+      + '</div>'
+      + '<div style="flex:1;min-width:0;">'
+      +   '<div style="height:5px;background:#F1F3F5;border-radius:3px;position:relative;overflow:hidden;">'
+      +     '<div style="position:absolute;left:0;top:0;bottom:0;width:' + cur + '%;background:' + col + ';"></div>'
+      +     '<div style="position:absolute;left:' + exp + '%;top:-3px;bottom:-3px;width:1.5px;background:var(--text-muted);"></div>'
+      +   '</div>'
+      +   '<div style="font-size:11.5px;color:var(--text-soft);margin-top:5px;">'
+      +     cur + '% · 기대 ' + exp + '% <span style="color:' + col + ';">' + r.gap + '%p</span>'
+      +   '</div>'
+      + '</div>'
+      + '<div style="width:122px;flex:none;text-align:right;">'
+      +   '<div style="font-size:12.5px;color:var(--text-soft);">빈방 ' + r.rooms_free + '</div>'
+      +   '<div style="font-size:11.5px;color:var(--text-muted);">' + (r.free_list || '') + '</div>'
+      + '</div>'
+      + '</div>';
+  };
+
+  host.innerHTML = '<div class="ceo-card">'
+    + '<div class="ceo-ch" style="display:flex;align-items:center;justify-content:space-between;">'
+    +   '<div style="display:flex;align-items:center;gap:8px;">'
+    +     '<span class="ceo-ct">요금 조정</span>'
+    +     '<span style="background:' + (reds ? 'rgba(226,75,74,.12)' : 'rgba(239,159,39,.14)') + ';color:' + (reds ? RED : AMB) + ';font-size:11.5px;padding:2px 8px;border-radius:8px;">' + rows.length + '건</span>'
+    +   '</div>'
+    +   '<span style="font-size:12px;color:var(--text-muted);">목표 가동률 95% · D-14 이내</span>'
+    + '</div>'
+    + '<div class="ceo-cb" style="padding:4px 0;">' + rows.map(line).join('') + '</div>'
+    + '<div style="display:flex;align-items:center;gap:14px;padding:9px 15px;border-top:1px solid var(--border);">'
+    +   '<span style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-soft);"><span style="width:7px;height:7px;border-radius:50%;background:' + RED + ';"></span>지금 내릴 것</span>'
+    +   '<span style="display:flex;align-items:center;gap:5px;font-size:11.5px;color:var(--text-soft);"><span style="width:7px;height:7px;border-radius:50%;background:' + AMB + ';"></span>지켜볼 것</span>'
+    +   '<span style="font-size:11.5px;color:var(--text-muted);margin-left:auto;">세로선 = 과거 같은 시점 평균</span>'
+    + '</div>'
+    + '</div>';
+}
+
 async function renderTodaySummary() {
   const box = $('#today-summary');
   if (!box) return;
