@@ -4278,8 +4278,46 @@ async function loadDashboard() {
   const lastSoldNights = lastBookings.reduce((s, b) => s + (b.nights || 0), 0);
   const revenue = bookings.reduce((s, b) => s + (b.gross_amount || 0), 0);
   const lastRevenue = lastBookings.reduce((s, b) => s + (b.gross_amount || 0), 0);
-  const occupancyRate = totalAvailableNights > 0 ? (soldNights / totalAvailableNights * 100) : 0;
-  const lastOccupancyRate = lastAvailableNights > 0 ? (lastSoldNights / lastAvailableNights * 100) : 0;
+  /* ══════════════════════════════════════════════════════════════
+     [2026-10-23] 점유율만 「분할(밤 단위)」 기준으로 계산합니다.
+
+     그전에는 체크인이 이 기간인 예약의 '전체 박수'를 다 더했습니다.
+     그래서 10/28 체크인 → 11/6 퇴실 같은 장박이 생기면 11월에 자는 밤까지
+     10월로 당겨져, 분모(155박)와 분자의 기간이 어긋났습니다.
+     실제로 8월은 112.9% 라는 있을 수 없는 점유율이 나왔습니다.
+
+     이제 '그 밤이 실제로 어느 달에 속하는지' 로 셉니다.
+     매출분석 탭과 같은 방식이라 두 탭 숫자가 일치합니다.
+
+     ※ 거래액·ADR 은 그대로 체크인 기준(발생주의)입니다. 일부러 안 바꿨습니다 —
+       사장님이 보시는 월 거래액 숫자가 달라지면 안 되기 때문입니다.
+     ══════════════════════════════════════════════════════════════ */
+  const _ovlpBookings = await (async () => {
+    let q = db.from('bookings')
+      .select('checkin_date, checkout_date, booking_status, channel_id')
+      .lte('checkin_date', end)
+      .gte('checkout_date', lastStart);
+    if (currentChannelFilter !== 'all') q = q.eq('channel_id', currentChannelFilter);
+    const { data } = await q;
+    return (data || []).filter(b => b.booking_status !== 'cancelled');
+  })();
+  // from~to 안에 실제로 들어 있는 밤의 수 (to 는 그날 밤까지 포함)
+  const _nightsIn = (from, to) => {
+    const f = new Date(from + 'T00:00:00').getTime();
+    const t = new Date(to + 'T00:00:00').getTime() + 86400000;
+    let n = 0;
+    for (const b of _ovlpBookings) {
+      if (!b.checkin_date || !b.checkout_date) continue;
+      const ci = new Date(b.checkin_date + 'T00:00:00').getTime();
+      const co = new Date(b.checkout_date + 'T00:00:00').getTime();
+      n += Math.max(0, Math.round((Math.min(co, t) - Math.max(ci, f)) / 86400000));
+    }
+    return n;
+  };
+  const occNights = _nightsIn(start, end);
+  const lastOccNights = _nightsIn(lastStart, lastEnd);
+  const occupancyRate = totalAvailableNights > 0 ? (occNights / totalAvailableNights * 100) : 0;
+  const lastOccupancyRate = lastAvailableNights > 0 ? (lastOccNights / lastAvailableNights * 100) : 0;
   const adr = soldNights > 0 ? Math.round(revenue / soldNights) : 0;
   const lastAdr = lastSoldNights > 0 ? Math.round(lastRevenue / lastSoldNights) : 0;
   const revpar = totalAvailableNights > 0 ? Math.round(revenue / totalAvailableNights) : 0;
