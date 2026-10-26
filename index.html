@@ -8391,6 +8391,7 @@ window.openCleaningAddModal_ = function () {
           <option value="15000">15,000원</option>
           <option value="20000">20,000원</option>
           <option value="25000">25,000원</option>
+          <option value="30000">30,000원</option>
         </select></div>
       <div><label style="font-size:12px; color:var(--text-soft); display:block; margin-bottom:5px;">메모(비고)</label>
         <textarea id="ca-memo" class="form-input" rows="2" placeholder="예: 102호 장박으로 추가 보수 지급"></textarea></div>
@@ -8572,7 +8573,7 @@ window.completeExtraCleaning_ = async function (taskId) {
 // 상세 모달용 — 추가보수 드롭다운 + 메모(비고) 편집 블록
 function cleaningMemoEditor_(t) {
   const cur = (t.extra_pay != null && t.extra_pay !== '') ? String(t.extra_pay) : '';
-  const opts = [['', '없음'], ['5000', '5,000원'], ['10000', '10,000원'], ['15000', '15,000원'], ['20000', '20,000원'], ['25000', '25,000원']];
+  const opts = [['', '없음'], ['5000', '5,000원'], ['10000', '10,000원'], ['15000', '15,000원'], ['20000', '20,000원'], ['25000', '25,000원'], ['30000', '30,000원']];
   const memoVal = (t.memo == null) ? '' : String(t.memo).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
   return `
     <div style="margin-top:12px; padding-top:12px; border-top:1px solid var(--border);">
