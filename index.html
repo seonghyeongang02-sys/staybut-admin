@@ -925,7 +925,7 @@
           <div class="form-row">
             <div class="form-group">
               <label class="form-label">공동현관 비번</label>
-              <input type="text" id="room-entrance-code" class="form-input" placeholder="예: 1369369*" />
+              <input type="text" id="room-entrance-code" class="form-input" placeholder="예: 12345*" />
             </div>
             <div class="form-group">
               <label class="form-label">도어락 비번</label>
@@ -2445,6 +2445,22 @@ const CHATBOT_COMMANDS = [
   // 도움말
   { keys: ['도움말', '?', 'help'], handler: 'help' },
 ];
+/* [2026-10-28] 공동현관·짐보관실 번호를 app_settings 한 곳에서만 읽는다.
+   예전엔 FAQ 초안 5군데에 1369369* 가 직접 박혀 있었는데 실제 번호와 달라서
+   게스트가 못 들어오는 일이 생길 수 있었다. 번호가 바뀌면 이제 DB만 고치면 된다. */
+let SITE_CODES = null;
+async function siteCodes_() {
+  if (SITE_CODES) return SITE_CODES;
+  const { data } = await db.from('app_settings').select('key,value')
+    .in('key', ['entrance_code', 'luggage_code']);
+  const m = Object.fromEntries((data || []).map(r => [r.key, r.value]));
+  SITE_CODES = {
+    entrance: m.entrance_code || '[[공동현관 번호]]',
+    luggage:  m.luggage_code  || '[[짐보관실 번호]]'
+  };
+  return SITE_CODES;
+}
+
 // 게스트 문의 FAQ (에어비앤비·부킹닷컴 채팅 분석 기반) — 조회 + 답장 초안용
 //   ai: 'O'=자동응답 가능 / '△'=상황 확인 필요 / 'X'=사람(헬퍼) 판단 필수
 //   room:true = 방별 정보(도어락/wifi)라 방번호 필요 (DB rooms에서 조회)
@@ -2452,10 +2468,10 @@ const CHATBOT_COMMANDS = [
 const CHATBOT_FAQ = [
   { id:'doorlock', cat:'체크인/아웃', title:'도어락 비밀번호', keys:['도어락 비번','도어락 비밀번호'], ai:'O', room:true,
     ref:'체크인 당일 오전 7시 일괄 발송. 객실별 도어락 번호는 객실 정보에 저장.',
-    draft:(r)=>`안녕하세요, 스테이벗입니다 :)\n\n${RH(r.room_number||'')} 도어락 비밀번호는 ${r.door_code||'(등록 필요)'} 입니다.\n공동현관 비밀번호는 1369369* 입니다.\n\n편안하게 들어오시고, 궁금한 점 있으시면 언제든 말씀해 주세요!` },
+    draft:(r,c)=>`안녕하세요, 스테이벗입니다 :)\n\n${RH(r.room_number||'')} 도어락 비밀번호는 ${r.door_code||'[[도어락 번호]]'} 입니다.\n공동현관 비밀번호는 ${c.entrance} 입니다.\n\n도어락은 손바닥으로 앞면을 한 번 터치해 화면을 켠 뒤, 번호를 누르고 마지막에 * 를 눌러 주세요.\n편안하게 들어오시고, 궁금한 점 있으시면 언제든 말씀해 주세요!` },
   { id:'entrance', cat:'체크인/아웃', title:'공동현관 비밀번호', keys:['공동현관','현관 비번','현관 비밀번호'], ai:'O',
-    ref:'공동현관 비밀번호 1369369* 안내.',
-    draft:()=>`안녕하세요, 스테이벗입니다 :)\n\n공동현관 비밀번호는 1369369* 입니다.\n편하게 이용하시고 궁금한 점 있으시면 말씀해 주세요!` },
+    ref:'공동현관 비밀번호 안내. 실제 번호는 설정(app_settings)에서 불러온다.',
+    draft:(r,c)=>`안녕하세요, 스테이벗입니다 :)\n\n공동현관 비밀번호는 ${c.entrance} 입니다.\n편하게 이용하시고 궁금한 점 있으시면 말씀해 주세요!` },
   { id:'checkin_time', cat:'체크인/아웃', title:'체크인 시간', keys:['체크인 시간','입실 시간','몇시 체크인'], ai:'O',
     ref:'체크인 오후 4시(16:00) 이후.',
     draft:()=>`안녕하세요 :) 체크인은 오후 4시(16:00)부터 가능합니다.\n도착 예정 시간 알려주시면 준비해 두겠습니다!` },
@@ -2463,20 +2479,20 @@ const CHATBOT_FAQ = [
     ref:'체크아웃 정오 12시(12:00).',
     draft:()=>`안녕하세요 :) 체크아웃은 정오 12시(12:00)까지입니다.\n짐 보관이 필요하시면 편하게 말씀해 주세요!` },
   { id:'luggage', cat:'체크인/아웃', title:'짐 보관', keys:['짐 보관','짐보관','캐리어 보관','짐 맡'], ai:'O',
-    ref:'1층 짐보관실 비밀번호 1369369*.',
-    draft:()=>`안녕하세요 :) 체크인 전/체크아웃 후 짐은 1층 짐보관실에 보관하실 수 있습니다.\n비밀번호는 1369369* 입니다. 편하게 이용해 주세요!` },
+    ref:'1층 계단실 왼쪽(유리 현관 왼쪽 문), 당겨서 연다. 번호는 설정에서 불러온다.',
+    draft:(r,c)=>`안녕하세요 :) 체크인 전/체크아웃 후 짐은 1층 짐보관실에 보관하실 수 있습니다.\n계단실 왼쪽(유리 현관 기준 왼쪽 문)이고, 문을 당겨서 열어 주세요.\n비밀번호는 ${c.luggage} 입니다.\n다만 귀중품은 책임지기 어려우니 직접 소지해 주세요!` },
   { id:'early_checkin', cat:'체크인/아웃', title:'얼리 체크인', keys:['얼리 체크인','일찍 체크인','조기 입실'], ai:'△',
     ref:'당일 상황 확인 후 가/부 회신 → 가능 시 무료 또는 유료. (헬퍼 판단)',
-    draft:()=>`안녕하세요 :) 얼리 체크인 문의 감사합니다.\n당일 객실 청소 상황에 따라 가능 여부가 달라져, 확인 후 다시 안내드리겠습니다.\n그 전에 도착하시면 1층 짐보관실(1369369*)을 이용하실 수 있어요!` },
+    draft:(r,c)=>`안녕하세요 :) 얼리 체크인 문의 감사합니다.\n체크인은 오후 4시, 체크아웃은 낮 12시가 기본입니다.\n얼리 체크인은 당일 객실 상황과 청소 일정에 따라 달라져 미리 확정이 어렵습니다. 당일 최대한 빨리 청소를 마치고 알려드릴게요. 도착하시는 날 아침에 한 번 더 메시지 주세요!\n4시 전에 도착하시면 1층 무료 짐보관실(${c.luggage})을 이용하실 수 있어요. 다만 귀중품은 직접 소지해 주세요.` },
   { id:'late_checkout', cat:'체크인/아웃', title:'레이트 체크아웃', keys:['레이트 체크아웃','늦은 체크아웃','늦게 퇴실'], ai:'△',
-    ref:'당일 상황 확인 후 시간당 1만원 또는 불가. (헬퍼 판단)',
-    draft:()=>`안녕하세요 :) 레이트 체크아웃 문의 감사합니다.\n다음 예약 상황에 따라 시간당 1만원으로 연장 가능하거나 어려울 수 있어, 확인 후 안내드리겠습니다.` },
+    ref:'문의 단계에서는 요금을 언급하지 않는다. 다음 예약·청소 일정 확인 후 준노가 가부 판단. 현재 무료 운영이지만 제공 확정 뒤에만 "이번엔 무료로" 라고 알린다. (가이드 5-0, 5-2)',
+    draft:(r,c)=>`안녕하세요 :) 레이트 체크아웃 문의 감사합니다.\n다음 예약 일정과 청소 일정에 따라 달라져서, 확인 후 다시 안내드리겠습니다.\n어려운 경우에는 체크아웃 후 1층 짐보관실(${c.luggage})을 이용하실 수 있어요. 다만 귀중품은 직접 소지해 주세요!` },
   { id:'wifi', cat:'시설', title:'Wi-Fi', keys:['와이파이','wifi','wi-fi','무선인터넷'], ai:'O', room:true,
     ref:'객실별 Wi-Fi ID/PW 발송 (객실 정보에 저장).',
     draft:(r)=>`안녕하세요 :) Wi-Fi 정보 안내드립니다.\n\n네트워크: ${r.wifi_id||'(등록 필요)'}\n비밀번호: ${r.wifi_password||'(등록 필요)'}\n\n연결이 안 되시면 편하게 말씀해 주세요!` },
   { id:'aircon', cat:'시설', title:'에어컨/난방', keys:['에어컨','난방','히터','전기장판','냉방'], ai:'O',
-    ref:'천장형 에어컨 안내 / 전기장판 위치 안내.',
-    draft:()=>`안녕하세요 :) 냉난방 안내드립니다.\n냉방은 천장형 에어컨 리모컨으로, 난방은 객실 내 전기장판을 이용해 주세요.\n사용이 어려우시면 말씀해 주세요!` },
+    ref:'바닥난방 없음. 천장형 에어컨·히터를 리모컨으로 조절(난방은 히터 모드로 전환). 침대 전기장판 스위치는 침대 옆. 문의 1~2위가 "히터 모드를 못 찾겠다"임.',
+    draft:()=>`안녕하세요 :) 냉난방 안내드립니다.\n바닥 난방은 없고, 천장형 에어컨·히터를 리모컨으로 조절하시면 됩니다. 난방이 필요하시면 리모컨에서 히터(난방) 모드로 바꿔 주세요.\n침대에는 전기장판이 깔려 있고, 스위치는 침대 옆에 있어요.\n작동이 안 되시면 바로 말씀해 주세요!` },
   { id:'parking', cat:'시설', title:'주차', keys:['주차','parking','차 대'], ai:'O',
     ref:'건물 내 주차 불가 / 성수2가3동 공영주차장(도보 3분, 최대 3만원).',
     draft:()=>`안녕하세요 :) 주차 안내드립니다.\n건물 내 주차는 어려워, 도보 3분 거리의 성수2가3동 공영주차장 이용을 추천드립니다(1일 최대 약 3만원).` },
@@ -2487,20 +2503,20 @@ const CHATBOT_FAQ = [
     ref:'객실 내 제공.',
     draft:()=>`안녕하세요 :) 슬리퍼는 객실 내에 준비되어 있습니다 :)` },
   { id:'cooking', cat:'시설', title:'취사', keys:['취사','요리','조리','음식 해먹'], ai:'O',
-    ref:'간단한 조리 가능 / 삼겹살·생선·마라탕 등 냄새 강한 음식 제한.',
-    draft:()=>`안녕하세요 :) 간단한 조리는 가능합니다.\n다만 냄새가 오래 남는 삼겹살·생선·마라탕 등은 제한하고 있으니 양해 부탁드립니다!` },
+    ref:'가능: 라면·파스타·계란요리·간단한 볶음. 불가: 삼겹살·생선·해산물·마라탕·훠궈 (위반 시 특수 탈취·추가 청소비 청구 가능).',
+    draft:()=>`안녕하세요 :) 객실마다 주방이 있어서 라면·파스타·계란요리·간단한 볶음 정도는 편하게 해 드실 수 있어요.\n다만 삼겹살·생선·해산물·마라탕·훠궈처럼 냄새가 오래 남는 음식은 어렵습니다. 양해 부탁드립니다!` },
   { id:'projector', cat:'시설', title:'빔프로젝터/TV', keys:['빔프로젝터','프로젝터','tv','티비','크롬캐스트','넷플릭스'], ai:'△',
     ref:'전원 버튼 10초 대기 / 크롬캐스트 연결 확인. (객실별 차이)',
     draft:()=>`안녕하세요 :) 전원 버튼을 누르신 뒤 10초 정도 기다려 주세요.\n영상 연결은 크롬캐스트 코드 연결을 확인해 주시면 됩니다. 계속 안 되시면 말씀해 주세요!` },
   { id:'towel', cat:'시설', title:'수건/어메니티', keys:['수건','타월','어메니티','칫솔','샴푸'], ai:'△',
-    ref:'비치 수량 안내 / 추가 요청 시 확인. (상황 확인)',
-    draft:()=>`안녕하세요 :) 수건과 기본 어메니티는 객실에 비치되어 있습니다.\n추가로 필요하신 게 있으면 말씀해 주세요, 확인해 드리겠습니다!` },
+    ref:'기본은 중간 크기 다용도 수건(한국 가정의 일반적 방식, 부족한 게 아님). 대형 목욕 타월은 제공 안 함. 추가 수건은 요청 시 제공 가능. 칫솔·치약은 미제공.',
+    draft:()=>`안녕하세요 :) 수건은 중간 크기의 다용도 수건으로 객실에 비치되어 있습니다. 한국 가정에서 일반적으로 쓰는 크기라 대형 목욕 타월은 따로 두고 있지 않아요.\n더 필요하시면 편하게 말씀해 주세요, 추가로 가져다 드릴게요!\n샴푸·바디워시·생수는 객실에 있고, 칫솔과 치약은 따로 제공되지 않습니다.` },
   { id:'location', cat:'로컬', title:'위치/교통', keys:['위치','교통','어떻게 가','오는 길','지하철','역에서'], ai:'O',
     ref:'성수역 1번 출구 도보 8분 / 뚝섬역 4번 출구 도보 8분.',
     draft:()=>`안녕하세요 :) 오시는 길 안내드립니다.\n지하철 성수역 1번 출구에서 도보 8분, 뚝섬역 4번 출구에서 도보 8분입니다.\n지도 링크가 필요하시면 보내드릴게요!` },
   { id:'pet', cat:'예약', title:'반려동물', keys:['반려동물','강아지','고양이','펫'], ai:'O',
-    ref:'반려동물 추가금 안내 / 예약 옵션 설정 안내.',
-    draft:()=>`안녕하세요 :) 반려동물 동반 관련 안내드립니다.\n추가 요금이 발생하며, 예약 옵션에서 반려동물을 선택해 주시면 됩니다. 자세한 금액은 확인 후 안내드릴게요!` },
+    ref:'반려동물 동반 불가. (2026-10-28 확인)',
+    draft:()=>`안녕하세요 :) 문의 감사합니다.\n죄송하지만 저희 숙소는 반려동물 동반이 어렵습니다. 양해 부탁드립니다.` },
   { id:'over_capacity', cat:'예약', title:'인원 초과', keys:['인원 초과','추가 인원','정원'], ai:'O',
     ref:'정원 초과 여부 및 추가요금 안내.',
     draft:()=>`안녕하세요 :) 인원 관련 안내드립니다.\n객실 정원을 초과하는 경우 추가 요금이 발생할 수 있어, 예상 인원을 알려주시면 정확히 안내드리겠습니다!` },
@@ -2702,20 +2718,24 @@ const chatbotHandlers = {
     const f = CHATBOT_FAQ.find(x => x.id === id);
     if (!f) return '해당 항목을 찾지 못했어요.';
     if (f.ai === 'X') return `<strong>${f.title}</strong>은(는) 사람이 직접 대응해야 해서 자동 초안을 만들지 않아요. 헬퍼에게 넘겨주세요.`;
+    const codes = await siteCodes_();
     let msg;
     if (f.room) {
       if (!room) return `${f.title} 답장은 방번호가 필요해요. 예: <b>답장 ${f.title} 102</b>`;
       const { data: r } = await db.from('rooms')
         .select('room_number, door_code, entrance_code, wifi_id, wifi_password')
         .eq('room_number', room).maybeSingle();
-      msg = f.draft(r || { room_number: room });
+      msg = f.draft(r || { room_number: room }, codes);
     } else {
-      msg = f.draft ? f.draft() : f.ref;
+      msg = f.draft ? f.draft({}, codes) : f.ref;
     }
+    /* 채우지 못한 [[ ]] 자리가 있으면 복사 전에 눈에 띄게 알려준다. */
+    const holes = msg.match(/\[\[[^\]]*\]\]/g);
     const forCopy = msg.replace(/\\/g, '\\\\').replace(/`/g, '\\`').replace(/\$/g, '\\$');
     return `<strong>✍ ${f.title} 답장 초안${room ? ' · ' + RH(room) : ''}</strong>
       <div style="margin-top:8px;padding:11px 13px;background:var(--surface-soft);border-radius:8px;white-space:pre-wrap;font-size:12.5px;line-height:1.6;color:var(--text);">${escapeHtml_(msg)}</div>
       <div class="chatbot-suggest"><span class="chatbot-suggest-chip" onclick="navigator.clipboard.writeText(\`${forCopy}\`); this.textContent='✓ 복사됨';">📋 복사</span></div>
+      ${holes ? `<div style="font-size:11px;color:var(--text-danger,#c0392b);margin-top:6px;">⚠ 보내기 전에 채워야 할 자리: <b>${escapeHtml_(holes.join(', '))}</b></div>` : ''}
       ${f.ai === '△' ? '<div style="font-size:11px;color:var(--text-muted);margin-top:6px;">🟡 상황(당일 가부 등) 확인 후 보내세요.</div>' : ''}`;
   },
   dateBookings: async (iso) => {
