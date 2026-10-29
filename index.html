@@ -8409,6 +8409,43 @@ window.completeExtraCleaning_ = async function (taskId) {
   document.getElementById('cleaning-task-modal').classList.remove('open');
   cleaningRefreshLocal_();
 };
+/* [2026-10-29] 상세 창의 담당자 — 드롭다운 대신 버튼으로.
+   카드를 누른 김에 한 번 더 눌러 배정이 끝나게 했습니다.
+   전에는 드롭다운을 열고 → 명단에서 찾고 → 고르는 세 동작이었습니다.
+   목록(주간 보드)에서는 자리가 좁아 드롭다운을 그대로 씁니다. */
+function cleaningAssignChips_(t){
+  const list = (cachedStaff || []).filter(s => s.is_active !== false);
+  const cur  = t.assigned_to || '';
+  const pill = (val, label, on) =>
+    `<button type="button" onclick="setCleaningAssign_('${t.id}','${val}'); event.stopPropagation();"
+       style="padding:7px 12px; border-radius:999px; cursor:pointer; font-size:12.5px; font-weight:700;
+              border:1px solid ${on ? '#2d5040' : 'var(--border)'};
+              background:${on ? '#2d5040' : 'var(--surface)'};
+              color:${on ? '#fff' : 'var(--text-soft)'};">${label}</button>`;
+  return `<div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:2px;">
+    ${list.map(s => pill(s.id, s.name.replace(' 실장님',''), cur === s.id)).join('')}
+    ${pill('', '미배정', !cur && t.status !== 'not_needed')}
+    ${pill('__none__', '청소 불필요', t.status === 'not_needed')}
+  </div>`;
+}
+window.setCleaningAssign_ = async function(taskId, val){
+  const t = window.__cleaningTaskById && window.__cleaningTaskById[taskId];
+  const wasNotNeeded = t && t.status === 'not_needed';
+  let update, staffId = null, notNeeded = false;
+  if (val === '__none__') { update = { assigned_to: null, status: 'not_needed' }; notNeeded = true; }
+  else { staffId = val || null; update = { assigned_to: staffId }; if (wasNotNeeded || !staffId) update.status = 'pending'; }
+  const { error } = await db.from('cleaning_tasks').update(update).eq('id', taskId);
+  if (error) { alert('저장 실패: ' + error.message); return; }
+  if (t) {
+    t.assigned_to = staffId;
+    if (notNeeded) t.status = 'not_needed';
+    else if (wasNotNeeded || !staffId) t.status = 'pending';
+    const s = staffId ? (cachedStaff || []).find(x => x.id === staffId) : null;
+    t.assigned_staff = s ? { name: s.name } : null;
+    openCleaningTaskModal_(taskId);   // 상세 창을 다시 그려 고른 버튼이 바로 보이게
+    cleaningRefreshLocal_();
+  } else { loadCleaning(); }
+};
 // 상세 모달용 — 추가보수 드롭다운 + 메모(비고) 편집 블록
 function cleaningMemoEditor_(t) {
   const cur = (t.extra_pay != null && t.extra_pay !== '') ? String(t.extra_pay) : '';
@@ -8830,11 +8867,11 @@ function renderCleaningCard(t, slot, opts) {
       </div>
       <div class="cleaning-card-assign">
         <label>담당자</label>
-        <select data-task-id="${t.id}">
+        ${showEditor ? cleaningAssignChips_(t) : `<select data-task-id="${t.id}">
           <option value="" ${(!t.assigned_to && t.status !== 'not_needed') ? 'selected' : ''}>미배정</option>
           <option value="__none__" ${t.status === 'not_needed' ? 'selected' : ''}>담당 필요 없음</option>
           ${cachedStaff.map(s => `<option value="${s.id}" ${t.assigned_to === s.id ? 'selected' : ''}>${s.name}${!s.is_resident ? ' (비상주)' : ''}</option>`).join('')}
-        </select>
+        </select>`}
       </div>
       <div class="cleaning-card-share" style="margin-top:8px;">
         <button class="btn btn-secondary" style="width:100%; font-size:13px; padding:8px;" onclick="openCleaningShare('${t.id}'); event.stopPropagation();">💬 카톡 공유</button>
