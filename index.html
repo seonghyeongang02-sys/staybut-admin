@@ -8422,8 +8422,12 @@ function cleaningAssignChips_(t){
               border:1px solid ${on ? '#2d5040' : 'var(--border)'};
               background:${on ? '#2d5040' : 'var(--surface)'};
               color:${on ? '#fff' : 'var(--text-soft)'};">${label}</button>`;
+  /* [2026-10-29] 「미배정」·「청소 불필요」는 이름 버튼과 섞이면 실수로 눌립니다.
+     줄을 나누고 흐린 글씨로 떼어놓았습니다. */
   return `<div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:2px;">
     ${list.map(s => pill(s.id, s.name.replace(' 실장님',''), cur === s.id)).join('')}
+  </div>
+  <div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:9px; padding-top:9px; border-top:1px dashed var(--border);">
     ${pill('', '미배정', !cur && t.status !== 'not_needed')}
     ${pill('__none__', '청소 불필요', t.status === 'not_needed')}
   </div>`;
