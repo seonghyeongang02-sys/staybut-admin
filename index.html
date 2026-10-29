@@ -9288,8 +9288,13 @@ function shareLangOf_(manager){
 }
 // 담당 실장님 명단 (평일 / 주말)
 /* [2026-08-27] 김진 실장님 그만두셔서 명단에서 제외했습니다. */
-const SHARE_MGR_WEEKDAY = ['미기 실장님'];
-const SHARE_MGR_WEEKEND = ['정선옥 실장님', '모영아 실장님', '모두룸(청소업체)'];
+/* [2026-10-29] 현재 인원으로 정리.
+   · 평일 — Khan · 미기 · 임재영
+   · 주말 — Khan · 정선옥 · 모영아
+   · 모두룸(청소업체)는 임재영 실장님으로 대체되어 뺐습니다.
+   · 강성현 실장님은 테스트용 계정이라 뺐습니다. */
+const SHARE_MGR_WEEKDAY = ['Khan 실장님', '미기 실장님', '임재영 실장님'];
+const SHARE_MGR_WEEKEND = ['Khan 실장님', '정선옥 실장님', '모영아 실장님'];
 window.pickShareManager = function(name) {
   $('#cleaning-share-manager').value = name;
   updateCleaningSharePreview();
@@ -9308,7 +9313,8 @@ window.openCleaningShare = function(taskId) {
   const d = new Date((task.scheduled_date || ymd_(new Date())) + 'T00:00:00');
   const isWeekend = (d.getDay() === 0 || d.getDay() === 6);
   const primary = isWeekend ? SHARE_MGR_WEEKEND : SHARE_MGR_WEEKDAY;
-  const secondary = isWeekend ? SHARE_MGR_WEEKDAY : SHARE_MGR_WEEKEND;
+  /* [2026-10-29] 양쪽 명단에 다 있는 분(Khan 실장님)이 버튼으로 두 번 나오지 않게 거릅니다. */
+  const secondary = (isWeekend ? SHARE_MGR_WEEKDAY : SHARE_MGR_WEEKEND).filter(n => !primary.includes(n));
   const chip = (n, hot) => `<button type="button" onclick="pickShareManager('${n}')" style="padding:6px 11px; border-radius:999px; cursor:pointer; font-size:12px; font-weight:600; border:1px solid ${hot ? '#2d5040' : '#d8ddd2'}; background:${hot ? '#eef3ec' : '#fff'}; color:#2d5040;">${n}</button>`;
   $('#cleaning-share-chips').innerHTML =
     primary.map(n => chip(n, true)).join('') + secondary.map(n => chip(n, false)).join('');
