@@ -109,7 +109,7 @@ const PHOTO_FN = SUPABASE_URL + '/functions/v1/cleaner-photo';
 const TOKEN = (location.hash.match(/t=([0-9a-f]{32,})/) || [])[1] || '';
 const DEMO = location.hash.includes('demo');
 
-/* ── 문구 (미기 실장님은 영어) ─────────────────────────── */
+/* ── 문구 (언어는 어드민에서 사람마다 지정 · staff.lang) ── */
 const KO = {sfx:'호',before:'청소 전',after:'청소 후',shoot:'촬영',supReq:'비품 신청',sup:{water:'생수',tissue:'휴지',wipes:'물티슈',shampoo:'샴푸',rinse:'린스',other:'기타'},otherPh:'필요한 비품을 적어주세요',reqSend:'비품 신청하기',reqDone:'비품 신청이 접수됐어요',reqEmpty:'신청할 비품을 골라주세요',clean:'청소',pay:'정산',week:(m,w)=>`${m}월 ${w}주차`,today:'오늘',all:'전체',none:'이 주에는 배정된 청소가 없어요',
   rooms:n=>`청소 ${n}건`,next:'다음 손님',vacant:'기본세팅 (공실)',ppl:(g,n)=>`${g}명 · ${n}박`,done:'업로드됨',
   towel:'수건',water:'생수',bedding:'차렵이불',list:'체크리스트',photos:'사진',add:'+ 사진 추가 촬영',
@@ -149,10 +149,16 @@ const ZH = {...KO,before:'清洁前',after:'清洁后',shoot:'拍照',supReq:'�
   slots:{before:'清洁前',towel:'毛巾',water:'矿泉水',tissue:'纸巾',fridge:'冰箱',bed:'床',bath:'浴室',laundry:'洗衣房',trash:'垃圾区',extra:'追加'},
   dow:['日','一','二','三','四','五','六'],sfx:'号房'};
 const LANGS = {ko:KO, en:EN, ja:JA, zh:ZH};
-function pickLang(name){
+/* [2026-10-29] 기본 언어를 DB(staff.lang)에서 받아옵니다.
+   전에는 "이름에 '미기'가 들어가면 영어" 라고 여기 박혀 있어서,
+   실장님이 바뀌거나 늘 때마다 이 파일을 고쳐야 했습니다.
+   이제는 어드민에서 사람마다 골라두면 됩니다.
+   화면에서 직접 바꾸신 적이 있으면 그 선택이 우선합니다. */
+function pickLang(serverLang){
   let v=null; try{ v=localStorage.getItem('staybut.cleaner.lang'); }catch(e){}
   if (LANGS[v]) return v;
-  return (name||'').includes('미기') ? 'en' : 'ko';
+  if (LANGS[serverLang]) return serverLang;
+  return 'ko';
 }
 function setLang(v){ try{ localStorage.setItem('staybut.cleaner.lang', v); }catch(e){} L=LANGS[v]||KO; render(); }
 const langSel = () => { const cur=Object.keys(LANGS).find(k=>LANGS[k]===L)||'ko';
@@ -202,7 +208,7 @@ async function rpc(fn, body){
 async function load(week){
   S.data = await rpc('cleaner_week', {p_token:TOKEN, p_week_start:week});
   S.week = S.data.week_start;
-  L = LANGS[pickLang(S.data.staff_name)];
+  L = LANGS[pickLang(S.data.staff_lang)];
   const days = [...new Set(S.data.tasks.map(t=>t.date))];
   S.day = days.includes(S.data.today) ? S.data.today : (days[0]||null);
   if (S.task) S.task = S.data.tasks.find(t=>t.id===S.task.id) || null;
