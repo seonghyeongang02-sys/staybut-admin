@@ -9228,17 +9228,27 @@ function buildCleaningCardText(task, manager, extra) {
   const mgr = (manager && manager.trim()) ? manager.trim() : '미배정';
   const ex = (extra && extra.trim()) ? extra.trim() : '-';
   const line = '━━━━━━━━━━━━━━━━━';
-  // 미기 실장님은 영어가 편하셔서 카톡 카드를 영어로 출력 (담당에 '미기' 포함 시)
+  /* [2026-10-29] 담당 실장님 언어로 카드를 만듭니다 (staff.lang) */
   /* [2026-08-27] 여유 이불 — 기준인원을 넘을 때만 붙입니다. · 매번 「차렵이불 0」이 뜨면 눈에 안 들어와서, 필요할 때만 보이게 했습니다. */
   const bed   = s.bedding > 0 ? ` · 차렵이불 ${s.bedding}` : '';
   const bedEn = s.bedding > 0 ? ` · Duvet ${s.bedding}`   : '';
-  if ((manager || '').includes('미기')) {
+  const bedJa = s.bedding > 0 ? ` ・ 掛け布団 ${s.bedding}` : '';
+  const _lang = shareLangOf_(manager);
+  if (_lang === 'en') {
     const enDow = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
     return `🧹 ${md(date)}(${enDow[date.getDay()]}) Cleaning
 [Room ${room}] Assigned ${mgr}
 Stay ${stay} · ${s.basis==='default'?`Default set ${s.guests}ppl (vacant)`:`Next ${s.guests}ppl/${s.nights}night(s)`}
 Towels ${s.towels} · Water ${s.water}${bedEn}
 Fee ₩${fee.toLocaleString()}${ex !== '-' ? ` (Extra ${ex})` : ''}`;
+  }
+  if (_lang === 'ja') {
+    const jaDow = ['日', '月', '火', '水', '木', '金', '土'];
+    return `🧹 ${md(date)}(${jaDow[date.getDay()]}) 清掃のご案内
+[${room}号室] 担当 ${mgr}
+滞在 ${stay} ・ ${s.basis==='default'?`基本セット ${s.guests}名（空室）`:`次のお客様 ${s.guests}名/${s.nights}泊`}
+タオル ${s.towels} ・ 飲料水 ${s.water}${bedJa}
+清掃料 ₩${fee.toLocaleString()}${ex !== '-' ? `（追加 ${ex}）` : ''}`;
   }
   return `🧹 ${md(date)}(${weekdays[date.getDay()]}) 청소 안내
 [${RH(room)}] 담당 ${mgr}
@@ -9253,6 +9263,28 @@ function updateCleaningSharePreview() {
   $('#cleaning-share-preview').textContent = buildCleaningCardText(
     task, $('#cleaning-share-manager').value, $('#cleaning-share-extra').value
   );
+}
+/* [2026-10-29] 실장님별 언어 — DB(staff.lang)에서 읽습니다.
+   전에는 「담당 이름에 '미기'가 들어가면 영어」라고 박혀 있었습니다.
+   사람이 바뀌거나 늘 때마다 이 파일을 고쳐야 했습니다. */
+window.__staffLang = window.__staffLang || {};
+async function loadStaffLang_(){
+  try{
+    const { data } = await db.from('staff').select('name, lang');
+    const m = {};
+    (data||[]).forEach(r => { if (r.name) m[r.name.trim()] = r.lang || 'ko'; });
+    window.__staffLang = m;
+  }catch(e){ /* 못 읽으면 전부 한국어로 둡니다 */ }
+}
+loadStaffLang_();
+/* 담당 이름 → 언어. 이름이 조금 달라도 찾아지도록 부분일치까지 봅니다. */
+function shareLangOf_(manager){
+  const n = String(manager||'').trim();
+  if (!n) return 'ko';
+  const m = window.__staffLang || {};
+  if (m[n]) return m[n];
+  const hit = Object.keys(m).find(k => k && (n.includes(k) || k.includes(n)));
+  return hit ? m[hit] : 'ko';
 }
 // 담당 실장님 명단 (평일 / 주말)
 /* [2026-08-27] 김진 실장님 그만두셔서 명단에서 제외했습니다. */
@@ -9344,7 +9376,7 @@ function weekLabelOfDate_(d) {
   const thu = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 3);
   return `${thu.getMonth() + 1}월 ${Math.ceil(thu.getDate() / 7)}주차`;
 }
-// 카드 DOM 생성 (이미지용). 담당에 '미기' 포함이면 영어 카드.
+// 카드 DOM 생성 (이미지용). 담당 실장님 언어(staff.lang)로 만듭니다.
 
 function cleaningImgFilename_() {
   const taskId = $('#cleaning-share-task-id').value;
@@ -9403,13 +9435,19 @@ function drawCleaningCardAt_(ctx, oy, task, manager, extra){
   const mgr=(manager&&String(manager).trim())?String(manager).trim():'미배정';
   const ex=(extra&&String(extra).trim())?String(extra).trim():'';
   const mm=(task.memo&&String(task.memo).trim())?String(task.memo).trim():'';   // 청소 메모 = 특이사항
-  const en=String(manager||'').includes('미기');
+  const _lang=shareLangOf_(manager);
+  const en=(_lang==='en');
   const week=weekLabelOfDate_(date);
   const koDow=['일','월','화','수','목','금','토'][date.getDay()];
   const enDow=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][date.getDay()];
+  const jaDow=['日','月','火','水','木','金','土'][date.getDay()];
   const _dfl = s.basis === 'default';
-  const L=en?{title:'Cleaning',stay:'Stay',next:_dfl?'Default':'Next guests',towel:'Towels',water:'Water',bed:'Duvet',fee:'Fee',extra:'Extra',memo:'Note',unit:_dfl?`${s.guests}ppl (vacant)`:`${s.guests} ppl · ${s.nights} night(s)`,dow:enDow,week:week}
-            :{title:'청소 안내',stay:'투숙기간',next:_dfl?'기본세팅':'다음 손님',towel:'수건',water:'생수',bed:'차렵이불',fee:'청소비',extra:'추가요금',memo:'특이사항',unit:_dfl?`${s.guests}명 기준(공실)`:`${s.guests}명 · ${s.nights}박`,dow:koDow,week:week};
+  const _CARD_L = {
+    en:{title:'Cleaning',stay:'Stay',next:_dfl?'Default':'Next guests',towel:'Towels',water:'Water',bed:'Duvet',fee:'Fee',extra:'Extra',memo:'Note',unit:_dfl?`${s.guests}ppl (vacant)`:`${s.guests} ppl · ${s.nights} night(s)`,dow:enDow,week:week},
+    ja:{title:'清掃のご案内',stay:'滞在期間',next:_dfl?'基本セット':'次のお客様',towel:'タオル',water:'飲料水',bed:'掛け布団',fee:'清掃料',extra:'追加料金',memo:'特記事項',unit:_dfl?`${s.guests}名（空室）`:`${s.guests}名 ・ ${s.nights}泊`,dow:jaDow,week:week},
+    ko:{title:'청소 안내',stay:'투숙기간',next:_dfl?'기본세팅':'다음 손님',towel:'수건',water:'생수',bed:'차렵이불',fee:'청소비',extra:'추가요금',memo:'특이사항',unit:_dfl?`${s.guests}명 기준(공실)`:`${s.guests}명 · ${s.nights}박`,dow:koDow,week:week}
+  };
+  const L=_CARD_L[_lang]||_CARD_L.ko;
   const W=340,padX=18,headerH=52;
   const FT="'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',-apple-system,sans-serif";
   ctx.fillStyle='#16161b'; ctx.fillRect(0,oy,W,headerH);
@@ -9476,7 +9514,7 @@ function renderCleaningCardCanvas_(){
   const ctx=cv.getContext('2d'); ctx.scale(SC,SC);
   ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,W,H);
   drawCleaningCardAt_(ctx,0,task,manager,extra);
-  drawCardFooter_(ctx,base,W,String(manager||'').includes('미기'));
+  drawCardFooter_(ctx,base,W,shareLangOf_(manager)!=='ko');
   return cv;
 }
 function renderBulkCleaningCanvas_(items){
@@ -9488,7 +9526,7 @@ function renderBulkCleaningCanvas_(items){
   ctx.fillStyle='#e9ebe6'; ctx.fillRect(0,0,W,H);
   let oy=0;
   items.forEach((it,i)=>{ ctx.fillStyle='#ffffff'; ctx.fillRect(0,oy,W,heights[i]); drawCleaningCardAt_(ctx,oy,it.task,it.manager,it.extra); oy+=heights[i]+GAP; });
-  drawCardFooter_(ctx,oy,W,items.length>0&&items.every(it=>String(it.manager||'').includes('미기')));
+  drawCardFooter_(ctx,oy,W,items.length>0&&items.every(it=>shareLangOf_(it.manager)!=='ko'));
   return cv;
 }
 function showBulkImgOverlay_(dataUrl){
