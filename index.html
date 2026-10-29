@@ -869,33 +869,16 @@
   </div>
   <!-- 체크인 안내 메시지 모달                                            -->
   <!-- 🤖 챗봇 FAB + 모달 (PC + 모바일)                                 -->
-  <!-- 청소 카톡 공유 모달 (방별) -->
-  <div class="modal-backdrop" id="cleaning-share-modal">
-    <div class="modal" style="max-width: 460px;">
-      <div class="modal-header">
-        <div class="modal-title" id="cleaning-share-title">카톡 공유</div>
-        <button class="btn btn-ghost" id="close-cleaning-share">✕</button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" id="cleaning-share-task-id" />
-        <div class="form-group">
-          <label class="form-label">담당 실장님</label>
-          <input type="text" id="cleaning-share-manager" class="form-input" placeholder="직접 입력 (예: 미기 실장님)" />
-        </div>
-        <div class="form-group">
-          <label class="form-label">추가요금 (선택)</label>
-          <input type="text" id="cleaning-share-extra" class="form-input" placeholder="예: 늦은 체크아웃 +1만" />
-        </div>
-        <label class="form-label" style="margin-top:10px; display:block;">미리보기</label>
-        <pre id="cleaning-share-preview" style="white-space:pre-wrap; word-break:break-word; background: var(--surface-soft, #f5f7f2); border:1px solid var(--border, #e2e6dc); border-radius:10px; padding:14px; font-family:'Pretendard Variable','Pretendard',-apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', Roboto, sans-serif; font-size:13px; line-height:1.65; margin:6px 0 0; color: var(--text-soft, #333);"></pre>
-        <div style="display:flex; gap:8px; margin-top:14px;">
-          <button class="btn btn-secondary" id="copy-cleaning-share" style="flex:1;">📋 텍스트</button>
-          <button class="btn btn-primary" id="save-cleaning-img" style="flex:1;">🖼 이미지 다운로드</button>
-        </div>
-        <div id="cleaning-share-fallback" style="margin-top:12px;"></div>
-      </div>
-    </div>
+  <!-- [2026-10-29] 청소 카톡 공유 모달을 없앴습니다.
+       「카톡 공유」를 누르면 바로 이미지가 만들어집니다.
+       담당자는 배정된 분, 추가요금은 청소 상세의 추가보수를 그대로 씁니다.
+       아래 칸들은 카드를 그릴 때 값을 담아두는 자리라 화면에 보이지 않습니다. -->
+  <div style="display:none;">
+    <input type="hidden" id="cleaning-share-task-id" />
+    <input type="hidden" id="cleaning-share-manager" />
+    <input type="hidden" id="cleaning-share-extra" />
   </div>
+  <div id="cleaning-share-fallback" style="display:none;"></div>
   <!-- [2026-08-28] 「BUT」 자동답변 버튼 숨김 — 명령어 사전 방식이라 자연어가 안 되고, · 실제로 안 쓰신다고 하셔서 뺐습니다. 코드는 그대로 있어 되살리기 쉽습니다. -->
   <button class="chatbot-fab" id="chatbot-fab" title="BUT" aria-label="BUT 비서" style="display:none;">
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
@@ -8841,7 +8824,7 @@ function renderCleaningCard(t, slot, opts) {
         </select>
       </div>
       <div class="cleaning-card-share" style="margin-top:8px;">
-        <button class="btn btn-secondary" style="width:100%; font-size:13px; padding:8px;" onclick="openCleaningShare('${t.id}'); event.stopPropagation();">💬 카톡 공유</button>
+        <button class="btn btn-secondary" style="width:100%; font-size:13px; padding:8px;" onclick="openCleaningShare('${t.id}', this); event.stopPropagation();">💬 카톡 공유</button>
       </div>
       <!-- [2026-08-27] 정산 · 정산완료 버튼 제거 — 안 쓰신다고 하셔서 뺐습니다. · 추가보수·메모는 그대로 씁니다. -->
       ${showEditor ? cleaningMemoEditor_(t) : ''}
@@ -9259,14 +9242,6 @@ Fee ₩${fee.toLocaleString()}${ex !== '-' ? ` (Extra ${ex})` : ''}`;
 수건 ${s.towels} · 생수 ${s.water}${bed}
 청소비 ₩${fee.toLocaleString()}${ex !== '-' ? ` (추가 ${ex})` : ''}`;
 }
-function updateCleaningSharePreview() {
-  const taskId = $('#cleaning-share-task-id').value;
-  const task = (window.__cleaningTaskById || {})[taskId];
-  if (!task) return;
-  $('#cleaning-share-preview').textContent = buildCleaningCardText(
-    task, $('#cleaning-share-manager').value, $('#cleaning-share-extra').value
-  );
-}
 /* [2026-10-29] 실장님별 언어 — DB(staff.lang)에서 읽습니다.
    전에는 「담당 이름에 '미기'가 들어가면 영어」라고 박혀 있었습니다.
    사람이 바뀌거나 늘 때마다 이 파일을 고쳐야 했습니다. */
@@ -9293,28 +9268,18 @@ function shareLangOf_(manager){
    공유 창에 올 때는 이미 배정된 실장님이 자동으로 채워져 있어서,
    거기서 또 고르라고 버튼을 늘어놓을 이유가 없었습니다.
    대신 가실 때처럼 바꿔야 하면 아래 입력칸을 직접 고치시면 됩니다. */
-// 카드 버튼에서 호출
-window.openCleaningShare = function(taskId) {
+// 카드의 「카톡 공유」 — 창을 띄우지 않고 바로 이미지를 만듭니다.
+window.openCleaningShare = async function (taskId, btnEl) {
   const task = (window.__cleaningTaskById || {})[taskId];
   if (!task) { alert('작업 정보를 찾을 수 없어요. 새로고침 후 다시 시도해주세요.'); return; }
-  const room = task.rooms?.room_number || '?';
   $('#cleaning-share-task-id').value = taskId;
-  $('#cleaning-share-title').textContent = `${RH(room)} 카톡 공유`;
-  // 카드에서 이미 배정한 담당 실장님을 그대로 가져옴 (미배정이면 비움 → 직접입력)
+  // 담당자는 배정된 분을 그대로 (카드 언어도 이 이름으로 정해집니다)
   $('#cleaning-share-manager').value = task.assigned_staff?.name || '';
-  $('#cleaning-share-extra').value = '';
-  const _si = $('#save-cleaning-img'); if (_si) _si.textContent = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ? '📤 카톡 공유' : '🖼 이미지 다운로드';
-  updateCleaningSharePreview();
-  $('#cleaning-share-modal').classList.add('open');
+  // 추가요금은 청소 상세에서 입력한 추가보수를 그대로 씁니다
+  $('#cleaning-share-extra').value = task.extra_pay
+    ? ('₩' + Number(task.extra_pay).toLocaleString('ko-KR')) : '';
+  await shareCleaningCardNow_(btnEl);
 };
-$('#cleaning-share-manager').addEventListener('input', updateCleaningSharePreview);
-$('#cleaning-share-extra').addEventListener('input', updateCleaningSharePreview);
-$('#close-cleaning-share').addEventListener('click', () => {
-  $('#cleaning-share-modal').classList.remove('open');
-});
-$('#cleaning-share-modal').addEventListener('click', (e) => {
-  if (e.target.id === 'cleaning-share-modal') $('#cleaning-share-modal').classList.remove('open');
-});
 // 팝업 없이 조용히 복사 (클립보드 API → 실패 시 숨은 textarea)
 async function copyTextSilent_(text) {
   try {
@@ -9340,15 +9305,6 @@ async function copyTextSilent_(text) {
     return ok;
   } catch (e) { return false; }
 }
-$('#copy-cleaning-share').addEventListener('click', async () => {
-  const text = $('#cleaning-share-preview').textContent;
-  const btn = $('#copy-cleaning-share');
-  const orig = btn.dataset.orig || btn.textContent;
-  btn.dataset.orig = orig;
-  const ok = await copyTextSilent_(text);
-  btn.textContent = ok ? '✅ 복사됐어요' : '⚠️ 복사 실패';
-  setTimeout(() => { btn.textContent = orig; }, 1600);
-});
 // ── 청소 카드 이미지 공유 (html2canvas) ──
 function ensureHtml2Canvas_() {
   if (window.html2canvas) return Promise.resolve();
@@ -9575,12 +9531,14 @@ function pickCleanerShare_(ds){
   ov.addEventListener('click',()=>ov.remove());
   document.body.appendChild(ov);
 }
-$('#save-cleaning-img').addEventListener('click', async () => {
-  const btn = $('#save-cleaning-img');
+/* [2026-10-29] 「카톡 공유」를 누르면 바로 도는 부분.
+   전에는 창을 띄우고 「이미지 다운로드」를 한 번 더 눌러야 했습니다. */
+async function shareCleaningCardNow_(btn) {
   const isMobile = isMobileDevice_();
-  const orig = isMobile ? '📤 카톡 공유' : '🖼 이미지 다운로드';
-  const fb = $('#cleaning-share-fallback'); if (fb) fb.innerHTML = '';
-  btn.textContent = '⏳ 생성 중...';
+  const orig = btn ? btn.textContent : '';
+  const fb = $('#cleaning-share-fallback'); if (fb) { fb.innerHTML = ''; fb.style.display = 'none'; }
+  const say = (t) => { if (btn) btn.textContent = t; };
+  say('⏳ 만드는 중…');
   try {
     const canvas = renderCleaningCardCanvas_();
     const dataUrl = canvas.toDataURL('image/png');
@@ -9588,19 +9546,23 @@ $('#save-cleaning-img').addEventListener('click', async () => {
     const url = URL.createObjectURL(blob);
     const file = new File([blob], cleaningImgFilename_(), { type: 'image/png' });
     if (isMobile && navigator.canShare && navigator.canShare({ files: [file] })) {
-      try { await navigator.share({ files: [file], title: '청소 안내' }); btn.textContent = '✅ 공유됨'; setTimeout(()=>{btn.textContent=orig;},1600); return; }
-      catch (err) { if (err && err.name === 'AbortError') { btn.textContent = orig; return; } }
+      try { await navigator.share({ files: [file], title: '청소 안내' }); say('✅ 공유됨'); setTimeout(()=>say(orig),1600); return; }
+      catch (err) { if (err && err.name === 'AbortError') { say(orig); return; } }
     }
-    if (isMobile) { showCleaningImgFallback_(dataUrl); btn.textContent = '👇 아래 이미지 저장'; setTimeout(()=>{btn.textContent=orig;},2500); return; }
+    if (isMobile) {
+      if (fb) fb.style.display = '';
+      showCleaningImgFallback_(dataUrl);
+      say('👇 아래 이미지 저장'); setTimeout(()=>say(orig),2500); return;
+    }
     const a = document.createElement('a'); a.href = url; a.download = cleaningImgFilename_(); a.click();
     setTimeout(()=>URL.revokeObjectURL(url),4000);
-    btn.textContent = '✅ 다운로드됨';
+    say('✅ 다운로드됨');
   } catch (e) {
-    if (e && e.name === 'AbortError') { btn.textContent = orig; return; }
-    alert('이미지 생성 실패: ' + (e.message || e)); btn.textContent = orig;
+    if (e && e.name === 'AbortError') { say(orig); return; }
+    alert('이미지 생성 실패: ' + (e.message || e)); say(orig);
   }
-  setTimeout(()=>{btn.textContent=orig;},1600);
-});
+  setTimeout(()=>say(orig),1600);
+}
 // 📤 공유 (모바일: 카톡 공유 / 데스크톱: 이미지 클립보드 복사)
 /* [2026-10-29] 청소 카드 정산 버튼과 토글 함수를 들어냈습니다.
    정산은 시스템 밖에서 처리하기로 해, 부르는 곳이 없는 채 남아 있던 코드입니다.
