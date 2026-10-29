@@ -149,6 +149,9 @@
   .qr{ display:flex; gap:5px; padding:8px 11px 0; flex-wrap:wrap; }
   .qr .chip{ font-size:10.5px; border:1px solid var(--line); border-radius:14px; padding:4px 9px; color:var(--soft-text); cursor:pointer; background:var(--bg); }
   .qr .chip:hover{ background:var(--soft); border-color:var(--line2); }
+  .qr .chip-more{ font-weight:600; }
+  .qr .qr-rest{ display:contents; }
+  .qr .qr-rest[hidden]{ display:none; }
   .composer{ display:flex; align-items:flex-end; gap:7px; padding:8px 11px; }
   .composer .att{ width:32px; height:32px; border-radius:8px; border:1px solid var(--line2); background:var(--bg); display:flex; align-items:center; justify-content:center; font-size:16px; cursor:pointer; flex-shrink:0; }
   .composer textarea{ flex:1; border:1px solid #d1d1d6; border-radius:17px; padding:7px 13px; font-size:13.5px; resize:none; max-height:100px; outline:none; font-family:inherit; background:var(--bg); }
@@ -1143,7 +1146,30 @@ const $=s=>document.querySelector(s);
 
 let staffName='상담원', curConv=null, curRoom='', curBooking=null, curGuestSeen=null, listTimer=null, msgTimer=null;
 let rtConvCh=null, rtMsgCh=null, rtTypeCh=null, staffTypingAt=0, typingHideC=null;
-let msgSig='', quickReplies=[], lastNotifiedMsgId=null, notifReady=false;
+let msgSig='', quickReplies=[], appSettings={}, lastNotifiedMsgId=null, notifReady=false;
+
+/* 템플릿 자리표시자 치환
+   { } = 자동으로 채워지는 값   {객실} {정원} {침대} {층} {공동현관} {짐보관}
+   [[ ]] = 사람이 직접 채우는 자리. 그대로 남는다 (예: [[도어락 번호]])
+   도어락·와이파이 비밀번호는 loadRooms 가 일부러 안 가져오므로 [[ ]] 로 둔다. */
+function fillTpl(body, roomNo){
+  const r = (ROOMS||[]).find(x => String(x.room_number) === String(roomNo)) || {};
+  const cap = r.max_guests ?? r.capacity;
+  /* 값이 없으면 빈칸으로 두지 않는다. "호는 최대 명까지" 같은 문장이
+     그대로 나가면 사고라서, 채울 수 없는 자리는 [[ ]] 로 남겨 눈에 띄게 한다. */
+  const or = (v, label) => (v == null || v === '') ? ('[[' + label + ']]') : String(v);
+  const map = {
+    '{객실}': or(roomNo, '객실번호'),
+    '{정원}': or(cap, '정원'),
+    '{침대}': r.bed_config ? ('\n' + r.bed_config) : '\n[[침대 구성]]',
+    '{층}': roomNo ? String(roomNo).charAt(0) + '층' : '[[층]]',
+    '{공동현관}': or(appSettings.entrance_code, '공동현관 번호'),
+    '{짐보관}': or(appSettings.luggage_code, '짐보관실 번호')
+  };
+  let out = String(body || '');
+  for (const [k, v] of Object.entries(map)) out = out.split(k).join(v);
+  return out;
+}
 
 function esc(t){ return String(t==null?'':t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
 function fmt(ts){ const d=new Date(ts); let h=d.getHours(),m=String(d.getMinutes()).padStart(2,'0'); const ap=h<12?'오전':'오후'; h=h%12||12; return `${ap} ${h}:${m}`; }
@@ -1430,7 +1456,8 @@ async function start(){
   document.body.classList.remove('ready-login'); document.body.classList.add('ready-app'); $('#login').style.display='none'; $('#app').style.display='flex';
   notifReady = ('Notification' in window && Notification.permission==='granted'); updateNotifBtn();
   if(notifReady) enablePush(false);
-  quickReplies = (await db.from('chat_quick_replies').select('label,body').order('sort')).data||[];
+  quickReplies = (await db.from('chat_quick_replies').select('label,body,pinned').order('sort')).data||[];
+  appSettings = Object.fromEntries(((await db.from('app_settings').select('key,value')).data||[]).map(r=>[r.key,r.value]));
   await loadRooms(); await loadTodayBookings();
   await refreshList(true);
   setInterval(()=>{ loadTodayBookings(); }, 10*60*1000);
@@ -1525,7 +1552,9 @@ async function loadRooms(){
   // [2026-08-26] public_key 는 '오늘 체크인' 손님에게 QR 링크를 보내기 위해 추가.
   /* [2026-08-27] 입실·퇴실 시각을 같이 가져옵니다.
      배지가 「오늘 체크인 → 숙박 중」으로 넘어가는 기준이 이 값입니다. */
-  const {data}=await db.from('rooms').select('id,room_number,public_key,check_in_time,check_out_time');
+  /* [2026-10-28] 답변 템플릿의 {정원}·{침대} 치환에 쓰려고 max_guests·bed_config 를 추가.
+     door_code·wifi_password 는 여전히 가져오지 않는다. */
+  const {data}=await db.from('rooms').select('id,room_number,public_key,check_in_time,check_out_time,max_guests,capacity,bed_config');
   ROOMS=(data||[]).slice().sort((a,b)=>
     String(a.room_number).localeCompare(String(b.room_number),'en',{numeric:true}));
 }
@@ -1914,7 +1943,13 @@ async function openConv(c){
   document.body.classList.add('chat');
   if(msgTimer) clearInterval(msgTimer);
   const si=stayInfo(c.booking);
-  const qrHtml=quickReplies.map((q,i)=>`<span class="chip" data-i="${i}">${esc(q.label)}</span>`).join('');
+  /* [2026-10-28] 자주 쓰는 4개만 깔고 나머지는 '더보기'로 접는다.
+     어느 걸 앞에 둘지는 chat_quick_replies.pinned 로 정한다. */
+  const _pin=quickReplies.filter(q=>q.pinned), _rest=quickReplies.filter(q=>!q.pinned);
+  const _chip=q=>`<span class="chip" data-i="${quickReplies.indexOf(q)}">${esc(q.label)}</span>`;
+  const qrHtml=_pin.map(_chip).join('')
+    + (_rest.length?`<span class="chip chip-more" id="qrMore">더보기 ${_rest.length}</span>`:'')
+    + (_rest.length?`<span class="qr-rest" id="qrRest" hidden>${_rest.map(_chip).join('')}</span>`:'');
   $('#pane').innerHTML=`
     <div class="chead">
       <div><div class="ch-big">${esc(c.room_number)}</div>
@@ -1946,7 +1981,21 @@ async function openConv(c){
   const rep=$('#reply');
   rep.addEventListener('input',()=>{ syncSend(); rep.style.height='auto'; rep.style.height=Math.min(rep.scrollHeight,120)+'px'; const now=Date.now(); if(rtTypeCh && now-staffTypingAt>1800){ staffTypingAt=now; try{ rtTypeCh.send({type:'broadcast',event:'typing',payload:{who:'staff'}}); }catch(e){} } });
   rep.addEventListener('keydown',e=>{ if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); send(); } });
-  $('#qr').querySelectorAll('.chip').forEach(ch=>ch.addEventListener('click',()=>{ const q=quickReplies[+ch.dataset.i]; if(q){ rep.value=q.body; rep.focus(); rep.dispatchEvent(new Event('input')); } }));
+  /* [2026-10-28] 칩을 누르면 {객실}·{정원} 같은 자리표시자를 실제 값으로 바꿔서 넣는다.
+     [[도어락 번호]] 처럼 대괄호 두 개인 자리는 남겨두고, 커서를 그 자리에 세워준다. */
+  const _qrMore=$('#qrMore'), _qrRest=$('#qrRest');
+  if(_qrMore && _qrRest) _qrMore.addEventListener('click',()=>{
+    _qrRest.hidden=!_qrRest.hidden;
+    _qrMore.textContent = _qrRest.hidden ? ('더보기 '+_qrRest.querySelectorAll('.chip').length) : '접기';
+  });
+  $('#qr').querySelectorAll('.chip').forEach(ch=>ch.addEventListener('click',()=>{
+    if(ch.id==='qrMore') return;
+    const q=quickReplies[+ch.dataset.i]; if(!q) return;
+    rep.value=fillTpl(q.body, curRoom);
+    rep.focus(); rep.dispatchEvent(new Event('input'));
+    const m=rep.value.match(/\[\[[^\]]*\]\]/);
+    if(m){ const s=rep.value.indexOf(m[0]); rep.setSelectionRange(s, s+m[0].length); }
+  }));
   // 드래그&드롭
   const msgsEl=$('#msgs');
   ['dragover','dragenter'].forEach(ev=>msgsEl.addEventListener(ev,e=>{e.preventDefault();}));
@@ -2118,6 +2167,15 @@ function syncSend(){
 async function send(){
   const rep=$('#reply'); if(!rep) return;
   const body=rep.value.trim(); if(!body||!curConv) return;
+  /* [2026-10-28] 템플릿에서 채우지 못한 [[ ]] 자리가 남은 채 나가는 것을 막는다.
+     도어락 번호처럼 사람이 직접 적어야 하는 값이 빈 채로 전송되면 사고다. */
+  const _hole=body.match(/\[\[[^\]]*\]\]/g);
+  if(_hole){
+    alert('아직 채우지 않은 자리가 있어요:\n\n'+_hole.join('\n')+'\n\n이 부분을 채운 뒤 보내주세요.');
+    const s=rep.value.indexOf(_hole[0]);
+    rep.focus(); rep.setSelectionRange(s, s+_hole[0].length);
+    return;
+  }
   const btn=$('#sendBtn'); btn.disabled=true;
   const {error}=await db.from('chat_messages').insert({conversation_id:curConv,sender:'staff',body,msg_type:'text',staff_name:staffName});
   if(!error){
