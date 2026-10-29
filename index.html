@@ -166,16 +166,6 @@
           <div class="modal-body" id="cleaning-add-modal-body"></div>
         </div>
       </div>
-      <!-- 비품 상세 모달 (발주 토글 + 삭제) -->
-      <div class="modal-backdrop" id="supply-modal">
-        <div class="modal" style="max-width:360px;">
-          <div class="modal-header">
-            <div class="modal-title">📦 비품</div>
-            <button class="modal-close" onclick="document.getElementById('supply-modal').classList.remove('open')">✕</button>
-          </div>
-          <div class="modal-body" id="supply-modal-body"></div>
-        </div>
-      </div>
       <!-- Main -->
       <main>
         <div class="admin-topbar">
@@ -493,83 +483,6 @@
             <div class="modal-footer">
               <button class="btn btn-secondary" onclick="document.getElementById('review-add-modal').classList.remove('open')">취소</button>
               <button class="btn btn-primary" id="submit-review-btn">저장</button>
-            </div>
-          </div>
-        </div>
-        <!-- 비품·파손 관리 -->
-        <!-- [2026-10-15] 비품관리 화면 제거. 복구는 _index_백업_정리전_1015.html 참고. -->
-        <!-- 비품 추가 모달 -->
-        <div class="modal-backdrop" id="supply-add-modal">
-          <div class="modal" style="max-width: 580px;">
-            <div class="modal-header">
-              <div class="modal-title" id="supply-modal-title">+ 비품 추가</div>
-              <button class="modal-close" onclick="document.getElementById('supply-add-modal').classList.remove('open')">✕</button>
-            </div>
-            <div class="modal-body">
-              <input type="hidden" id="sup-id" />
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">비품명 <span style="color:var(--danger);">*</span></label>
-                  <input type="text" id="sup-name" class="form-input" placeholder="예: 슬리퍼" />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">카테고리</label>
-                  <select id="sup-category" class="form-select">
-                    <option value="청소">청소용품 (세제·락스·수세미 등)</option>
-                    <option value="세탁">세탁용품 (섬유유연제 등)</option>
-                    <option value="세제">세제</option>
-                    <option value="어메니티">어메니티 (샴푸·비누·치약 등)</option>
-                    <option value="주방">주방·집기 (수저·컵 등)</option>
-                    <option value="침구">침구 (수건·시트 등)</option>
-                    <option value="음료">음료 (생수·커피 등)</option>
-                    <option value="소모품">소모품 (휴지·쓰레기봉투 등)</option>
-                    <option value="기타" selected>기타</option>
-                  </select>
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">단위</label>
-                  <input type="text" id="sup-unit" class="form-input" placeholder="예: 켤레, 장, 병" />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">현재 재고</label>
-                  <input type="number" id="sup-stock" class="form-input" placeholder="0" min="0" />
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">최소 재고 (이하 시 빨간 알림)</label>
-                  <input type="number" id="sup-min-stock" class="form-input" placeholder="5" min="0" value="5" />
-                </div>
-                <div class="form-group">
-                  <label class="form-label">1회 주문 수량</label>
-                  <input type="number" id="sup-order-qty" class="form-input" placeholder="1" min="1" value="1" />
-                </div>
-              </div>
-              <div class="form-row">
-                <div class="form-group">
-                  <label class="form-label">개당 단가 (선택)</label>
-                  <input type="number" id="sup-unit-price" class="form-input" placeholder="원" min="0" />
-                </div>
-                <div class="form-group">
-                  <!-- 비워둠 -->
-                </div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">🛒 구매 링크 (쿠팡 / 11번가 / 알리 등)</label>
-                <input type="url" id="sup-purchase-link" class="form-input" placeholder="https://www.coupang.com/..." />
-                <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">발주 시 [구매 링크] 버튼으로 바로 이동.</div>
-              </div>
-              <div class="form-group">
-                <label class="form-label">자동 인식 키워드 <small style="font-weight:400;color:var(--text-muted);">(쉼표 구분, 선택)</small></label>
-                <input type="text" id="sup-keywords" class="form-input" placeholder="예: 슬리퍼, 실내화" />
-                <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">청소사가 "기타 - 직접 입력"으로 보고했을 때 fallback 매칭에만 사용. 정확한 보고는 셀렉트 박스 방식이 권장됩니다.</div>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button class="btn btn-secondary" onclick="document.getElementById('supply-add-modal').classList.remove('open')">취소</button>
-              <button class="btn btn-primary" id="submit-supply-btn">저장</button>
             </div>
           </div>
         </div>
@@ -1155,21 +1068,6 @@
       </div>
     </div>
   </div>
-  <!-- 통합 상세 모달 (비품·파손 카드 클릭 시) -->
-  <div class="modal-backdrop" id="detail-modal">
-    <div class="modal">
-      <div class="modal-header">
-        <div class="modal-title" id="detail-modal-title">상세 정보</div>
-        <button class="modal-close" onclick="document.getElementById('detail-modal').classList.remove('open')">✕</button>
-      </div>
-      <div class="modal-body" id="detail-modal-body">
-        <div class="empty-state">로딩 중…</div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-secondary" onclick="document.getElementById('detail-modal').classList.remove('open')">닫기</button>
-      </div>
-    </div>
-  </div>
   <!-- 사진 확대 모달 (lightbox) -->
   <div class="photo-lightbox" id="photo-lightbox" onclick="this.classList.remove('open')">
     <img id="photo-lightbox-img" src="" alt="" />
@@ -1684,7 +1582,6 @@ async function runQuickSearch(query) {
   const sections = [
     { key: 'bookings', label: '예약', icon: '📅', limit: 5 },
     { key: 'staff',    label: '청소사', icon: '👤', limit: 3 },
-    { key: 'supplies', label: '비품',   icon: '📦', limit: 4 },
     { key: 'rooms',    label: '객실',   icon: '🏠', limit: 5 },
   ];
   let html = '';
@@ -1738,9 +1635,6 @@ window.quickSearchJump = (type, id, title) => {
     }, 200);
   } else if (type === 'staff') {
     document.querySelector('[data-view="cleaning"]')?.click();   /* 청소업체 정산 탭 제거 → 청소 관리로 */
-    closeSearch();
-  } else if (type === 'supplies') {
-    document.querySelector('[data-view="supplies"]')?.click();
     closeSearch();
   } else if (type === 'rooms') {
     document.querySelector('[data-view="rooms"]')?.click();
@@ -1809,7 +1703,6 @@ async function runMobileSearch(query) {
   const sections = [
     { key: 'bookings', label: '예약', icon: '📅', limit: 8 },
     { key: 'staff',    label: '청소사', icon: '👤', limit: 5 },
-    { key: 'supplies', label: '비품',   icon: '📦', limit: 5 },
     { key: 'rooms',    label: '객실',   icon: '🏠', limit: 5 },
   ];
   let html = '';
@@ -2428,13 +2321,9 @@ const CHATBOT_COMMANDS = [
   { keys: ['이번 주 청소', '주간 청소', '이번주 청소'], handler: 'weekCleaning' },
   { keys: ['청소 미배정', '미배정'], handler: 'unassignedCleaning' },
   { keys: ['오늘 청소', '청소', '청소 진행'], handler: 'todayCleaning' },
-  { keys: ['정산 대기', '청소비', '정산'], handler: 'payoutPending' },
   // 공실/점유
   { keys: ['빈 방', '빈방', '공실', '빈 객실'], handler: 'emptyRoomsToday' },
   { keys: ['점유율', '오늘 점유율', '재실'], handler: 'occupancyToday' },
-  // 비품
-  { keys: ['재고 부족', '부족', '비품 부족', '재고'], handler: 'lowStock' },
-  { keys: ['발주 필요', '발주', '주문'], handler: 'supplyOrders' },
   // 외국인/통계
   { keys: ['외국인', '외국인 비율', '국적'], handler: 'foreignStats' },
   // 객실/도어락/wifi
@@ -2529,8 +2418,8 @@ const CHATBOT_FAQ = [
 ];
 const CHATBOT_SUGGESTIONS = [
   '오늘 체크인', '오늘 체크아웃', '빈 방', '이번 주 청소',
-  '이번 달 매출', '채널별', '정산 대기', '검토 대기',
-  '재고 부족', '방별 도어락 비밀번호', '방별 Wi-Fi 비밀번호', '자주 문의', '도움말'
+  '이번 달 매출', '채널별', '검토 대기',
+  '방별 도어락 비밀번호', '방별 Wi-Fi 비밀번호', '자주 문의', '도움말'
 ];
 // FAB 열기/닫기
 document.addEventListener('click', (e) => {
@@ -2887,26 +2776,6 @@ const chatbotHandlers = {
       </ul>
       <div style="margin-top:8px;font-size:11px;color:var(--text-muted);">청소 관리 페이지에서 배정하세요</div>`;
   },
-  lowStock: async () => {
-    const { data } = await db.from('supplies').select('name, stock, min_stock, unit, category')
-      .order('stock', { ascending: true });
-    const low = (data || []).filter(s => (s.stock || 0) <= (s.min_stock || 5));
-    if (!low.length) return `✅ 재고 부족 비품 없음`;
-    return `⚠ <strong>재고 부족 ${low.length}개</strong>
-      <ul class="chatbot-msg-list">
-        ${low.map(s => `<li>${s.name} · 재고 ${s.stock}${s.unit || ''} / 최소 ${s.min_stock || 5}${s.unit || ''} (${s.category || '기타'})</li>`).join('')}
-      </ul>`;
-  },
-  supplyOrders: async () => {
-    const { data } = await db.from('supply_orders')
-      .select('quantity, supplies(name, unit), order_status, created_at')
-      .eq('order_status', 'confirmed').order('created_at', { ascending: false });
-    if (!data?.length) return `✅ 발주 필요 항목 없음`;
-    return `📦 <strong>발주 필요 ${data.length}건</strong>
-      <ul class="chatbot-msg-list">
-        ${data.map(o => `<li>${o.supplies?.name || '?'} · ${o.quantity}${o.supplies?.unit || ''}</li>`).join('')}
-      </ul>`;
-  },
   foreignStats: async () => {
     const today = new Date();
     const start = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-01`;
@@ -3092,20 +2961,6 @@ const chatbotHandlers = {
         }).join('')}
       </ul>`;
   },
-  // ── [신규] 정산 대기 (청소비) ──
-  payoutPending: async () => {
-    const { data } = await db.from('cleaning_tasks')
-      .select('payout_amount, scheduled_date, rooms(room_number), assigned_staff:staff!cleaning_tasks_assigned_to_fkey(name)')
-      .eq('status', 'completed').eq('payout_status', 'pending').order('scheduled_date');
-    if (!data?.length) return `✅ 정산 대기 중인 청소비 없음`;
-    const total = data.reduce((s, t) => s + (t.payout_amount || 0), 0);
-    const byStaff = {};
-    data.forEach(t => { const n = t.assigned_staff?.name || '미지정'; byStaff[n] = (byStaff[n] || 0) + (t.payout_amount || 0); });
-    return `💵 <strong>정산 대기 ${data.length}건 · ₩${total.toLocaleString()}</strong>
-      <ul class="chatbot-msg-list">
-        ${Object.entries(byStaff).map(([n, v]) => `<li>${n}: <strong>₩${v.toLocaleString()}</strong></li>`).join('')}
-      </ul>`;
-  },
   // ── [신규] 오늘 빈 방 (공실) ──
   emptyRoomsToday: async () => {
     const today = ymd_(new Date());
@@ -3126,9 +2981,8 @@ const chatbotHandlers = {
         <li><strong>예약</strong> — 6/26 (날짜) · 오늘 체크인 · 오늘 체크아웃 · 내일 체크인</li>
         <li><strong>매출</strong> — 이번 달 매출 · 오늘 매출 · 이번 주 매출 · 5월 매출 · 채널별</li>
         <li><strong>예약현황</strong> — 이번 달 예약 · 이번 달 취소 · 빈 방 · 점유율</li>
-        <li><strong>청소</strong> — 오늘 청소 · 내일 청소 · 이번 주 청소 · 청소 미배정 · 정산 대기</li>
+        <li><strong>청소</strong> — 오늘 청소 · 내일 청소 · 이번 주 청소 · 청소 미배정</li>
         <li><strong>운영</strong> — 검토 대기 · 파싱 실패</li>
-        <li><strong>비품</strong> — 재고 부족 · 발주 필요</li>
         <li><strong>통계</strong> — 외국인</li>
         <li><strong>정보</strong> — 도어락 101 · wifi 101 · 101호 (객실 상세)</li>
       </ul>`;
@@ -3488,9 +3342,7 @@ $$('.nav-item[data-view]').forEach(item => {
     if (view === 'bookings') loadBookings();
     if (view === 'review') loadReviewQueue();
     if (view === 'cleaning') loadCleaning();
-    if (view === 'payout') loadPayout();
     if (view === 'reviews') loadReviews();
-    if (view === 'supplies') loadSupplies();
     if (view === 'audit') loadAuditLogs();
     if (view === 'checklist') loadChecklist();
   });
@@ -3588,7 +3440,7 @@ function populateChannelFilter() {
 }
 // ---- 대시보드 ----
 // 📅 운영현황 타임라인 (예약 / 정산 모드)
-let tlMode = 'booking'; // 정산 모드 미사용
+const tlMode = 'booking'; // [2026-10-29] 정산 모드 제거 — 타임라인은 예약만 그립니다
 let tlStart = null;
 let TL_DAYS = 7;
 /* [2026-09-18] 타임라인 바탕색이 전부 밝은 값으로 고정돼 있었습니다. · 그래서 다크에서 표 배경·요일 헤더·오늘 열이 흰 띠로 남았습니다. · (실제 어드민 다크에서 확인했습니다 — 9월/10월 머리줄이 흰색으로 떴습니다) · const 라서 테마가 바뀌어도 그대로였는데, 이제 var() 토큰을 넣습니다. · 인라인 style 에 들어가는 값이므로 var() 가 그대로 동작합니다. */
@@ -3860,11 +3712,6 @@ async function loadTimeline(cfg) {
       const { data, error } = await q;
       window._tlErr = error ? error.message : null;
       window._tlBookings = data || [];
-    } else {
-      const { data } = await db.from('cleaning_tasks')
-        .select('id, scheduled_date, status, payout_status, payout_amount, room_id, rooms(room_number), assigned_staff:staff!cleaning_tasks_assigned_to_fkey(name)')
-        .gte('scheduled_date', startStr).lte('scheduled_date', endStr).limit(500);
-      window._tlTasks = data || [];
     }
     renderTimeline(cfg);
   } catch (e) {
@@ -3937,21 +3784,11 @@ function renderTimeline(cfg) {
         _rendered++;
         track += `<div onclick="${isFix ? `tlFixRemove('${b.id}')` : `editBooking('${b.id}')`}" onmouseenter="tlShowTip(event,'${b.id}')" onmousemove="tlShowTip(event,'${b.id}')" onmouseleave="tlHideTip()" style="position:absolute;top:9px;height:40px;left:${s*DAYW + (clipL ? 0 : 2)}px;width:${barW - (clipL ? 0 : 2) - (clipR ? 0 : 2)}px;background:${th.bg};color:${th.fg};border:${isFix ? '1px solid ' + th.bd : '0'};border-radius:${clipL ? '0' : '10px'} ${clipR ? '0 0' : '10px 10px'} ${clipL ? '0' : '10px'};box-sizing:border-box;font-size:12.5px;font-weight:700;display:flex;align-items:center;padding:0 10px;white-space:nowrap;overflow:hidden;cursor:pointer;${isPast ? 'opacity:.42;' : ''}" title="${isFix ? `객실수리 · ${(b.rooms && b.rooms.room_number) || ''}호 · ${b.checkin_date}~${b.checkout_date} (${totalN}일)${b.notes ? ' · ' + tlEsc_(String(b.notes).replace(/^\[수리\]\s*/, '')) : ''}` : `${tlEsc_(tlGuestName_(b))} · ${(b.channels && b.channels.name) || '-'} · ${b.checkin_date}~${b.checkout_date} (${totalN}박)${b.num_guests ? ' · ' + b.num_guests + '명' : ''}${staying ? ' · 숙박중' : ''}`}">${isFix ? tlFixLabel_(b, barW) : tlBarLabel_(b, barW, totalN, clipL, clipR, staying)}</div>`;
       });
-    } else {
-      (window._tlTasks || []).filter(t => String(t.room_id) === String(rm.id)).forEach(t => {
-        const i = _dayIndex(t.scheduled_date);
-        if (i < 0 || i >= _days) return;
-        const paid = t.payout_status === 'paid';
-        const c = paid ? ['#9FE1CB','#0F6E56'] : ['#F7C1C1','#A32D2D'];
-        const amt = t.payout_amount ? fmtKRW(t.payout_amount) : '';
-        _rendered++;
-        track += `<div onclick="tlToggleSettle('${t.id}','${paid?'pending':'paid'}')" title="${(t.assigned_staff?.name)||''} ${amt} (클릭: 정산 토글)" style="position:absolute;top:13px;height:32px;left:${i*DAYW+2}px;width:${DAYW-4}px;background:${c[0]};color:${c[1]};border-radius:7px;font-size:12px;line-height:32px;text-align:center;cursor:pointer;">${paid?'✓':'정산'}</div>`;
-      });
     }
     track += `</div>`;
     rows += `<div style="display:flex;border-bottom:1px solid ${TL_BD};background:${TL_BG};"><div class="tl-lab" style="width:${LABW}px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:${TL_TXT};background:${TL_BG};border-right:1px solid ${TL_BD};">${rm.room_number}</div>${track}</div>`;
   });
-  const loadedN = tlMode === 'booking' ? (window._tlBookings || []).length : (window._tlTasks || []).length;
+  const loadedN = (window._tlBookings || []).length;
   try { console.log(`[타임라인] 모드:${tlMode} / 로드:${loadedN}건 / 표시:${_rendered}건 / 객실:${rooms.length}개 / 오류:${window._tlErr || '없음'}`); if ((window._tlBookings||[])[0]) console.log('[타임라인] 예약샘플 room_id:', window._tlBookings[0].room_id, '/ 객실 id들:', rooms.map(r=>r.id)); } catch(_){}
   let monthBand = `<div style="display:flex; border-bottom:1px solid ${TL_BD}; background:${TL_HEAD};"><div class="tl-lab" style="width:${LABW}px;flex-shrink:0;background:${TL_HEAD};border-right:1px solid ${TL_BD};"></div><div style="display:flex;">`;
   let _gi = 0;
@@ -3979,14 +3816,14 @@ function renderTimeline(cfg) {
     + `<span style="width:9px;height:9px;border-radius:50%;background:${c.bg};flex:none;"></span>`
     + `${nm}</span>`;
   /* [2026-09-18] 숙박중이 더 이상 색을 뺏지 않으므로 범례도 「색」이 아니라 · 「테두리」로 설명합니다. 색 견본을 두면 또 채널색처럼 읽힙니다. */
-  (document.getElementById(cfg.legendId)||{}).innerHTML = _diag + ((tlMode === 'booking')
+  (document.getElementById(cfg.legendId)||{}).innerHTML = _diag + (true
     ? TL_CH_ORDER.map(k => _lgChip(TL_CH[k], TL_CH[k].nm)).join('')
       + _lgChip({ bg: tlStayColor_() }, '숙박중')
       /* [2026-09-18] 「객실수리」는 그 기간에 막대가 있을 때만 범례에 넣습니다. · 평소에는 없는 항목이라 늘 띄워두면 범례만 길어집니다. */
       + ((window._tlBookings || []).some(tlIsFix_)
           ? `<span style="display:inline-flex;align-items:center;gap:6px;"><span style="width:9px;height:9px;border-radius:2px;flex:none;background:${tlFixTint_().bg};"></span>객실수리</span>` : '')
       + `<span>· 막대 클릭 → 예약 상세</span>`
-    : `<span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:11px;height:11px;border-radius:3px;background:#9FE1CB;"></span>정산완료</span><span style="display:inline-flex;align-items:center;gap:5px;"><span style="width:11px;height:11px;border-radius:3px;background:#F7C1C1;"></span>정산대기</span><span>· 칸 클릭 → 정산 토글</span>`);
+    : '');
   if (window.markUpdated) markUpdated();
 }
 window.tlShowTip = (ev, id) => {
@@ -4039,29 +3876,12 @@ window.tlFixRemove = async (id) => {
   tlHideTip();
   loadTimeline();
 };
-window.tlToggleSettle = async (taskId, to) => {
-  const update = (to === 'paid') ? { payout_status: 'paid', paid_at: new Date().toISOString() } : { payout_status: 'pending', paid_at: null };
-  const { error } = await db.from('cleaning_tasks').update(update).eq('id', taskId);
-  if (error) { alert('정산 처리 실패: ' + error.message); return; }
-  if (document.getElementById('timeline-inner')) loadTimeline();
-};
 let _tlBound = false;
 function setupTimelineControls() {
   if (_tlBound) return; _tlBound = true;
   $('#tl-prev')?.addEventListener('click', () => { tlInitStart(); const d = new Date(tlStart); d.setDate(d.getDate() - TL_DAYS); tlSetMonth(d); loadTimeline(); });
   $('#tl-next')?.addEventListener('click', () => { tlInitStart(); const d = new Date(tlStart); d.setDate(d.getDate() + TL_DAYS); tlSetMonth(d); loadTimeline(); });
   $('#tl-today')?.addEventListener('click', () => { tlSetMonth(new Date()); loadTimeline(); });
-  document.querySelectorAll('.tl-mode-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      tlMode = btn.dataset.tlmode;
-      document.querySelectorAll('.tl-mode-btn').forEach(b => {
-        const on = b.dataset.tlmode === tlMode;
-        b.style.background = on ? 'var(--text)' : 'transparent';
-        b.style.color = on ? '#fff' : TL_MUT;
-      });
-      if (document.getElementById('timeline-inner')) loadTimeline();
-    });
-  });
 }
 // 🌍 국적 코드(ISO 2자리) → 국기 + 국가명
 const COUNTRY_KO = {
@@ -9305,119 +9125,6 @@ async function fetchIssueContext(issueId) {
     .single();
   return issue;
 }
-// 발주 카드 상세 보기
-window.viewSupplyOrderDetail = async (orderId) => {
-  const modal = $('#detail-modal');
-  const body = $('#detail-modal-body');
-  const title = $('#detail-modal-title');
-  modal.classList.add('open');
-  title.textContent = '🧺 비품 발주 상세';
-  body.innerHTML = '<div class="empty-state">로딩 중…</div>';
-  try {
-    const { data: order, error } = await db.from('supply_orders')
-      .select('*, supplies(name, unit, stock)')
-      .eq('id', orderId)
-      .single();
-    if (error) throw error;
-    // 연관 cleaning_issue 가져오기 (있으면)
-    const issue = order.source_issue_id ? await fetchIssueContext(order.source_issue_id) : null;
-    const task = issue?.cleaning_tasks;
-    const roomNumber = task?.rooms?.room_number || '?';
-    const staffName = task?.staff?.name || '청소사';
-    const dateStr = task?.scheduled_date || '';
-    const description = issue?.description || order.notes || '';
-    const photos = issue?.photo_urls || [];
-    const statusLabel = {
-      candidate: '⚪ 발주 후보 (확정 대기)',
-      confirmed: '🔴 발주 필요',
-      completed: '✅ 처리 완료',
-      ignored: '✕ 무시됨',
-    }[order.status] || order.status;
-    body.innerHTML = `
-      <div class="detail-section">
-        <div class="detail-summary-box">
-          <div class="detail-summary-title">${order.supplies?.name || '?'} <span style="font-size:13px; color:var(--text-soft); font-weight:400;">(${order.supplies?.unit || ''})</span></div>
-          <div class="detail-summary-meta">
-            <span>🏠 ${RH(roomNumber)}</span>
-            ${dateStr ? `<span>📅 ${dateStr}</span>` : ''}
-            <span>👤 ${staffName}</span>
-            <span class="detail-status-badge ${order.status}">${statusLabel}</span>
-          </div>
-        </div>
-      </div>
-      <div class="detail-section">
-        <div class="detail-section-label">💬 청소사가 쓴 내용</div>
-        <div class="detail-description-box ${description ? '' : 'empty'}">${description || '(작성된 내용 없음)'}</div>
-      </div>
-      ${renderDetailPhotos(photos)}
-      <div class="detail-section">
-        <div class="detail-section-label">⏰ 보고 시각</div>
-        <div style="font-size: 13px; color: var(--text-soft);">${new Date(order.created_at).toLocaleString('ko-KR')}</div>
-      </div>
-    `;
-  } catch (e) {
-    body.innerHTML = `<div class="alert alert-error">로딩 실패: ${e.message}</div>`;
-  }
-};
-// 파손 카드 상세 보기
-window.viewDamageDetail = async (damageId) => {
-  const modal = $('#detail-modal');
-  const body = $('#detail-modal-body');
-  const title = $('#detail-modal-title');
-  modal.classList.add('open');
-  title.textContent = '🔨 파손 신고 상세';
-  body.innerHTML = '<div class="empty-state">로딩 중…</div>';
-  try {
-    const { data: damage, error } = await db.from('damage_reports')
-      .select('*, rooms(room_number)')
-      .eq('id', damageId)
-      .single();
-    if (error) throw error;
-    // 연관 cleaning_issue 가져오기 (있으면)
-    const issue = damage.source_issue_id ? await fetchIssueContext(damage.source_issue_id) : null;
-    const task = issue?.cleaning_tasks;
-    const staffName = task?.staff?.name || '청소사';
-    const dateStr = task?.scheduled_date || '';
-    // 파손 사진은 damage_reports에 직접 저장된 거 우선, 없으면 cleaning_issues 사진
-    const photos = (damage.photo_urls && damage.photo_urls.length > 0)
-      ? damage.photo_urls
-      : (issue?.photo_urls || []);
-    const statusLabel = {
-      reported: '🔴 신규 신고',
-      confirmed: '🟡 확인됨 (수리 대기)',
-      resolved: '✅ 해결 완료',
-    }[damage.status] || damage.status;
-    body.innerHTML = `
-      <div class="detail-section">
-        <div class="detail-summary-box">
-          <div class="detail-summary-title">${RH(damage.rooms?.room_number || '?')} 파손</div>
-          <div class="detail-summary-meta">
-            ${dateStr ? `<span>📅 ${dateStr}</span>` : ''}
-            <span>👤 ${staffName}</span>
-            <span class="detail-status-badge ${damage.status}">${statusLabel}</span>
-          </div>
-        </div>
-      </div>
-      <div class="detail-section">
-        <div class="detail-section-label">💬 청소사가 쓴 내용</div>
-        <div class="detail-description-box ${damage.description ? '' : 'empty'}">${damage.description || '(작성된 내용 없음)'}</div>
-      </div>
-      ${renderDetailPhotos(photos)}
-      ${damage.resolution_notes ? `
-        <div class="detail-section">
-          <div class="detail-section-label">🔧 처리 메모</div>
-          <div class="detail-description-box">${damage.resolution_notes}</div>
-        </div>
-      ` : ''}
-      <div class="detail-section">
-        <div class="detail-section-label">⏰ 보고 시각</div>
-        <div style="font-size: 13px; color: var(--text-soft);">${new Date(damage.created_at).toLocaleString('ko-KR')}</div>
-      </div>
-    `;
-  } catch (e) {
-    body.innerHTML = `<div class="alert alert-error">로딩 실패: ${e.message}</div>`;
-  }
-};
 // 매니저: 특이사항 상세 조회
 window.viewIssueDetail = async (taskId) => {
   const modal = $('#issue-view-modal');
@@ -9866,59 +9573,9 @@ $('#save-cleaning-img').addEventListener('click', async () => {
   setTimeout(()=>{btn.textContent=orig;},1600);
 });
 // 📤 공유 (모바일: 카톡 공유 / 데스크톱: 이미지 클립보드 복사)
-// 매니저: 카드에서 정산 처리 (청소사 정산 페이지와 payout_status 공유 → 양방향 연동)
-/* [2026-08-27] 아래 정산 관련 함수들은 화면에서 떼어냈습니다 (호출하는 곳 없음). · payout_status 컬럼과 지난 기록은 그대로 있어, 나중에 다시 쓰시려면 · 청소 카드에서 cleaningSettlementRow(t) 를 부르기만 하면 됩니다. */
-// 정산 버튼 노출 시점: 매주 일요일 18:00 이후 (미정산 건). 정산완료 상태는 항상 표시.
-// 청소 카드 정산 토글 (항상 표시)
-function cleaningSettlementRow(t) {
-  const isPaid = t.payout_status === 'paid';
-  const base = 'flex:1; padding:7px 0; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer;';
-  const needStyle = isPaid
-    ? `${base} border:1px solid #e6c9ca; background:var(--surface); color:#c2474b;`
-    : `${base} border:1px solid #e5484d; background:#e5484d; color:#fff;`;
-  const doneStyle = isPaid
-    ? `${base} border:1px solid #2e8b57; background:#2e8b57; color:#fff;`
-    : `${base} border:1px solid #bfe3cd; background:var(--surface); color:#2e8b57;`;
-  return `
-      <div style="margin-top:8px;">
-        <div style="font-size:11px; color: var(--text-muted, #999); margin-bottom:4px;">정산</div>
-        <div style="display:flex; gap:6px;">
-          <button style="${needStyle}" onclick="setCleaningSettle('${t.id}','pending'); event.stopPropagation();">정산!</button>
-          <button style="${doneStyle}" onclick="setCleaningSettle('${t.id}','paid'); event.stopPropagation();">정산완료</button>
-        </div>
-      </div>`;
-}
-// 정산 상태 토글 — 청소사 정산 페이지와 동일한 payout_status 컬럼을 갱신 → 자동 연동
-window.setCleaningSettle = async (taskId, status) => {
-  const update = (status === 'paid')
-    ? { payout_status: 'paid', paid_at: new Date().toISOString() }
-    : { payout_status: 'pending', paid_at: null };
-  const { error } = await db.from('cleaning_tasks').update(update).eq('id', taskId);
-  if (error) { alert('정산 처리 실패: ' + error.message); return; }
-  // 운영 일지
-  try {
-    const { data: tk } = await db.from('cleaning_tasks')
-      .select('rooms(room_number), payout_amount, staff(name)')
-      .eq('id', taskId).single();
-    if (status === 'paid') {
-      logEvent('settlement_paid', `정산 완료 (${RH(tk?.rooms?.room_number || '?')} · ${fmtKRW(tk?.payout_amount || 0)})`, {
-        targetType: 'cleaning_task', targetId: taskId, metadata: { amount: tk?.payout_amount || 0 },
-      });
-    } else {
-      logEvent('settlement_pending', `정산 취소 (${RH(tk?.rooms?.room_number || '?')})`, {
-        targetType: 'cleaning_task', targetId: taskId,
-      });
-    }
-  } catch (e) {}
-  const t = window.__cleaningTaskById && window.__cleaningTaskById[taskId];
-  if (t) {
-    t.payout_status = update.payout_status;
-    t.paid_at = update.paid_at;
-    cleaningRefreshLocal_();  // 전체 리로드 없이 카드만 갱신
-  } else {
-    loadCleaning();
-  }
-};
+/* [2026-10-29] 청소 카드 정산 버튼과 토글 함수를 들어냈습니다.
+   정산은 시스템 밖에서 처리하기로 해, 부르는 곳이 없는 채 남아 있던 코드입니다.
+   cleaning_tasks.payout_status / payout_amount 컬럼과 지난 기록은 그대로 둡니다. */
 // 청소 시작
 window.startCleaning = async (taskId) => {
   await db.from('cleaning_tasks').update({
@@ -10040,8 +9697,8 @@ $('#complete-submit').addEventListener('click', async () => {
       const staffName = tinfo?.assigned_staff?.name || '담당';
       await createNotification('cleaning_completed',
         `🧹 ${RH(roomNumber)} 청소 완료`,
-        `${staffName} · ${fmtKRW(payoutAmount)} 정산 필요`,
-        'payout',
+        `${staffName} 님이 청소를 마쳤습니다`,
+        'cleaning',
         { task_id: currentCompletionTaskId }
       );
       // 운영 일지
@@ -10335,651 +9992,10 @@ async function showAppWithCleanerCheck(user) {
     }, 30 * 1000);
   }
 }
-// 비품·파손 관리
-let currentSuppliesTab = 'orders';
-async function loadSupplies() {
-  if (currentSuppliesTab === 'orders') {
-    loadSupplyOrders();
-    loadSuppliesMaster();
-  } else {
-    loadDamageReports();
-  }
-}
-async function loadSupplyOrders() {
-  // 모든 supply_orders + 비품명 + 구매링크 join
-  const { data: orders, error } = await db.from('supply_orders')
-    .select('*, supplies(id, name, unit, purchase_link, order_qty, min_stock, stock, category), cleaning_issues(description, photo_urls)')
-    .order('created_at', { ascending: false });
-  if (error) {
-    $('#supply-candidates').innerHTML = `<div class="empty-state">에러: ${error.message}</div>`;
-    return;
-  }
-  const candidates = (orders || []).filter(o => o.status === 'candidate');
-  const confirmed = (orders || []).filter(o => o.status === 'confirmed');
-  const completed = (orders || []).filter(o => o.status === 'completed').slice(0, 20);
-  // ── [가독성 개선] 섹션 헤더에 건수 배지 반영 ──
-  // '발주 필요'가 2일 이상 묵은 게 있으면 urgent 강조
-  const confirmedUrgent = confirmed.some(o => {
-    if (!o.confirmed_at) return false;
-    return (Date.now() - new Date(o.confirmed_at).getTime()) / 86400000 >= 2;
-  });
-  const setOrderHeader = (id, label, count, cls) => {
-    const el = document.getElementById(id);
-    if (!el) return;
-    const badge = count > 0 ? `<span class="supply-count-badge ${cls || ''}">${count}</span>` : '';
-    el.innerHTML = `${label}${badge}`;
-  };
-  setOrderHeader('supply-candidates-title', '발주 후보 (자동 인식)', candidates.length, '');
-  setOrderHeader('supply-confirmed-title', '발주 필요', confirmed.length, confirmedUrgent ? 'urgent' : 'need');
-  // 발주 후보 (회색)
-  if (candidates.length === 0) {
-    $('#supply-candidates').innerHTML = '<div class="empty-state">새로 인식된 발주 후보가 없습니다.</div>';
-  } else {
-    $('#supply-candidates').innerHTML = candidates.map(o => {
-      const qty = o.quantity || 1;
-      const unit = o.supplies?.unit || '';
-      const name = o.supplies?.name || '?';
-      const category = o.supplies?.category || '기타';
-      const reviewBadge = o.needs_review ? '<span class="order-row-tag warning">⚠ 확인 필요</span>' : '';
-      const cleanerComment = (o.cleaning_issues?.description || o.notes || '').trim();
-      const linkBtn = o.supplies?.purchase_link
-        ? `<a href="${o.supplies.purchase_link}" target="_blank" rel="noopener noreferrer" class="btn btn-ghost order-row-btn-link" onclick="event.stopPropagation()" title="쇼핑몰에서 보기">🛒 링크</a>`
-        : '';
-      // 경과 시간 표시 (간단한 timeago)
-      const elapsedHours = Math.round((Date.now() - new Date(o.created_at).getTime()) / 3600000);
-      const elapsedText = elapsedHours < 1 ? '방금 전' : elapsedHours < 24 ? `${elapsedHours}시간 전` : `${Math.floor(elapsedHours / 24)}일 전`;
-      return `
-        <div class="order-row candidate" onclick="viewSupplyOrderDetail('${o.id}')">
-          <div class="order-row-status">
-            <div class="order-row-status-dot candidate"></div>
-            <div class="order-row-status-label">후보</div>
-          </div>
-          <div class="order-row-main">
-            <div class="order-row-head">
-              <div class="order-row-name">${name}</div>
-              <div class="order-row-tags">
-                <span class="order-row-tag qty">${qty}${unit}</span>
-                <span class="order-row-tag cat cat-${categoryClass(category)}">${category}</span>
-                ${reviewBadge}
-              </div>
-            </div>
-            ${cleanerComment ? `
-              <div class="order-row-quote">
-                <span class="order-row-quote-icon">💬</span>
-                <span class="order-row-quote-text">"${cleanerComment.slice(0, 120)}${cleanerComment.length > 120 ? '…' : ''}"</span>
-              </div>
-            ` : ''}
-            <div class="order-row-meta">
-              <span>등록 ${elapsedText}</span>
-              <span class="order-row-meta-dot">·</span>
-              <span>${new Date(o.created_at).toLocaleString('ko-KR', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'})}</span>
-            </div>
-          </div>
-          <div class="order-row-actions" onclick="event.stopPropagation()">
-            ${linkBtn}
-            <button class="btn btn-primary order-row-btn-primary" onclick="confirmSupplyOrder('${o.id}')">✓ 확정</button>
-            <button class="btn btn-secondary order-row-btn-secondary" onclick="ignoreSupplyOrder('${o.id}')">✕ 무시</button>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-  // 발주 필요 (빨간 ❗)
-  if (confirmed.length === 0) {
-    $('#supply-confirmed').innerHTML = '<div class="empty-state">발주 필요 항목 없음.</div>';
-  } else {
-    $('#supply-confirmed').innerHTML = confirmed.map(o => {
-      const qty = o.quantity || 1;
-      const unit = o.supplies?.unit || '';
-      const name = o.supplies?.name || '?';
-      const category = o.supplies?.category || '기타';
-      const cleanerComment = (o.notes || o.cleaning_issues?.description || '').trim();
-      const linkBtn = o.supplies?.purchase_link
-        ? `<a href="${o.supplies.purchase_link}" target="_blank" rel="noopener noreferrer" class="btn btn-primary order-row-btn-link primary" onclick="event.stopPropagation()">🛒 바로 주문</a>`
-        : `<button class="btn btn-ghost order-row-btn-link" onclick="event.stopPropagation(); quickAddSupplyLink('${o.supplies?.id}', '${name.replace(/'/g, "\\'")}')">+ 링크</button>`;
-      // 확정 후 며칠 됐는지 (긴급도)
-      const confirmedAt = o.confirmed_at ? new Date(o.confirmed_at) : null;
-      const elapsedHours = confirmedAt ? Math.round((Date.now() - confirmedAt.getTime()) / 3600000) : 0;
-      const elapsedDays = Math.floor(elapsedHours / 24);
-      const elapsedText = elapsedHours < 1 ? '방금' : elapsedHours < 24 ? `${elapsedHours}시간 전` : `${elapsedDays}일 전`;
-      const urgent = elapsedDays >= 2;
-      return `
-        <div class="order-row needed ${urgent ? 'urgent' : ''}" onclick="viewSupplyOrderDetail('${o.id}')">
-          <div class="order-row-status">
-            <div class="order-row-status-dot needed"></div>
-            <div class="order-row-status-label">발주 필요</div>
-          </div>
-          <div class="order-row-main">
-            <div class="order-row-head">
-              <div class="order-row-name">${name}</div>
-              <div class="order-row-tags">
-                <span class="order-row-tag qty">${qty}${unit}</span>
-                <span class="order-row-tag cat cat-${categoryClass(category)}">${category}</span>
-                ${urgent ? '<span class="order-row-tag danger">⚠ 빨리 처리</span>' : ''}
-              </div>
-            </div>
-            ${cleanerComment ? `
-              <div class="order-row-quote">
-                <span class="order-row-quote-icon">💬</span>
-                <span class="order-row-quote-text">"${cleanerComment.slice(0, 120)}${cleanerComment.length > 120 ? '…' : ''}"</span>
-              </div>
-            ` : ''}
-            <div class="order-row-meta">
-              <span>확정 ${elapsedText}</span>
-              <span class="order-row-meta-dot">·</span>
-              <span>${confirmedAt ? confirmedAt.toLocaleDateString('ko-KR') : '-'}</span>
-            </div>
-          </div>
-          <div class="order-row-actions" onclick="event.stopPropagation()">
-            ${linkBtn}
-            <button class="btn btn-primary order-row-btn-primary" onclick="completeSupplyOrder('${o.id}')">✓ 처리 완료</button>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-  // 처리 완료 (초록 ✓)
-  if (completed.length === 0) {
-    $('#supply-completed').innerHTML = '<div class="empty-state">아직 처리 완료된 발주 없음.</div>';
-  } else {
-    $('#supply-completed').innerHTML = completed.map(o => {
-      const name = o.supplies?.name || '?';
-      const qty = o.quantity || 1;
-      const unit = o.supplies?.unit || '';
-      return `
-        <div class="order-row done" onclick="viewSupplyOrderDetail('${o.id}')">
-          <div class="order-row-status">
-            <div class="order-row-status-dot done">✓</div>
-            <div class="order-row-status-label">완료</div>
-          </div>
-          <div class="order-row-main">
-            <div class="order-row-head">
-              <div class="order-row-name">${name}</div>
-              <div class="order-row-tags">
-                <span class="order-row-tag qty">${qty}${unit}</span>
-              </div>
-            </div>
-            <div class="order-row-meta">
-              <span>${o.completed_at ? new Date(o.completed_at).toLocaleDateString('ko-KR') : '-'} 처리 완료</span>
-            </div>
-          </div>
-          <div class="order-row-actions" onclick="event.stopPropagation()">
-            <button class="btn btn-secondary order-row-btn-secondary" onclick="undoSupplyOrder('${o.id}')">되돌리기</button>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-}
-// 카테고리 → CSS 클래스 매핑
-function categoryClass(cat) {
-  if (cat === '세제') return 'detergent';
-  if (cat === '어메니티') return 'amenity';
-  if (cat === '침구') return 'linen';
-  if (cat === '음료') return 'drink';
-  if (cat === '소모품') return 'consumable';
-  return 'default';
-}
-// ══════════ 비품관리 — 구매일 기록 방식 (재고 숫자 미사용) ══════════
-const SUP_CONSUM_CATS = ['소모품', '어메니티', '청소', '세탁', '세제', '음료'];
-const SUP_CONSUM_NAMES = ['수건'];            // 분류는 침구지만 실제로는 소모품
-function supIsConsum_(s) { return SUP_CONSUM_CATS.includes(s.category) || SUP_CONSUM_NAMES.includes(s.name); }
-function supEsc_(v) { return String(v == null ? '' : v).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
-// 외부 링크는 http(s) 만 허용 (javascript: 등 차단)
-function supLink_(u) { const t = String(u || '').trim(); return /^https?:\/\//i.test(t) ? supEsc_(t) : ''; }
-let __supMaster = [], __supTab = 'consum', __supQuery = '';
-let __supSel = new Set(), __supJust = new Map(), __supBusy = new Set();   // supply_id → 방금 만든 order id
-async function loadSuppliesMaster() {
-  const host = $('#supplies-master-list');
-  if (!host) return;
-  const [supRes, ordRes] = await Promise.all([
-    db.from('supplies').select('*').order('name'),
-    db.from('supply_orders').select('id, supply_id, completed_at, confirmed_at, created_at')
-      .order('created_at', { ascending: false }).limit(3000),
-  ]);
-  if (supRes.error) { host.innerHTML = `<div class="empty-state">에러: ${supRes.error.message}</div>`; return; }
-  const supplies = supRes.data || [];
-  if (!supplies.length) { host.innerHTML = '<div class="empty-state">등록된 비품이 없습니다. 우측 상단 [+ 비품 추가]로 넣어주세요.</div>'; return; }
-  // 품목별 구매일 목록 (최신순)
-  const hist = {};
-  (ordRes.data || []).forEach(o => {
-    const d = o.completed_at || o.confirmed_at || o.created_at;
-    if (!d) return;
-    (hist[o.supply_id] = hist[o.supply_id] || []).push(String(d).slice(0, 10));
-  });
-  Object.values(hist).forEach(a => a.sort((x, y) => y.localeCompare(x)));
-  const t0 = new Date(); t0.setHours(0, 0, 0, 0);
-  const ago = (ymd) => Math.round((t0 - new Date(ymd + 'T00:00:00')) / 86400000);
-  __supMaster = supplies.map(s => {
-    const h = hist[s.id] || [];
-    const last = h[0] || null;
-    const days = last ? ago(last) : null;
-    let cycle = null;                        // 평균 구매 주기 (최근 간격 5개 평균)
-    if (h.length >= 2) {
-      const gaps = [];
-      for (let k = 0; k < Math.min(h.length - 1, 5); k++) gaps.push(ago(h[k + 1]) - ago(h[k]));
-      const pos = gaps.filter(g => g > 0);
-      if (pos.length) cycle = Math.round(pos.reduce((a, b) => a + b, 0) / pos.length);
-    }
-    const ratio = (days == null) ? null : (cycle ? days / cycle : days / 60);
-    return Object.assign({}, s, { consum: supIsConsum_(s), last, days, cycle, buys: h.length, ratio });
-  });
-  renderSupplyGroups();
-}
-window.supSetTab   = (t) => { __supTab = t; renderSupplyGroups(); };
-window.supSearchIn = (v) => { __supQuery = v; renderSupplyGroups(); };
-window.supToggle   = (id) => { __supSel.has(id) ? __supSel.delete(id) : __supSel.add(id); renderSupplyGroups(); };
-window.supClearSel = () => { __supSel.clear(); renderSupplyGroups(); };
-// 한 번 클릭 = 오늘 날짜로 발주완료. 체크 표시 + 마지막 구매일이 바로 갱신됩니다.
-window.supBuy = async (id) => {
-  if (__supBusy.has(id)) return;
-  __supBusy.add(id); renderSupplyGroups();
-  const s = __supMaster.find(x => x.id === id);
-  const iso = new Date(ymd_(new Date()) + 'T12:00:00').toISOString();
-  const { data, error } = await db.from('supply_orders')
-    .insert([{ supply_id: id, quantity: Number((s && s.order_qty) || 1), status: 'completed', confirmed_at: iso, completed_at: iso }])
-    .select('id, supply_id');
-  __supBusy.delete(id);
-  if (error) { alert('기록 실패: ' + error.message); renderSupplyGroups(); return; }
-  if (data && data[0]) __supJust.set(id, data[0].id);
-  if (window.showToast) showToast(`${(s && s.name) || '품목'} — 오늘 발주완료로 기록했어요.`, 'ok');
-  await loadSuppliesMaster();
-};
-window.supRecord = async () => {
-  const ids = Array.from(__supSel);
-  if (!ids.length) return;
-  const dEl = document.getElementById('sup-rec-date');
-  const d = (dEl && dEl.value) ? dEl.value : ymd_(new Date());
-  const iso = new Date(d + 'T12:00:00').toISOString();
-  const rows = ids.map(id => {
-    const s = __supMaster.find(x => x.id === id);
-    return { supply_id: id, quantity: Number((s && s.order_qty) || 1), status: 'completed', confirmed_at: iso, completed_at: iso };
-  });
-  const { data, error } = await db.from('supply_orders').insert(rows).select('id, supply_id');
-  if (error) { alert('기록 실패: ' + error.message); return; }
-  __supJust = new Map((data || []).map(r => [r.supply_id, r.id]));
-  __supSel.clear();
-  if (window.showToast) showToast(`${ids.length}개 구매 기록했어요.`, 'ok');
-  await loadSuppliesMaster();
-};
-window.supUndo = async (supplyId) => {
-  const oid = __supJust.get(supplyId);
-  if (!oid) return;
-  const { error } = await db.from('supply_orders').delete().eq('id', oid);
-  if (error) { alert('되돌리기 실패: ' + error.message); return; }
-  __supJust.delete(supplyId);
-  if (window.showToast) showToast('되돌렸어요.', 'ok');
-  await loadSuppliesMaster();
-};
-function renderSupplyGroups(query) {
-  if (typeof query === 'string') __supQuery = query;
-  const host = $('#supplies-master-list');
-  if (!host) return;
-  const q = (__supQuery || '').trim().toLowerCase();
-  // 검색 중이면 탭 무시하고 전체에서 찾는다 (안 보이는 걸 찾아 담을 수 있게)
-  let list = q
-    ? __supMaster.filter(s => [s.name, s.category].concat(s.keywords || []).join(' ').toLowerCase().includes(q))
-    : __supMaster.filter(s => __supTab === 'consum' ? s.consum : !s.consum);
-  list = list.slice().sort((a, b) => {
-    const ra = a.ratio == null ? -1 : a.ratio, rb = b.ratio == null ? -1 : b.ratio;
-    if (rb !== ra) return rb - ra;
-    return (a.name || '').localeCompare(b.name || '');
-  });
-  const nConsum = __supMaster.filter(s => s.consum).length;
-  const nDur = __supMaster.length - nConsum;
-  const oldN = __supMaster.filter(s => s.consum && s.days != null && (s.ratio >= 1.5 || s.days >= 60)).length;
-  const chip = (k, label, n) =>
-    `<span onclick="supSetTab('${k}')" style="cursor:pointer;font-size:13px;font-weight:700;border:1px solid ${!q && __supTab === k ? '#1f1f23' : 'var(--border)'};background:${!q && __supTab === k ? '#1f1f23' : '#fff'};color:${!q && __supTab === k ? '#fff' : '#57534c'};border-radius:20px;padding:6px 14px;">${label} ${n}</span>`;
-  const row = (s) => {
-    const sel = __supSel.has(s.id);
-    const just = __supJust.has(s.id);
-    let cls = 'color:#d6d3cd;font-weight:600;', txt = '기록 없음';
-    if (s.days != null) {
-      const hard = (s.ratio >= 1.5 || s.days >= 60), soft = (s.ratio >= 1 || s.days >= 30);
-      cls = hard ? 'color:var(--danger-500);' : (soft ? 'color:var(--warning-600);' : 'color:var(--text-muted);');
-      txt = s.days === 0 ? '오늘' : (s.days === 1 ? '어제' : s.days + '일 전');
-      if (s.cycle) txt += `<span style="font-weight:600;opacity:.75;"> · 보통 ${s.cycle}일</span>`;
-    }
-    const w = s.ratio == null ? 0 : Math.min(100, Math.max(3, s.ratio * 66));
-    const barC = s.days == null ? 'var(--border)' : (s.ratio >= 1.5 || s.days >= 60 ? 'var(--danger-500)' : (s.ratio >= 1 || s.days >= 30 ? 'var(--warning-500)' : 'var(--border-strong)'));
-    const busy = __supBusy.has(s.id);
-    /* [2026-09-18] 비품 행 손질 · ① 색이 전부 밝은 값으로 박혀 있어 다크에서 「발주완료」 글씨가 안 보였습니다 → 토큰으로 · ② 행 높이를 키웠습니다 (위아래 11 → 16px) — 목록이 빽빽하다고 하셔서 · ③ 품목 이름·날짜 글씨도 한 단 키웠습니다 · ④ 「보통 N일」 막대를 62 → 96px 로 늘려 남는 폭을 씁니다 */
-    return `<div class="sup-row" style="display:grid;grid-template-columns:minmax(0,1fr) 78px 66px 260px 120px auto;align-items:center;gap:14px;padding:16px 6px;border-bottom:1px solid var(--border);${just ? 'background:var(--success-50);' : ''}">
-      <span onclick="supBuy('${s.id}')" style="cursor:pointer;font-weight:700;font-size:15px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${supEsc_(s.name)} — 누르면 오늘 발주완료로 기록">${supEsc_(s.name)}</span>
-      <span style="font-size:11.5px;font-weight:700;color:var(--text-soft);background:var(--surface-soft);border:1px solid var(--border);border-radius:6px;padding:4px 8px;white-space:nowrap;text-align:center;">${supEsc_(s.category || '기타')}</span>
-      <span style="font-size:13px;color:var(--text-muted);font-variant-numeric:tabular-nums;text-align:right;">${s.last ? s.last.slice(5).replace('-', '/') : '—'}</span>
-      <span style="font-size:13px;font-weight:700;min-width:0;white-space:nowrap;${cls}">${txt}
-        <span style="width:96px;height:7px;background:var(--surface-soft);border-radius:4px;overflow:hidden;display:inline-block;vertical-align:1px;margin-left:10px;"><span style="display:block;width:${w}%;height:100%;background:${barC};border-radius:4px;"></span></span>
-      </span>
-      ${just
-        ? `<span onclick="supUndo('${s.id}')" title="되돌리기" style="cursor:pointer;font-size:12.5px;font-weight:800;border-radius:8px;padding:9px 0;text-align:center;background:var(--success-50);border:1px solid var(--success-600);color:var(--success-600);white-space:nowrap;">✓ 완료 ↺</span>`
-        : `<span onclick="supBuy('${s.id}')" title="오늘 날짜로 발주완료 기록" style="cursor:${busy ? 'wait' : 'pointer'};opacity:${busy ? '.5' : '1'};font-size:12.5px;font-weight:800;border-radius:8px;padding:9px 0;text-align:center;background:var(--surface);border:1px solid var(--border-strong);color:var(--text);white-space:nowrap;">${busy ? '기록 중…' : '발주완료'}</span>`}
-      ${supLink_(s.purchase_link) ? `<a href="${supLink_(s.purchase_link)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="flex:none;font-size:12px;color:var(--info-600);text-decoration:none;font-weight:700;">구매처</a>` : ''}
-      <span onclick="editSupply('${s.id}')" title="수정" style="cursor:pointer;flex:none;color:var(--text-muted);font-size:13px;">✎</span>
-    </div>`;
-  };
-  // 「체크 → 하단 버튼」 2단계가 불편해서 행마다 [발주완료] 한 번 클릭으로 바꿨습니다.
-  const bar = '';
-  const selNames = Array.from(__supSel).map(id => (__supMaster.find(x => x.id === id) || {}).name).filter(Boolean);
-  const _oldBar = false ? `
-    <div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:10px -14px -14px;padding:11px 14px;background:var(--accent);color:#fff;border-radius:0 0 12px 12px;">
-      <span style="font-size:12px;font-weight:800;">${__supSel.size}개 선택</span>
-      <span style="font-size:11px;opacity:.8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:38%;">${supEsc_(selNames.join(' · '))}</span>
-      <span style="margin-left:auto;display:flex;gap:7px;align-items:center;flex-wrap:wrap;">
-        <input type="date" id="sup-rec-date" value="${ymd_(new Date())}" style="font-size:11.5px;padding:4px 8px;border-radius:7px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.12);color:#fff;">
-        <span onclick="supClearSel()" style="cursor:pointer;font-size:11.5px;font-weight:700;border:1px solid rgba(255,255,255,.35);border-radius:7px;padding:5px 10px;color:#c9d3e4;">선택 해제</span>
-        <span onclick="supRecord()" style="cursor:pointer;font-size:11.5px;font-weight:800;border-radius:7px;padding:5px 12px;background:var(--surface);color:#1f1f23;">🛒 구매 기록</span>
-      </span>
-    </div>` : '';
-  /* [2026-09-18] max-width:1000px 을 없앱니다. · PC 화면이 1400px 이어도 목록이 1000px 에서 잘려 오른쪽이 텅 비었습니다. · 검색창도 300px 상한을 풀어 남는 폭을 쓰게 합니다. */
-  host.innerHTML = `
-    <div>
-    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:13px;">
-      ${chip('consum', '소모품', nConsum)}${chip('durable', '비품(내구재)', nDur)}
-      <input type="search" value="${supEsc_(__supQuery)}" oninput="supSearchIn(this.value)" placeholder="품목 검색 (전체에서 찾기)"
-             style="margin-left:auto;flex:1;min-width:200px;max-width:420px;font-size:14px;padding:9px 13px;border:1px solid var(--border-strong);border-radius:8px;background:var(--surface);color:var(--text);">
-    </div>
-    ${q ? `<div style="font-size:12.5px;color:var(--text-muted);margin-bottom:9px;">"${supEsc_(__supQuery)}" 검색 결과 ${list.length}개 — [발주완료]를 누르면 오늘 날짜로 기록됩니다.</div>`
-        : (__supTab === 'consum' && oldN ? `<div style="font-size:12.5px;font-weight:700;color:var(--warning-600);background:var(--warning-50);border:1px solid var(--warning-500);border-radius:8px;padding:9px 13px;margin-bottom:10px;">평소 주기보다 오래된 품목 ${oldN}개 — 위쪽부터 확인해보세요</div>` : '')}
-    ${list.length ? list.map(row).join('') : '<div class="empty-state" style="padding:22px 0;">해당하는 품목이 없어요.</div>'}
-    <div style="font-size:12.5px;color:var(--text-muted);margin-top:14px;line-height:1.75;">
-      · <b>재고 숫자는 쓰지 않습니다.</b> 상주하지 않으니 세는 게 어렵고, 대신 <b>마지막 구매일</b>과 <b>평균 구매 주기</b>로 판단합니다.<br>
-      · 두 번 이상 사면 주기가 자동으로 잡혀서 "보통 30일마다 사는데 44일 됐다"를 알려줍니다. 기록이 없으면 60일을 기준으로 봅니다.<br>
-      · <b>[발주완료]를 한 번 누르면 오늘 날짜로 바로 기록</b>됩니다. 잘못 눌렀으면 <b>✓ 완료 ↺</b>로 되돌리세요. 다른 날짜로 넣으려면 <b>✎</b>에서 바꿉니다.
-    </div>
-    </div>
-    ${bar}`;
-}
-// 비품 카드 클릭 → 상세 모달 (발주 필요↔충분 토글 + 삭제)
-window.openSupplyModal_ = function (supplyId) {
-  const s = (window.__supplies || []).find(x => x.id === supplyId);
-  if (!s) return;
-  const on = (s.stock || 0) <= (s.min_stock || 5);
-  const nameEsc = (s.name || '').replace(/'/g, "\\'");
-  const body = document.getElementById('supply-modal-body');
-  body.innerHTML = `
-    <div style="display:flex; flex-direction:column; gap:14px;">
-      <div>
-        <div style="font-size:17px; font-weight:500;">${s.name}</div>
-        <div style="font-size:12px; color:var(--text-soft); margin-top:3px;">${s.category || '기타'}</div>
-      </div>
-      <div style="display:flex; align-items:center; justify-content:space-between; background:var(--surface-soft); border-radius:10px; padding:12px 14px;">
-        <span style="font-size:13px; font-weight:500;">발주 상태</span>
-        <span style="font-size:13px; font-weight:700; color:${on ? 'var(--danger-600)' : 'var(--success-600)'};">${on ? '발주 필요' : '충분'}</span>
-      </div>
-      <button class="btn ${on ? 'btn-secondary' : 'btn-primary'}" onclick="toggleSupplyOrder_('${supplyId}')">
-        ${on ? '충분함으로 표시 (발주 해제)' : '발주 필요로 표시'}
-      </button>
-      ${s.purchase_link ? `<a href="${s.purchase_link}" target="_blank" rel="noopener noreferrer" class="btn btn-secondary" style="text-align:center; text-decoration:none;">🛒 구매 링크 열기</a>` : ''}
-      <div style="padding-top:10px; border-top:1px solid var(--border); text-align:right;">
-        <button class="btn btn-danger" style="padding:7px 14px; font-size:13px;" onclick="deleteSupply('${supplyId}', '${nameEsc}'); document.getElementById('supply-modal').classList.remove('open');">비품 삭제</button>
-      </div>
-    </div>`;
-  document.getElementById('supply-modal').classList.add('open');
-};
-// 발주 필요 ↔ 충분 토글 (재고 컬럼 재활용: 부족=0, 충분=min_stock+1)
-window.toggleSupplyOrder_ = async function (supplyId) {
-  const s = (window.__supplies || []).find(x => x.id === supplyId);
-  if (!s) return;
-  const on = (s.stock || 0) <= (s.min_stock || 5);
-  const minStock = s.min_stock || 5;
-  const newStock = on ? (minStock + 1) : 0;  // 발주필요→충분 / 충분→발주필요
-  const { error } = await db.from('supplies').update({ stock: newStock }).eq('id', supplyId);
-  if (error) { alert('변경 실패: ' + error.message); return; }
-  document.getElementById('supply-modal').classList.remove('open');
-  loadSuppliesMaster();
-};
-// 발주완료 체크 → supply_orders에 기록 → "M/D 발주완료" 표시
-window.markSupplyOrdered = async (supplyId, name) => {
-  const s = (window.__supplies || []).find(x => x.id === supplyId);
-  try {
-    const { error } = await db.from('supply_orders').insert({
-      supply_id: supplyId,
-      status: 'confirmed',
-      confirmed_at: new Date().toISOString(),
-      quantity: (s && s.order_qty) ? s.order_qty : 1,
-      needs_review: false,
-      notes: '[발주완료 체크]',
-    });
-    if (error) throw error;
-    if (typeof logEvent === 'function') logEvent('supply_order', `${name || '비품'} 발주완료 체크`, {});
-    loadSuppliesMaster();
-  } catch (err) {
-    alert('발주 기록 실패: ' + (err.message || err));
-  }
-};
-// 빠른 재고 조정 (+1 / -1)
-window.adjustSupplyStock = async (supplyId, delta) => {
-  const row = document.querySelector(`.supply-tr[data-supply-id="${supplyId}"]`);
-  const input = row?.querySelector('.supply-td-input');
-  if (!input) return;
-  const current = parseInt(input.value) || 0;
-  const next = Math.max(0, current + delta);
-  input.value = next;
-  await updateSupplyStockAndRefresh(supplyId, next, row);
-};
-// 재고 업데이트 + 즉시 시각 갱신 (표 행 단위)
-async function updateSupplyStockAndRefresh(supplyId, newStock, row) {
-  const stock = parseInt(newStock) || 0;
-  const { error } = await db.from('supplies').update({ stock }).eq('id', supplyId);
-  if (error) { alert('업데이트 실패: ' + error.message); return; }
-  // 즉시 시각 반영: min_stock 다시 조회
-  const { data: s } = await db.from('supplies').select('min_stock').eq('id', supplyId).single();
-  const minStock = s?.min_stock || 5;
-  const isLow = stock <= minStock;
-  if (row) {
-    row.classList.toggle('low', isLow);
-    const input = row.querySelector('.supply-td-input');
-    if (input) input.classList.toggle('low', isLow);
-  }
-  // 주문필요↔충분 그룹이 바뀔 수 있으므로 목록 전체를 다시 그림 (요약 숫자·그룹 재계산)
-  loadSuppliesMaster();
-}
-// 인풋 onblur에서도 즉시 시각 반영
-window.updateSupplyStock = async (supplyId, newStock) => {
-  const row = document.querySelector(`.supply-tr[data-supply-id="${supplyId}"]`);
-  await updateSupplyStockAndRefresh(supplyId, newStock, row);
-};
-// 구매 링크 빠른 추가 (prompt 한 번)
-window.quickAddSupplyLink = async (supplyId, supplyName) => {
-  const url = prompt(`"${supplyName}" 구매 링크 URL을 붙여넣으세요\n(예: https://www.coupang.com/...)`);
-  if (!url) return;
-  const trimmed = url.trim();
-  if (!/^https?:\/\//.test(trimmed)) {
-    alert('http:// 또는 https:// 로 시작하는 URL이어야 합니다.');
-    return;
-  }
-  const { error } = await db.from('supplies').update({ purchase_link: trimmed }).eq('id', supplyId);
-  if (error) { alert('저장 실패: ' + error.message); return; }
-  loadSuppliesMaster();
-};
-window.confirmSupplyOrder = async (orderId) => {
-  const { error } = await db.from('supply_orders').update({
-    status: 'confirmed',
-    confirmed_at: new Date().toISOString(),
-  }).eq('id', orderId);
-  if (error) { alert('실패: ' + error.message); return; }
-  try {
-    const { data: o } = await db.from('supply_orders').select('supplies(name)').eq('id', orderId).single();
-    logEvent('supply_ordered', `비품 발주 확정 — ${o?.supplies?.name || '?'}`, {
-      targetType: 'supply_order', targetId: orderId,
-    });
-  } catch (e) {}
-  loadSupplyOrders();
-};
-window.ignoreSupplyOrder = async (orderId) => {
-  const { error } = await db.from('supply_orders').update({ status: 'ignored' }).eq('id', orderId);
-  if (error) { alert('실패: ' + error.message); return; }
-  try {
-    const { data: o } = await db.from('supply_orders').select('supplies(name)').eq('id', orderId).single();
-    logEvent('supply_ignored', `비품 발주 무시 — ${o?.supplies?.name || '?'}`, {
-      targetType: 'supply_order', targetId: orderId,
-    });
-  } catch (e) {}
-  loadSupplyOrders();
-};
-window.completeSupplyOrder = async (orderId) => {
-  if (!(await showConfirm('이 발주를 처리 완료로 표시하시겠습니까?'))) return;
-  const { error } = await db.from('supply_orders').update({
-    status: 'completed',
-    completed_at: new Date().toISOString(),
-  }).eq('id', orderId);
-  if (error) { alert('실패: ' + error.message); return; }
-  try {
-    const { data: o } = await db.from('supply_orders').select('supplies(name)').eq('id', orderId).single();
-    logEvent('supply_received', `비품 수령 완료 — ${o?.supplies?.name || '?'}`, {
-      targetType: 'supply_order', targetId: orderId,
-    });
-  } catch (e) {}
-  loadSupplyOrders();
-};
-window.undoSupplyOrder = async (orderId) => {
-  const { error } = await db.from('supply_orders').update({
-    status: 'confirmed',
-    completed_at: null,
-  }).eq('id', orderId);
-  if (error) { alert('실패: ' + error.message); return; }
-  loadSupplyOrders();
-};
-window.deleteSupply = async (supplyId, name) => {
-  if (!(await showConfirm(`"${name}" 비품을 삭제하시겠습니까?`))) return;
-  const { error } = await db.from('supplies').delete().eq('id', supplyId);
-  if (error) { alert('실패: ' + error.message); return; }
-  loadSuppliesMaster();
-};
-// 비품 추가/수정 모달
-$('#add-supply-btn')?.addEventListener('click', () => {
-  $('#supply-modal-title').textContent = '+ 비품 추가';
-  $('#sup-id').value = '';
-  $('#sup-name').value = '';
-  $('#sup-category').value = '기타';
-  $('#sup-unit').value = '';
-  $('#sup-stock').value = '0';
-  $('#sup-min-stock').value = '5';
-  $('#sup-order-qty').value = '1';
-  $('#sup-unit-price').value = '';
-  $('#sup-purchase-link').value = '';
-  $('#sup-keywords').value = '';
-  $('#supply-add-modal').classList.add('open');
-});
-window.editSupply = async (supplyId) => {
-  const { data: s, error } = await db.from('supplies').select('*').eq('id', supplyId).single();
-  if (error || !s) { alert('비품 정보 로딩 실패: ' + (error?.message || '')); return; }
-  $('#supply-modal-title').textContent = '✏ 비품 수정';
-  $('#sup-id').value = s.id;
-  $('#sup-name').value = s.name || '';
-  $('#sup-category').value = s.category || '기타';
-  $('#sup-unit').value = s.unit || '';
-  $('#sup-stock').value = s.stock || 0;
-  $('#sup-min-stock').value = s.min_stock || 5;
-  $('#sup-order-qty').value = s.order_qty || 1;
-  $('#sup-unit-price').value = s.unit_price || '';
-  $('#sup-purchase-link').value = s.purchase_link || '';
-  $('#sup-keywords').value = (s.keywords || []).join(', ');
-  $('#supply-add-modal').classList.add('open');
-};
-$('#submit-supply-btn')?.addEventListener('click', async () => {
-  const id = $('#sup-id').value;
-  const name = $('#sup-name').value.trim();
-  if (!name) { alert('비품명을 입력해주세요'); return; }
-  const category = $('#sup-category').value || '기타';
-  const unit = $('#sup-unit').value.trim() || null;
-  const stock = parseInt($('#sup-stock').value) || 0;
-  const min_stock = parseInt($('#sup-min-stock').value) || 5;
-  const order_qty = parseInt($('#sup-order-qty').value) || 1;
-  const unit_price = parseInt($('#sup-unit-price').value) || null;
-  const purchase_link = $('#sup-purchase-link').value.trim() || null;
-  const keywordsRaw = $('#sup-keywords').value.trim();
-  const keywords = keywordsRaw ? keywordsRaw.split(',').map(k => k.trim()).filter(Boolean) : null;
-  const payload = { name, category, unit, stock, min_stock, order_qty, unit_price, purchase_link, keywords };
-  let result;
-  if (id) {
-    result = await db.from('supplies').update(payload).eq('id', id);
-  } else {
-    result = await db.from('supplies').insert(payload);
-  }
-  if (result.error) { alert('저장 실패: ' + result.error.message); return; }
-  $('#supply-add-modal').classList.remove('open');
-  loadSuppliesMaster();
-});
-// 파손 신고
-async function loadDamageReports() {
-  const { data: reports, error } = await db.from('damage_reports')
-    .select('*, rooms(room_number)')
-    .order('created_at', { ascending: false });
-  if (error) {
-    $('#damage-new').innerHTML = `<div class="empty-state">에러: ${error.message}</div>`;
-    return;
-  }
-  const reported = (reports || []).filter(r => r.status === 'reported');
-  const confirmed = (reports || []).filter(r => r.status === 'confirmed');
-  const resolved = (reports || []).filter(r => r.status === 'resolved').slice(0, 20);
-  const cardHtml = (r, actions) => `
-    <div class="damage-card clickable" onclick="viewDamageDetail('${r.id}')">
-      <div class="damage-row">
-        <div class="damage-info">
-          <div class="damage-room">${RH(r.rooms?.room_number || '?')}</div>
-          <div class="damage-desc">${r.description || '(설명 없음)'}</div>
-          <div class="damage-time">${new Date(r.created_at).toLocaleString('ko-KR', {month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit'})}</div>
-        </div>
-        <div class="damage-actions" onclick="event.stopPropagation()">${actions}</div>
-      </div>
-      ${r.resolution_notes ? `<div class="damage-resolution">처리: ${r.resolution_notes}</div>` : ''}
-    </div>
-  `;
-  $('#damage-new').innerHTML = reported.length === 0
-    ? '<div class="empty-state">신규 파손 보고 없음.</div>'
-    : reported.map(r => cardHtml(r, `
-        <button class="btn btn-primary" onclick="confirmDamage('${r.id}')">확인</button>
-      `)).join('');
-  $('#damage-confirmed').innerHTML = confirmed.length === 0
-    ? '<div class="empty-state">수리/교체 대기 중인 항목 없음.</div>'
-    : confirmed.map(r => cardHtml(r, `
-        <button class="btn btn-primary" onclick="resolveDamage('${r.id}')">완료</button>
-      `)).join('');
-  $('#damage-resolved').innerHTML = resolved.length === 0
-    ? '<div class="empty-state">아직 해결된 파손 없음.</div>'
-    : resolved.map(r => cardHtml(r, `<span style="font-size:12px; color: var(--success); font-weight:600;">✓ 해결</span>`)).join('');
-}
-window.confirmDamage = async (id) => {
-  const { error } = await db.from('damage_reports').update({
-    status: 'confirmed',
-    confirmed_at: new Date().toISOString(),
-  }).eq('id', id);
-  if (error) { alert('실패: ' + error.message); return; }
-  logEvent('damage_confirmed', '파손 확인 (수리/교체 진행 예정)', {
-    targetType: 'damage_report', targetId: id,
-  });
-  loadDamageReports();
-};
-window.resolveDamage = async (id) => {
-  const notes = prompt('수리/교체 내용을 입력해주세요 (선택):') || null;
-  const { error } = await db.from('damage_reports').update({
-    status: 'resolved',
-    resolved_at: new Date().toISOString(),
-    resolution_notes: notes,
-  }).eq('id', id);
-  if (error) { alert('실패: ' + error.message); return; }
-  logEvent('damage_resolved', '파손 해결 완료', {
-    targetType: 'damage_report', targetId: id,
-    description: notes,
-  });
-  loadDamageReports();
-};
-// 비품 탭 전환
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest('.review-tab[data-supplies-tab]');
-  if (!btn) return;
-  const tab = btn.dataset.suppliesTab;
-  currentSuppliesTab = tab;
-  document.querySelectorAll('.review-tab[data-supplies-tab]').forEach(t =>
-    t.classList.toggle('active', t.dataset.suppliesTab === tab));
-  document.querySelectorAll('.supplies-tab-content').forEach(c =>
-    c.style.display = c.dataset.suppliesContent === tab ? 'block' : 'none');
-  loadSupplies();
-});
-// 정산 관리 (청소사 정산)
-let currentPayoutTab = 'process';
+/* [2026-10-29] 비품관리·파손신고 화면을 들어냈습니다.
+   10/15에 사이드바 탭이 사라지면서 붙을 자리(#supply-*, #damage-*)가 없어졌는데
+   함수만 남아 있었습니다. supplies / supply_orders / damage_reports 표와
+   데이터는 그대로 둡니다. 청소 「특이사항」 보고는 영향 없습니다. */
 // 16:00 지나면 청소 자동 완료 (사진 무관) — 매니저 화면 진입 시 1회 처리
 async function autoCompletePastCleanings() {
   try {
@@ -11017,203 +10033,9 @@ async function autoCompletePastCleanings() {
     return 0;
   }
 }
-// 정산 처리 — 필터 / 기간 / 일괄 정산
-
-
-
-
-window.settlePayoutTasks = () => {};;
-let _payoutControlsBound = false;
-
-async function loadPayout() { /* [2026-10-15] 화면 제거로 비움 */ }
-
-// 정산 완료 내역 표 (필터/Excel 지원)
-async function renderPayoutTable(staffMap) { /* [2026-10-15] 화면 제거로 비움 */ }
-// CSV 다운로드
-function exportPayoutCSV() { /* [2026-10-15] 화면 제거로 비움 */ }
-// 필터 변경 시 테이블만 다시 로드
-document.addEventListener('change', (e) => {
-  if (e.target.id === 'payout-filter-period' || e.target.id === 'payout-filter-staff') {
-    const staffMapEmpty = {};
-    renderPayoutTable(staffMapEmpty);
-  }
-});
-document.addEventListener('click', (e) => {
-  if (e.target.id === 'payout-export-csv') exportPayoutCSV();
-});
-// 청소사 계좌 정보 화면
-async function loadStaffAccounts() {
-  const { data: staffList, error } = await db.from('staff')
-    .select('id, name, role, bank_name, account_number, is_active')
-    .order('name');
-  if (error) {
-    $('#staff-accounts-list').innerHTML = `<div class="empty-state">에러: ${error.message}</div>`;
-    return;
-  }
-  // 그만 오시는 분(is_active=false)은 목록에서 제외 — 과거 정산 기록은 그대로 보존됨
-  const cleaners = (staffList || []).filter(s => (s.role === 'cleaner' || s.role === 'cleaning') && s.is_active !== false);
-  if (cleaners.length === 0) {
-    $('#staff-accounts-list').innerHTML = `
-      <div class="empty-state">
-        등록된 청소사가 없습니다.<br/>
-        Supabase에서 staff 테이블에 청소사 정보를 추가해주세요.
-      </div>
-    `;
-    return;
-  }
-  // 이번 달 시작일/말일
-  const today = new Date();
-  const monthStart = ymd_(new Date(today.getFullYear(), today.getMonth(), 1));
-  const monthEnd = ymd_(new Date(today.getFullYear(), today.getMonth() + 1, 0));
-  // 모든 청소사의 이번 달 통계를 병렬로
-  const statsArr = await Promise.all(cleaners.map(async (s) => {
-    try {
-      // 이번 달 배정된 청소 작업들
-      const { data: tasks } = await db.from('cleaning_tasks')
-        .select('id, status, payout_status, payout_amount, completed_at')
-        .eq('assigned_to', s.id)
-        .gte('scheduled_date', monthStart)
-        .lte('scheduled_date', monthEnd);
-      const totalAssigned = tasks?.length || 0;
-      const completed = (tasks || []).filter(t => t.status === 'completed');
-      const paid = completed.filter(t => t.payout_status === 'paid');
-      const pending = completed.filter(t => t.payout_status === 'pending');
-      const paidAmount = paid.reduce((s, t) => s + (t.payout_amount || 0), 0);
-      const pendingAmount = pending.reduce((s, t) => s + (t.payout_amount || 0), 0);
-      // 최근 완료 작업 시각
-      const lastCompleted = completed
-        .map(t => t.completed_at)
-        .filter(Boolean)
-        .sort()
-        .pop();
-      return {
-        totalAssigned, completedCount: completed.length,
-        paidCount: paid.length, paidAmount,
-        pendingCount: pending.length, pendingAmount,
-        lastCompleted,
-      };
-    } catch (e) {
-      return { totalAssigned: 0, completedCount: 0, paidCount: 0, paidAmount: 0, pendingCount: 0, pendingAmount: 0 };
-    }
-  }));
-  $('#staff-accounts-list').innerHTML = `<div class="staff-grid-compact">${cleaners.map((s, idx) => {
-    const stats = statsArr[idx];
-    const initials = s.name.slice(-2);
-    const hasAccount = s.bank_name && s.account_number;
-    const lastSeenTxt = stats.lastCompleted
-      ? `최근 ${timeAgo(stats.lastCompleted)}`
-      : '이번 달 활동 없음';
-    const colors = ['#5b8a72', '#a07a4a', '#8b7355', '#6b8e8b', '#8e7c8e'];
-    const colorIdx = (s.name.charCodeAt(0) + s.name.charCodeAt(s.name.length - 1)) % colors.length;
-    const avatarColor = colors[colorIdx];
-    return `
-      <div class="staff-card-compact">
-        <div class="staff-compact-head">
-          <div class="staff-compact-avatar" style="background: ${avatarColor};">${initials}</div>
-          <div class="staff-compact-info">
-            <div class="staff-compact-name">${s.name}</div>
-            <div class="staff-compact-meta">${s.is_active === false ? '비활성' : '활동중'} · ${lastSeenTxt}</div>
-          </div>
-          ${hasAccount
-            ? '<span class="badge badge-success" style="font-size:10px;">계좌 OK</span>'
-            : '<span class="badge badge-warning" style="font-size:10px;">미등록</span>'}
-        </div>
-        <div class="staff-compact-stats">
-          <div class="staff-compact-stat">
-            <div class="staff-compact-stat-label">이번 달</div>
-            <div class="staff-compact-stat-value">${stats.completedCount}<span class="staff-compact-stat-unit">건</span></div>
-          </div>
-          <div class="staff-compact-stat">
-            <div class="staff-compact-stat-label">정산 완료</div>
-            <div class="staff-compact-stat-value">${fmtKRW(stats.paidAmount)}</div>
-          </div>
-          <div class="staff-compact-stat ${stats.pendingCount > 0 ? 'warn' : ''}">
-            <div class="staff-compact-stat-label">정산 대기</div>
-            <div class="staff-compact-stat-value">${fmtKRW(stats.pendingAmount)}</div>
-          </div>
-        </div>
-        <div class="staff-compact-bank">
-          <input type="text" placeholder="은행 검색 (예: 신)" value="${s.bank_name || ''}"
-                 id="bank-${s.id}" class="form-input staff-compact-input"
-                 list="bank-options" autocomplete="off" />
-          <input type="text" placeholder="계좌번호" value="${s.account_number || ''}"
-                 id="account-${s.id}" class="form-input staff-compact-input" />
-          <button class="btn btn-primary staff-compact-save" onclick="saveStaffAccount('${s.id}')">저장</button>
-        </div>
-      </div>
-    `;
-  }).join('')}</div>
-  <!-- 한국 주요 은행 자동완성 리스트 (재사용 가능, datalist는 인풋과 따로 정의해도 OK) -->
-  <datalist id="bank-options">
-    <option value="KB국민은행"></option>
-    <option value="신한은행"></option>
-    <option value="우리은행"></option>
-    <option value="하나은행"></option>
-    <option value="IBK기업은행"></option>
-    <option value="NH농협은행"></option>
-    <option value="SC제일은행"></option>
-    <option value="한국씨티은행"></option>
-    <option value="카카오뱅크"></option>
-    <option value="토스뱅크"></option>
-    <option value="케이뱅크"></option>
-    <option value="부산은행"></option>
-    <option value="대구은행"></option>
-    <option value="광주은행"></option>
-    <option value="전북은행"></option>
-    <option value="경남은행"></option>
-    <option value="제주은행"></option>
-    <option value="새마을금고"></option>
-    <option value="신협"></option>
-    <option value="우체국"></option>
-    <option value="수협은행"></option>
-    <option value="산업은행"></option>
-  </datalist>
-  `;
-}
-window.saveStaffAccount = async (staffId) => {
-  const bankName = $(`#bank-${staffId}`).value.trim();
-  const accountNumber = $(`#account-${staffId}`).value.trim();
-  const { error } = await db.from('staff').update({
-    bank_name: bankName || null,
-    account_number: accountNumber || null,
-  }).eq('id', staffId);
-  if (error) { alert('저장 실패: ' + error.message); return; }
-  // 토스트 대신 인라인 피드백
-  const btn = document.querySelector(`button[onclick="saveStaffAccount('${staffId}')"]`);
-  if (btn) {
-    const orig = btn.textContent;
-    btn.textContent = '✓ 저장됨';
-    btn.style.background = 'var(--success)';
-    setTimeout(() => { btn.textContent = orig; btn.style.background = ''; }, 1500);
-  }
-  loadStaffAccounts();
-};
-// 정산 탭 전환
-document.addEventListener('click', (e) => {
-  const btn = e.target.closest('.review-tab[data-payout-tab]');
-  if (!btn) return;
-  const tab = btn.dataset.payoutTab;
-  currentPayoutTab = tab;
-  document.querySelectorAll('.review-tab[data-payout-tab]').forEach(t => 
-    t.classList.toggle('active', t.dataset.payoutTab === tab));
-  document.querySelectorAll('.payout-tab-content').forEach(c =>
-    c.style.display = c.dataset.payoutContent === tab ? 'block' : 'none');
-  loadPayout();
-});
-window.markPayoutPaid = () => {};;
-window.undoPayout = () => {};;
-$('#payout-refresh-btn')?.addEventListener('click', loadPayout);
-// 정산 완료 내역 필터 변경 → 재로드
-['#payout-filter-period', '#payout-filter-staff'].forEach(sel => {
-  $(sel)?.addEventListener('change', async () => {
-    const { data: staffData } = await db.from('staff').select('id, name, bank_name, account_number');
-    const staffMap = {};
-    (staffData || []).forEach(s => { staffMap[s.id] = s; });
-    renderPayoutTable(staffMap);
-  });
-});
-// 📥 엑셀(CSV) 다운로드 핸들러는 위의 exportPayoutCSV() + 위임 클릭 리스너로 처리됨
-//    (예전에 여기 중복 리스너가 있어 파일이 2개씩 받아지던 문제 → 제거함)
+/* [2026-10-29] 청소사 현황 카드(loadStaffAccounts)를 들어냈습니다.
+   붙을 자리였던 #staff-accounts-list 가 화면에 없어, 만든 뒤 한 번도 그려진 적이 없습니다.
+   (10/15에 정산 화면을 지울 때 같이 사라졌는데 함수만 남아 있었습니다.) */
 // 리뷰 관리
 let currentReviewTab = 'ours';
 async function loadReviews() { /* [2026-10-15] 화면 제거로 비움 */ }
@@ -11491,17 +10313,14 @@ async function runDailyChecks() {
     }
     // (체크인 안내 미발송 알림은 직접 발송 방식이라 제거 — 2026-08)
     // 오늘 일정 요약
-    const [bookingsRes, checkoutsRes, paymentsRes] = await Promise.all([
+    const [bookingsRes, checkoutsRes] = await Promise.all([
       db.from('bookings').select('id', { count: 'exact', head: true })
         .eq('checkin_date', todayStr).neq('booking_status', 'cancelled'),
       db.from('bookings').select('id', { count: 'exact', head: true })
         .eq('checkout_date', todayStr).neq('booking_status', 'cancelled'),
-      db.from('cleaning_tasks').select('id', { count: 'exact', head: true })
-        .eq('status', 'completed').eq('payout_status', 'pending'),
     ]);
     const checkins = bookingsRes.count || 0;
     const checkouts = checkoutsRes.count || 0;
-    const pendingPayouts = paymentsRes.count || 0;
     // 🏠 오늘 체크인 — 별도 강조 토스트 (객실 번호까지 표시)
     if (checkins > 0) {
       const { data: checkinList } = await db.from('bookings')
@@ -11515,11 +10334,11 @@ async function runDailyChecks() {
         'bookings'
       );
     }
-    // 📋 나머지 요약 (체크아웃 / 정산 대기)
-    if (checkouts > 0 || pendingPayouts > 0) {
+    // 📋 나머지 요약 (체크아웃)
+    if (checkouts > 0) {
       await createNotification('daily_summary',
         `📋 오늘 일정 요약`,
-        `체크아웃 ${checkouts}건 · 정산 대기 ${pendingPayouts}건`,
+        `체크아웃 ${checkouts}건`,
         'dashboard'
       );
     }
