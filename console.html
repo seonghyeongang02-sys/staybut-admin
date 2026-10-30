@@ -1018,6 +1018,16 @@
       }
     }
 </style>
+<style>
+/* [2026-10-30] 내용물을 어드민과 같은 모양으로.
+   전 : 바탕이 진한 회색(#E5E7EB)이고 카드가 위아래만 떠 있어 양옆이 딱 붙어 보였습니다.
+   후 : 어드민과 같은 연회색 바탕에, 사방으로 띄운 흰 카드. */
+@media (min-width:641px){
+  #app{ background:var(--chat); }
+  .wrap{ width:auto; max-width:none; margin:16px 18px 18px;
+         box-shadow:0 1px 3px rgba(17,24,39,.06); }
+}
+</style>
 </head>
 <body>
 <div id="boot"></div>
