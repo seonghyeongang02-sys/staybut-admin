@@ -8052,6 +8052,12 @@ function computeCleaningSlots(tasks) {
 async function loadStaffData() {
   const { data, error } = await db.from('staff').select('*').eq('is_active', true).order('name');
   if (!error) cachedStaff = data || [];
+  /* [2026-10-29] 공유 카드 언어 사전도 같이 채웁니다 (로그인 뒤라 확실히 읽힙니다). */
+  try {
+    const m = {};
+    (cachedStaff || []).forEach(r => { if (r.name) m[String(r.name).trim()] = r.lang || 'ko'; });
+    if (Object.keys(m).length) window.__staffLang = m;
+  } catch (e) {}
 }
 // 청소 관리 화면 로드
 function weekStartMon_(d) {
@@ -9255,10 +9261,14 @@ async function loadStaffLang_(){
   }catch(e){ /* 못 읽으면 전부 한국어로 둡니다 */ }
 }
 loadStaffLang_();
-/* 담당 이름 → 언어. 이름이 조금 달라도 찾아지도록 부분일치까지 봅니다. */
+/* 담당 이름 → 언어. 이름이 조금 달라도 찾아지도록 부분일치까지 봅니다.
+   [2026-10-29] 로그인 전에 읽으면 빈 사전이 되어 한국어로 나오던 문제가 있었습니다.
+   그래서 로그인 뒤에 채워지는 cachedStaff 를 먼저 봅니다. */
 function shareLangOf_(manager){
   const n = String(manager||'').trim();
   if (!n) return 'ko';
+  const pick = (name, lang) => (name && lang && (n === name || n.includes(name) || name.includes(n))) ? lang : null;
+  for (const s of (cachedStaff || [])) { const v = pick(s.name, s.lang); if (v) return v; }
   const m = window.__staffLang || {};
   if (m[n]) return m[n];
   const hit = Object.keys(m).find(k => k && (n.includes(k) || k.includes(n)));
