@@ -17,7 +17,7 @@
      전에는 /apple-180.png 를 가리켰는데 그 파일이 없어 iOS 가 「SB」 글자 아이콘을 만들었습니다.
      어드민이 쓰는 /logo.png 는 실제로 뜨는 게 확인된 파일입니다. -->
 <link rel="manifest" href="manifest.json" />
-<meta name="theme-color" content="#1f1f23" />
+<meta name="theme-color" content="var(--ink)" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 <meta name="apple-mobile-web-app-title" content="StayBUT 상담" />
@@ -44,23 +44,26 @@
     if (v !== 'dark') v = 'light';
     document.documentElement.setAttribute('data-theme', v);
     var m = document.querySelector('meta[name="theme-color"]');
-    if (m) m.setAttribute('content', v === 'dark' ? '#16161b' : '#1f1f23');
+    if (m) m.setAttribute('content', v === 'dark' ? '#16161b' : 'var(--ink)');
   })();
 </script>
 <style>
-  :root{ --bg:#fff; --soft:#fafaf9; --chat:#f5f4f2; --line:#d9d5cd; --line2:#b8b2a7; --text:#1a1815; --soft-text:#57534c; --muted:#78736b; --ink:#1f1f23; --ink2:#161619; --booking:#1B4480; --danger:#b85c3f; --ok:#3a7030;
-    /* [2026-09-18] 사이드바 — 어드민과 같은 값 */
-    --sidebar:#f7f6f3; --sidebar-line:#d9d5cd; --sidebar-fg:#1a1815; --sidebar-fg-dim:#3f3c36;
-    --sidebar-fg-faint:#a8a39a; --sidebar-hover:#eeece8; --sidebar-active-bg:#e2e0da; --sidebar-active-fg:#1a1815;
+  :root{
+    /* [2026-10-30] 어드민과 같은 색으로 통일. admin.css 의 토큰 값을 그대로 옮겼습니다. */
+    --bg:#FFFFFF; --soft:#FAFBFC; --chat:#F7F8FA; --line:#E5E7EB; --line2:#D1D5DB;
+    --text:#111827; --soft-text:#6B7280; --muted:#9CA3AF; --ink:#111827; --ink2:#1F2937;
+    --booking:#2563EB; --danger:#DC2626; --ok:#059669;
+    --sidebar:#111827; --sidebar-line:#1F2937; --sidebar-fg:#FFFFFF; --sidebar-fg-dim:#9CA3AF;
+    --sidebar-fg-faint:#6B7280; --sidebar-hover:rgba(255,255,255,.08); --sidebar-active-bg:rgba(255,255,255,.14); --sidebar-active-fg:#FFFFFF;
   }
   /* [2026-09-18] 다크 — 어드민과 같은 값입니다.
      --ink 는 상단바 색이라 다크에서는 본문보다 한 단 어둡게 둡니다. */
   html[data-theme="dark"]{
-    --bg:#1c1c22; --soft:#16161b; --chat:#1a1a20; --line:#33333b; --line2:#4a4a55;
-    --text:#fafaf9; --soft-text:#c9c9d0; --muted:#8a8a92; --ink:#0f0f13; --ink2:#0a0a0d;
-    --booking:#8fbde8; --danger:#e08a6a; --ok:#7fc06c;
-    --sidebar:#0f0f13; --sidebar-line:#26262c; --sidebar-fg:#fafaf9; --sidebar-fg-dim:#c9c9d0;
-    --sidebar-fg-faint:#7a7a82; --sidebar-hover:#22222a; --sidebar-active-bg:#2a2a30; --sidebar-active-fg:#fafaf9;
+    --bg:#1C1C22; --soft:#1F1F25; --chat:#16161B; --line:#33333B; --line2:#4A4A55;
+    --text:var(--soft); --soft-text:#C9C9D0; --muted:#9A9AA2; --ink:#16161B; --ink2:#0F0F13;
+    --booking:#8FBDE8; --danger:#E08A6A; --ok:#7FC06C;
+    --sidebar:#0F0F13; --sidebar-line:#26262C; --sidebar-fg:var(--soft); --sidebar-fg-dim:#C9C9D0;
+    --sidebar-fg-faint:#7A7A82; --sidebar-hover:#22222A; --sidebar-active-bg:#2A2A30; --sidebar-active-fg:var(--soft);
     color-scheme:dark;
   }
   /* [2026-09-18] 어드민에서 뺀 두 탭을 상담에서도 뺍니다 — 목록이 달라 보였습니다.
@@ -98,8 +101,8 @@
           border-left:1px solid var(--line); border-right:1px solid var(--line); background:var(--bg); }
   @media (max-width:1020px){ .wrap{ border-left:0; border-right:0; } }
   .list{ width:236px; border-right:1px solid var(--line); background:var(--soft); overflow-y:auto; flex-shrink:0; }
-  .conv{ padding:12px 14px; border-bottom:1px solid #f0eeea; cursor:pointer; display:flex; gap:10px; align-items:center; }
-  .conv:hover{ background:#f3f0ec; }
+  .conv{ padding:12px 14px; border-bottom:1px solid var(--line); cursor:pointer; display:flex; gap:10px; align-items:center; }
+  .conv:hover{ background:var(--soft); }
   .conv.active{ background:var(--bg); box-shadow:inset 3px 0 0 var(--ink); }
   .av{ width:38px; height:38px; border-radius:10px; color:#fff; font-weight:800; font-size:13px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .conv .cc{ min-width:0; flex:1; }
@@ -130,9 +133,9 @@
          display:flex; flex-direction:column; gap:3px; }
   .msgs > :first-child{ margin-top:auto; }
   /* 대화가 비었을 때 안내 */
-  .msgs-empty{ align-self:center; text-align:center; color:#a8a39a; font-size:12.5px; line-height:1.7;
+  .msgs-empty{ align-self:center; text-align:center; color:var(--muted); font-size:12.5px; line-height:1.7;
                margin:auto 0; padding:18px; }
-  .msgs-empty b{ display:block; font-size:14px; color:#6b6660; margin-bottom:5px; font-weight:700; }
+  .msgs-empty b{ display:block; font-size:14px; color:var(--soft-text); margin-bottom:5px; font-weight:700; }
   .daydiv{ align-self:center; background:transparent; color:#8e8e93; font-size:11px; font-weight:600; padding:10px 0 4px; margin:0; }
   .m{ display:flex; gap:8px; max-width:min(72%, 420px); margin-top:2px; }
   .m + .m.s, .m + .m.g{ margin-top:1px; }
@@ -169,7 +172,7 @@
   .chip2{ font-size:10.5px; font-weight:800; border-radius:6px; padding:3px 8px; color:#fff; }
   .info .kv{ font-size:12.5px; line-height:2; margin-top:12px; }
   .info .kv .k{ color:var(--muted); margin-right:5px; }
-  .st-stay{ background:#ecf6e9; color:var(--ok);} .st-in{ background:#e8f0fa; color:#2e5891;} .st-out{ background:#fbeae3; color:#9a4a32;} .st-none{ background:#f0eeea; color:var(--muted);}
+  .st-stay{ background:#ecf6e9; color:var(--ok);} .st-in{ background:#e8f0fa; color:#2e5891;} .st-out{ background:#fbeae3; color:#9a4a32;} .st-none{ background:var(--line); color:var(--muted);}
   .stpill{ display:inline-block; font-size:11px; font-weight:800; border-radius:999px; padding:3px 11px; margin-top:8px; }
   .reqbox{ background:var(--soft); border:1px solid var(--line); border-radius:8px; padding:9px 11px; font-size:11.5px; color:var(--soft-text); line-height:1.5; margin-top:12px; }
   .linkbtn{ display:block; text-align:center; border:1px solid var(--ink); border-radius:9px; padding:9px; font-size:12.5px; font-weight:700; margin-top:14px; cursor:pointer; background:var(--bg); }
@@ -250,7 +253,7 @@
   .trbtn:hover{ opacity:.9; }
 
   /* ===== 2026-08-19 개편 : 객실 5실 고정 · 워드마크 · 읽음 상태 ===== */
-  :root{ --nk:#141414; --nmuted:#8B867D; --nfaint:#B8B3A9; --nsel:#F6F5F1; --nhair:#EFEDE7; }
+  :root{ --nk:var(--text); --nmuted:var(--muted); --nfaint:var(--muted); --nsel:var(--soft); --nhair:var(--line); }
 
   .top{ padding:12px 18px; }
   .top .l{ gap:11px; }
@@ -260,18 +263,18 @@
   .wmk .sp{ display:inline-block; width:.26em; }
   .wmk .cjk{ font-family:'Pretendard','Apple SD Gothic Neo',sans-serif; font-weight:500; margin-left:-.055em; }
   .top .vr{ width:1px; height:14px; background:#454340; display:inline-block; }
-  .top .scr{ font-size:13px; font-weight:600; color:#D6D2CA; }
-  .top .cnt{ font-size:11px; color:#98938A; font-weight:600; opacity:1; }
+  .top .scr{ font-size:13px; font-weight:600; color:var(--line2); }
+  .top .cnt{ font-size:11px; color:var(--muted); font-weight:600; opacity:1; }
   .top .backbtn{ font-size:15px; padding:5px 10px; }
 
   /* 객실 목록 */
   .list{ background:var(--bg); }
   /* [2026-08-28] 폰 전용 로그아웃 — 어드민 오른쪽 위와 같은 모양 */
-  #topbar-logout{ display:none; margin-left:10px; border:1px solid #e8e6e1; background:var(--bg);
-                  color:#78736b; border-radius:9px; padding:7px 12px; font-size:12px;
+  #topbar-logout{ display:none; margin-left:10px; border:1px solid var(--line); background:var(--bg);
+                  color:var(--muted); border-radius:9px; padding:7px 12px; font-size:12px;
                   font-weight:700; font-family:inherit; cursor:pointer; line-height:1;
                   align-self:center; flex:none; }
-  #topbar-logout:active{ background:#f5f4f2; }
+  #topbar-logout:active{ background:var(--chat); }
   @media (max-width:768px){ #topbar-logout{ display:inline-flex; } }
 
   /* ─────────────────────────────────────────────────────────────
@@ -287,11 +290,11 @@
      글자는 두 개만 씁니다. 왜 꺼져 있는지는 눌렀을 때 시트로 보여줍니다.
      「켜기」와 「꺼짐」을 섞으면 지금 상태가 헷갈립니다.
      ───────────────────────────────────────────────────────────── */
-  #topbar-notif{ display:none; margin-left:8px; border:1px solid #e8e6e1; background:var(--bg);
-                 color:#78736b; border-radius:9px; padding:7px 11px; font-size:12px;
+  #topbar-notif{ display:none; margin-left:8px; border:1px solid var(--line); background:var(--bg);
+                 color:var(--muted); border-radius:9px; padding:7px 11px; font-size:12px;
                  font-weight:700; font-family:inherit; cursor:pointer; line-height:1;
                  align-self:center; flex:none; align-items:center; gap:5px; white-space:nowrap; }
-  #topbar-notif:active{ background:#f5f4f2; }
+  #topbar-notif:active{ background:var(--chat); }
   #topbar-notif svg{ width:14px; height:14px; stroke:currentColor; fill:none; stroke-width:1.8;
                      stroke-linecap:round; stroke-linejoin:round; flex:none; }
   #topbar-notif.on{ background:#ecf6e9; border-color:#d5e8cf; color:#3a7030; }
@@ -314,7 +317,7 @@
   #notif-sheet .nok{ border:0; background:var(--ink); color:#FAEEC4; border-radius:8px;
                      padding:9px 15px; font:inherit; font-size:12.5px; font-weight:800; cursor:pointer; flex:none; }
   #notif-sheet .nlink{ background:none; border:0; padding:0; font:inherit; font-size:11.5px;
-                       color:#78736b; text-decoration:underline; cursor:pointer; }
+                       color:var(--muted); text-decoration:underline; cursor:pointer; }
   #notif-sheet .nlink.off{ color:#9a4a32; }
   #notif-sheet .nerr{ margin-top:10px; background:#fbeae3; border:1px solid #f0d9cd; border-radius:8px;
                       padding:10px 12px; font-size:11.5px; color:#9a4a32; line-height:1.65; word-break:break-all; }
@@ -326,7 +329,7 @@
 
   .roomrow{ padding:15px 18px; position:relative; cursor:pointer; background:var(--bg); }
   .roomrow + .roomrow{ box-shadow:inset 0 1px 0 var(--nhair); }
-  .roomrow:hover{ background:#FBFAF7; }
+  .roomrow:hover{ background:var(--soft); }
   .roomrow.on{ background:var(--nsel); }
   .roomrow.on::before{ content:''; position:absolute; left:0; top:0; bottom:0; width:2px; background:var(--nk); }
   .rr1{ display:flex; align-items:baseline; gap:8px; }
@@ -334,7 +337,7 @@
      호실 숫자 왼쪽에 붙어서, 목록을 훑을 때 한눈에 들어옵니다. */
   .rdot{ width:7px; height:7px; border-radius:50%; flex:none; align-self:center;
          background:#3f9c63; box-shadow:0 0 0 3px rgba(63,156,99,.15); }
-  .rdot.off{ background:#d3d0c9; box-shadow:none; }
+  .rdot.off{ background:var(--line2); box-shadow:none; }
   .rr-no{ font-family:'Archivo',sans-serif; font-size:21px; font-weight:800; letter-spacing:-.05em;
           line-height:1; color:var(--nk); }
   .rr-ch{ font-size:11px; color:var(--nfaint); font-weight:600; }
@@ -342,26 +345,26 @@
   .rr-dot{ background:var(--nk); color:#fff; font-family:'Archivo',sans-serif; font-size:9.5px;
            font-weight:800; min-width:16px; height:16px; border-radius:8px; align-self:center;
            display:inline-flex; align-items:center; justify-content:center; padding:0 5px; }
-  .rr-msg{ font-size:13px; color:#2a2723; margin-top:9px; line-height:1.4;
+  .rr-msg{ font-size:13px; color:var(--text); margin-top:9px; line-height:1.4;
            white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
   .roomrow.idle .rr-no{ color:var(--nfaint); }
   .roomrow.idle .rr-msg{ color:var(--nmuted); }
 
   /* ── [2026-08-26] 목록 3분할 : 숙박 중 · 오늘 체크인 · 퇴실 후 ── */
-  .lsec{ display:flex; align-items:baseline; padding:13px 18px 8px; background:#FBFAF7;
+  .lsec{ display:flex; align-items:baseline; padding:13px 18px 8px; background:var(--soft);
          border-top:1px solid var(--nhair); border-bottom:1px solid var(--nhair); }
   .lsec-t{ font-size:12.5px; font-weight:800; color:var(--nk); letter-spacing:-.2px; }
   .lsec-n{ margin-left:auto; font-family:'Archivo',sans-serif; font-size:10.5px;
            font-weight:800; color:var(--nfaint); }
-  .lsec-note{ padding:7px 18px 9px; background:#FBFAF7; border-bottom:1px solid var(--nhair);
+  .lsec-note{ padding:7px 18px 9px; background:var(--soft); border-bottom:1px solid var(--nhair);
               font-size:11px; color:var(--nmuted); line-height:1.5; }
   .tagline{ display:flex; align-items:center; gap:7px; margin-top:9px; }
   .tg{ font-size:10.5px; font-weight:700; border-radius:5px; padding:3px 8px; }
   .tg-stay{ background:#ecf6e9; color:#3a7030; }
   .tg-in{ background:#e8f0fa; color:#2e5891; }
-  .tg-out{ background:#f0eeea; color:#78736b; }
+  .tg-out{ background:var(--line); color:var(--muted); }
   .tg-del{ background:#fbeae3; color:#9a4a32; }
-  .tg-none{ background:#f0eeea; color:#a09a90; }   /* [2026-08-27] 예약이 안 붙은 대화 */
+  .tg-none{ background:var(--line); color:var(--muted); }   /* [2026-08-27] 예약이 안 붙은 대화 */
 
   /* [2026-08-27] 예약이 어긋났다는 알림 — 목록 맨 위 */
   .lhealth{ margin:10px 14px 4px; padding:11px 13px; border-radius:10px;
@@ -378,19 +381,19 @@
      퇴실 건이라고 회색 처리했더니 정작 답해야 할 목록이 안 읽혔습니다. */
   .roomrow.hot{ border-left:2px solid var(--nk); padding-left:16px; }
   .roomrow.hot .rr-no{ color:var(--nk) !important; }
-  .roomrow.hot .rr-ch{ color:#5F5E5A; font-size:11.5px; font-weight:600; }
-  .roomrow.hot .rr-tm{ color:#5F5E5A; }
+  .roomrow.hot .rr-ch{ color:var(--soft-text); font-size:11.5px; font-weight:600; }
+  .roomrow.hot .rr-tm{ color:var(--soft-text); }
   .roomrow.hot .rr-msg{ color:var(--nk); font-size:13.5px; font-weight:600; }
   /* 날짜·시각이 너무 옅어 안 보이던 것 한 단계 진하게 */
-  .rr-ch{ color:#8B867D; }
-  .rr-tm{ color:#8B867D; }
+  .rr-ch{ color:var(--muted); }
+  .rr-tm{ color:var(--muted); }
 
   /* [2026-08-26] 퇴실 후 접기 · 숨김 안내 */
   .lfold{ width:100%; display:flex; align-items:center; gap:8px; cursor:pointer;
-          padding:12px 18px; background:#FBFAF7; border:0; border-top:1px solid var(--nhair);
+          padding:12px 18px; background:var(--soft); border:0; border-top:1px solid var(--nhair);
           border-bottom:1px solid var(--nhair); font-family:inherit;
           font-size:12.5px; font-weight:700; color:var(--nmuted); text-align:left; }
-  .lfold:hover{ background:#F6F4EF; }
+  .lfold:hover{ background:var(--soft); }
   .lfold.open{ color:var(--nk); }
   .lfold .n{ margin-left:auto; font-family:'Archivo',sans-serif; font-size:10.5px;
              font-weight:800; color:var(--nfaint); }
@@ -435,7 +438,7 @@
            line-height:.9; color:var(--nk); }
   .ch-meta{ font-size:11.5px; color:var(--nmuted); margin-top:8px; font-variant-numeric:tabular-nums; }
   .ch-lang{ margin-left:auto; font-size:11px; color:var(--nmuted); padding-top:4px; white-space:nowrap; }
-  .ch-lang b{ font-family:'Archivo',sans-serif; font-weight:800; color:#2a2723; }
+  .ch-lang b{ font-family:'Archivo',sans-serif; font-weight:800; color:var(--text); }
 
   /* 읽음 상태 */
   .rd{ color:var(--nmuted); font-weight:600; }
@@ -450,7 +453,7 @@
   /* 전송 버튼 */
   .composer .send{ width:38px; height:38px; border-radius:50%; background:var(--nk); color:#fff;
                    display:flex; align-items:center; justify-content:center; border:none; cursor:pointer; }
-  .composer .send.off{ background:#E4E1DA; cursor:default; }
+  .composer .send.off{ background:var(--line); cursor:default; }
   .comp-lock{ padding:16px; font-size:12.5px; color:var(--nmuted); text-align:center; line-height:1.6; }
 
   /* ===== 대화 영역을 시안 색으로 ===== */
@@ -458,16 +461,16 @@
   .daydiv{ font-family:'Archivo',sans-serif; font-size:9.5px; font-weight:800;
            letter-spacing:.16em; color:var(--nfaint); padding:12px 0 8px; }
   .bubble{ padding:11px 15px; font-size:13.5px; line-height:1.55; }
-  .m.g .bubble{ background:#F4F2ED; color:#141414; border-radius:2px 15px 15px 15px; }
-  .m.s .bubble{ background:#FAEEC4; color:#141414; border-radius:15px 2px 15px 15px; }
+  .m.g .bubble{ background:var(--soft); color:var(--text); border-radius:2px 15px 15px 15px; }
+  .m.s .bubble{ background:#FAEEC4; color:var(--text); border-radius:15px 2px 15px 15px; }
   .m .meta{ font-size:10px; color:var(--nfaint); }
   .trbtn{ opacity:.28; font-size:12px; }
   .trbtn:hover{ opacity:.8; }
-  .typing{ background:#F4F2ED; }
+  .typing{ background:var(--soft); }
 
   /* 빠른답변 : 테두리 대신 회색 면 */
-  .qr .chip{ background:#F4F2ED; border:none; border-radius:13px; color:#2a2723; }
-  .qr .chip:hover{ background:#EAE7DF; border:none; }
+  .qr .chip{ background:var(--soft); border:none; border-radius:13px; color:var(--text); }
+  .qr .chip:hover{ background:var(--line); border:none; }
 
   /* [2026-09-18] 다크 보정 — 대화 영역
      말풍선은 밝은 색이라 다크에서도 글씨는 읽힙니다. 다만 어두운 화면에
@@ -481,9 +484,9 @@
   html[data-theme="dark"] .qr .chip:hover{ background:#33333d; }
 
   /* 입력창 : 파란 테두리 제거 */
-  .composer .att{ border:none; background:transparent; color:#A8A398; }
-  .composer .att:hover{ color:#57534c; }
-  .composer textarea{ background:#F7F6F2; border:1px solid transparent; border-radius:20px; }
+  .composer .att{ border:none; background:transparent; color:var(--muted); }
+  .composer .att:hover{ color:var(--soft-text); }
+  .composer textarea{ background:var(--soft); border:1px solid transparent; border-radius:20px; }
   .composer textarea:focus{ background:var(--bg); border-color:#CFC9B8; }
 
   /* 말풍선 옆 객실 아바타 제거 — 화면에서 색은 크림 말풍선과 안읽음 표시만 */
@@ -493,33 +496,33 @@
 
   /* ===== 예약 정보 패널 · 답변 대기 ===== */
   .ch-right{ margin-left:auto; display:flex; align-items:center; gap:10px; flex-shrink:0; }
-  .ch-more{ border:1px solid #DFDBD1; background:var(--bg); color:#2a2723; font-family:inherit;
+  .ch-more{ border:1px solid var(--line); background:var(--bg); color:var(--text); font-family:inherit;
             font-size:11px; font-weight:700; padding:5px 10px; border-radius:6px; cursor:pointer;
             white-space:nowrap; }
-  .ch-more:hover{ background:#FBFAF7; }
+  .ch-more:hover{ background:var(--soft); }
 
-  .bkpanel{ background:#FBFAF7; box-shadow:inset 0 -1px 0 var(--nhair); padding:14px 20px 16px;
+  .bkpanel{ background:var(--soft); box-shadow:inset 0 -1px 0 var(--nhair); padding:14px 20px 16px;
             flex-shrink:0; }
   .bkpanel[hidden]{ display:none; }
   .bk-r{ display:flex; gap:12px; font-size:12.5px; line-height:1.7; }
   .bk-k{ flex:0 0 74px; color:var(--nfaint); font-weight:600; }
-  .bk-v{ flex:1; color:#2a2723; word-break:break-word; }
+  .bk-v{ flex:1; color:var(--text); word-break:break-word; }
   .bk-none{ font-size:12.5px; color:var(--nmuted); }
   .bk-act{ margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; }
   .btn-line, .btn-danger{ font-family:inherit; font-size:12px; font-weight:700; padding:8px 13px;
-                          border-radius:7px; cursor:pointer; border:1px solid #DFDBD1; background:var(--bg);
-                          color:#2a2723; }
-  .btn-line:hover{ background:#F4F2ED; }
+                          border-radius:7px; cursor:pointer; border:1px solid var(--line); background:var(--bg);
+                          color:var(--text); }
+  .btn-line:hover{ background:var(--soft); }
   .btn-danger{ border-color:#E3C9BB; color:#9A5B2E; }
   .btn-danger:hover{ background:#FBF3EA; }
 
   /* 어드민과 같은 배율 — 상단 모양이 두 화면에서 똑같이 보이게 */
   @media (min-width:641px){
-    #app{ height:100dvh; overflow:hidden; background:#EDEBE4; }
+    #app{ height:100dvh; overflow:hidden; background:var(--line); }
     /* 상단바(약 100px)를 뺀 나머지를 다 쓴다 */
     /* 남은 공간을 그대로 채운다. 높이를 직접 계산하지 않아 스크롤이 안 생긴다. */
     .wrap{ flex:1 1 auto; min-height:0; max-width:1560px; width:calc(100% - 56px);
-           margin:14px auto 16px; border:1px solid #DFDBD1; border-radius:12px;
+           margin:14px auto 16px; border:1px solid var(--line); border-radius:12px;
            overflow:hidden; box-shadow:0 2px 12px rgba(20,25,40,.06); }
     .list{ flex:0 0 320px; }
     /* 아래쪽 입력 영역을 얇게 */
@@ -823,7 +826,7 @@
     position: fixed; bottom: 0; left: 0; right: 0; top: auto;
     width: auto !important; height: auto !important;
     border-right: none;
-    border-top: 1px solid #e8e6e1;   /* [2026-08-28] 어드민과 같은 선 색 */
+    border-top: 1px solid var(--line);   /* [2026-08-28] 어드민과 같은 선 색 */
     z-index: 50;
   }
   /* 채팅 영역이 탭바에 가리지 않게 */
@@ -1178,7 +1181,7 @@ function dayLabel(ts){ const d=new Date(ts); const D=['일','월','화','수','�
 function fmtKRW(n){ return (n==null)?'-':'₩'+Number(n).toLocaleString('ko-KR'); }
 const DOW=['일','월','화','수','목','금','토'];
 function mdow(ds){ if(!ds) return ''; const d=new Date(ds+'T00:00:00'); return `${d.getMonth()+1}/${d.getDate()}(${DOW[d.getDay()]})`; }
-function avColor(room){ const s=String(room); if(s[0]==='1') return '#1f1f23'; if(s[0]==='2') return '#1B4480'; return '#6C4BD8'; }
+function avColor(room){ const s=String(room); if(s[0]==='1') return 'var(--ink)'; if(s[0]==='2') return '#1B4480'; return '#6C4BD8'; }
 
 // ===== 로그인 =====
 async function doLogin(){
@@ -1517,7 +1520,7 @@ function miniStatus(b){
 function convSummary(b){
   if(!b||!b.checkin_date||!b.checkout_date) return '';
   const nights=Math.max(1,Math.round((new Date(b.checkout_date)-new Date(b.checkin_date))/86400000));
-  const nm=(b.channels&&b.channels.name)||''; let cc='#78736b',lbl='직접';
+  const nm=(b.channels&&b.channels.name)||''; let cc='var(--muted)',lbl='직접';
   if(/에어|airbnb/i.test(nm)){cc='#FF385C';lbl='Airbnb';} else if(/부킹|booking/i.test(nm)){cc='#1B4480';lbl='Booking';} else if(/아고다|agoda/i.test(nm)){cc='#6C4BD8';lbl='Agoda';} else if(/익스피디아|expedia/i.test(nm)){cc='#C98A00';lbl='Expedia';}
   return `<div class="csum">${mdow(b.checkin_date)}~${mdow(b.checkout_date)} · ${nights}박 · <span style="color:${cc};font-weight:700;">${lbl}</span></div>`;
 }
@@ -1881,7 +1884,7 @@ function stayInfo(b){
   else if(ciD<t&&coD>t){ pill=`<span class="stpill st-stay">● 숙박 중</span>`; }
   else if(coD<t) pill='<span class="stpill st-none">이용 종료</span>';
   else pill='';
-  const nm=(b.channels&&b.channels.name)||''; let cc='#78736b',lbl='직접';
+  const nm=(b.channels&&b.channels.name)||''; let cc='var(--muted)',lbl='직접';
   if(/에어|airbnb/i.test(nm)){cc='#FF385C';lbl='에어비앤비';} else if(/부킹|booking/i.test(nm)){cc='#1B4480';lbl='부킹닷컴';} else if(/아고다|agoda/i.test(nm)){cc='#6C4BD8';lbl='아고다';} else if(/익스피디아|expedia/i.test(nm)){cc='#C98A00';lbl='익스피디아';}
   const g=b.num_guests?` · ${b.num_guests}명`:'';
   const kv=`<div><span class="k">숙박</span><b>${mdow(ci)}~${mdow(co)} · ${nights}박${g}</b></div>`;
@@ -1965,7 +1968,7 @@ async function openConv(c){
     <div class="foot">
       <div class="qr" id="qr">${qrHtml}</div>
       <div class="composer">
-        <div class="att" id="attBtn" title="사진 보내기" aria-label="사진 보내기" style="display:flex;align-items:center;justify-content:center;color:#8f8f89;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg></div>
+        <div class="att" id="attBtn" title="사진 보내기" aria-label="사진 보내기" style="display:flex;align-items:center;justify-content:center;color:var(--muted);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg></div>
         <textarea id="reply" rows="1" placeholder="답장 입력…"></textarea>
         <button class="send off" id="sendBtn" aria-label="메시지 전송" disabled><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round" stroke-linecap="round"><path d="M21.4 3.1 2.9 10.4c-.8.3-.8 1.5.1 1.7l7 1.9 1.9 7c.2.9 1.4.9 1.7.1l7.3-18.5c.2-.6-.3-1.2-.9-.9z"/><path d="M10 14 21.4 3.1"/></svg></button>
       </div>
@@ -2068,7 +2071,7 @@ async function autoTranslateMsgs(box){
       if(!t){ t=await translateText(text,'KO'); _trCache[text]=t; }
       if(!t || t.trim()===text.trim()) continue;
       const tr=document.createElement('div'); tr.className='m g trrow';
-      tr.innerHTML='<div class="mav" style="background:transparent"></div><div class="bubble" style="background:transparent;color:#867F72;font-size:12.5px;padding:2px 4px;">'+esc(t)+'</div>';
+      tr.innerHTML='<div class="mav" style="background:transparent"></div><div class="bubble" style="background:transparent;color:var(--muted);font-size:12.5px;padding:2px 4px;">'+esc(t)+'</div>';
       row.after(tr);
     }catch(e){}
   }
@@ -2092,7 +2095,7 @@ function renderMsgs(msgs, first){
     if(day!==lastDay){ html+=`<div class="daydiv">${day}</div>`; lastDay=day; }
     const isS=m.sender==='staff';
     const isImg=m.msg_type==='image'&&m.image_path;
-    const av=isS?`<div class="mav" style="background:#57534c">나</div>`:`<div class="mav" style="background:${avColor(curRoom)}">${esc(curRoom)}</div>`;
+    const av=isS?`<div class="mav" style="background:var(--soft-text)">나</div>`:`<div class="mav" style="background:${avColor(curRoom)}">${esc(curRoom)}</div>`;
     let inner = isImg
       ? `<div class="bubble img"><img data-path="${esc(m.image_path)}" alt="사진" /></div>`
       : `<div class="bubble">${esc(m.body)}</div>`;
@@ -2139,7 +2142,7 @@ function renderMsgs(msgs, first){
     try{ const t=await translateText(text,tgt);
       const row=b.closest('.m'); const side=row.classList.contains('s')?'s':'g';
       const tr=document.createElement('div'); tr.className='m '+side;
-      tr.innerHTML='<div class="bubble" style="background:transparent;color:#867F72;font-size:12.5px;padding:2px 4px;">'+esc(t)+'</div>';
+      tr.innerHTML='<div class="bubble" style="background:transparent;color:var(--muted);font-size:12.5px;padding:2px 4px;">'+esc(t)+'</div>';
       row.after(tr); b.dataset.done='1'; b.textContent='🌐';
     }catch(e){ b.textContent=old||'🌐'; }
   }));
