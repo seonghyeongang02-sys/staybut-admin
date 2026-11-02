@@ -9484,9 +9484,9 @@ function wkLoadLogo_(){
 }
 /* 실장님 언어에 맞춘 말. 일별 카드와 같은 기준(staff.lang)을 씁니다. */
 const WK_L = {
-  ko: { title: '주간 청소 작업표', towel: '수건', water: '생수', dow: ['월','화','수','목','금'] },
-  ja: { title: '週間清掃予定表',   towel: 'タオル', water: '飲料水', dow: ['月','火','水','木','金'] },
-  en: { title: 'Weekly Cleaning',  towel: 'Towels', water: 'Water',  dow: ['Mon','Tue','Wed','Thu','Fri'] }
+  ko: { title: '주간 청소 작업표', towel: '수건', water: '생수', note: '숫자는  수건 · 생수', dow: ['월','화','수','목','금'] },
+  ja: { title: '週間清掃予定表',   towel: 'タオル', water: '飲料水', note: '数字は  タオル・飲料水', dow: ['月','火','水','木','金'] },
+  en: { title: 'Weekly Cleaning',  towel: 'Towels', water: 'Water',  note: 'Numbers: towels · water', dow: ['Mon','Tue','Wed','Thu','Fri'] }
 };
 const WK_FT  = "'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',-apple-system,sans-serif";
 /* 그 주 월요일부터 금요일까지, 이 실장님 몫만 요일별로 모읍니다. */
@@ -9509,10 +9509,15 @@ function renderWeekCardCanvas_(staffName, monDs){
      폰에서 보시는 걸 전제로 칸을 넓히고 글씨를 키웠습니다. 가로 5칸이라
      폰 화면에서는 한 칸이 손가락 하나 폭밖에 안 됩니다. */
   const L = WK_L[shareLangOf_(staffName)] || WK_L.ko;
-  const COLW = 132, W = COLW * 5, SC = 3;
-  const HEAD = 84, DOWH = 42, ROOM = 32, SUP = 30, PADT = 14, PADB = 18;
-  const bodyH = PADT + maxRooms * (ROOM + SUP) + PADB;
-  const H = HEAD + DOWH + bodyH;
+  /* [2026-11-02] 가로 660×세로 344라 폰에서 띠처럼 보였습니다.
+     칸을 132→120으로 좁히고 줄 높이·글씨를 키워 세로를 벌렸습니다(600×408).
+     최소 3줄을 잡아 두는 이유: 방이 하나뿐인 주에도 카드 모양이 같아야
+     매주 받으시는 분이 같은 자리에서 같은 걸 찾습니다. */
+  const COLW = 120, W = COLW * 5, SC = 3;
+  const HEAD = 84, DOWH = 48, CNTH = 30, ROOM = 38, SUP = 40, PADT = 18, PADB = 24;
+  const bodyH = PADT + Math.max(maxRooms, 3) * (ROOM + SUP) + PADB;
+  const NOTEH = 0;
+  const H = HEAD + DOWH + CNTH + bodyH;
   const cv = document.createElement('canvas');
   cv.width = W * SC; cv.height = H * SC;
   const ctx = cv.getContext('2d'); ctx.scale(SC, SC);
@@ -9545,37 +9550,57 @@ function renderWeekCardCanvas_(staffName, monDs){
        크기 순서는 날짜 > 객실 > 비품입니다. 날짜가 기준이라 제일 커야 합니다. */
     ctx.fillStyle = '#1b1b1b'; ctx.font = '700 17px ' + WK_FT;
     ctx.fillText(`${d.md}(${L.dow[i]})`, cx, HEAD + 29);
+    /* [2026-11-02] 그날 몇 실인지, 날짜 줄 아래에 줄을 하나 더 두고 숫자만 적습니다.
+       날짜에 붙이면 날짜의 일부처럼 읽혀서 따로 떼었습니다.
+       청소가 없는 날은 비워 둡니다 — 0을 적으면 괜히 눈에 걸립니다. */
+    if (d.tasks.length) {
+      ctx.fillStyle = '#1b1b1b'; ctx.font = '700 15px ' + WK_FT;
+      ctx.fillText(String(d.tasks.length), cx, HEAD + DOWH + 21);
+    }
   });
   ctx.textAlign = 'left';
 
-  ctx.strokeStyle = '#E4E4E0'; ctx.lineWidth = 1;
+  /* [2026-11-02] 세로줄을 더 연하게. 선이 셀수록 표가 빽빽해 보입니다. */
+  ctx.strokeStyle = '#E6E6E2'; ctx.lineWidth = 1;
   for (let i = 1; i < 5; i++){
-    ctx.beginPath(); ctx.moveTo(i * COLW + 0.5, HEAD); ctx.lineTo(i * COLW + 0.5, H); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(i * COLW + 0.5, HEAD); ctx.lineTo(i * COLW + 0.5, H - NOTEH); ctx.stroke();
   }
   ctx.beginPath(); ctx.moveTo(0, HEAD + DOWH + 0.5); ctx.lineTo(W, HEAD + DOWH + 0.5); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, HEAD + DOWH + CNTH + 0.5); ctx.lineTo(W, HEAD + DOWH + CNTH + 0.5); ctx.stroke();
 
   days.forEach((d, i) => {
     const x0 = i * COLW, cx = x0 + COLW / 2;
-    let y = HEAD + DOWH + PADT;
+    let y = HEAD + DOWH + CNTH + PADT;
     d.tasks.forEach(t => {
-      /* [2026-11-02] 객실 띠를 검정 반전으로 둡니다. 연회색은 폰으로 받아 축소되면
-         배경과 거의 같아 보여서, 어느 줄이 객실인지 바로 안 잡혔습니다. */
+      /* [2026-11-02] 객실 띠는 검정 반전. 색을 호실별로 넣어 봤지만 다섯 색이 한꺼번에
+         보여 오히려 난잡했고, 카톡 압축·흑백 인쇄·햇빛 아래에서는 연한 색이 다 사라집니다.
+         검정 한 가지면 어느 조건에서도 띠가 남습니다. */
       ctx.fillStyle = '#111111'; ctx.fillRect(x0 + 1, y, COLW - 2, ROOM);
       ctx.textAlign = 'center';
-      ctx.fillStyle = '#ffffff'; ctx.font = '700 15px ' + WK_FT;
-      ctx.fillText(RH(t.room), cx, y + 23);
+      ctx.fillStyle = '#ffffff'; ctx.font = '700 16px ' + WK_FT;
+      ctx.fillText(RH(t.room), cx, y + 26);
       /* [2026-11-02] 연한 회색이라 폰에서 안 읽혀서 진하게·굵게 바꿨습니다.
          실장님이 실제로 챙기시는 숫자라 객실번호 다음으로 잘 보여야 합니다. */
-      /* [2026-11-02] 일본어·영어는 한국어보다 길어서 칸을 넘칩니다.
-         넘치면 글씨를 한 단계씩 줄여 칸 안에 넣습니다 (11px까지). */
-      const supTxt = `${L.towel} ${t.sup.towels} · ${L.water} ${t.sup.water}`;
-      let supPx = 14;
-      ctx.font = '700 ' + supPx + 'px ' + WK_FT;
-      while (supPx > 11 && ctx.measureText(supTxt).width > COLW - 10) {
-        supPx -= 1; ctx.font = '700 ' + supPx + 'px ' + WK_FT;
-      }
-      ctx.fillStyle = '#2b2b29';
-      ctx.fillText(supTxt, cx, y + ROOM + 21);
+      /* [2026-11-02] 「수건 6 · 생수 2」를 칸마다 적으니 같은 글자가 아홉 번 반복돼
+         표가 빽빽해 보였습니다. 일별 카드에서 쓰던 수건·생수 아이콘을 그대로 가져와
+         글자를 지웠습니다 — 말이 필요 없고, 언어가 달라도 그림은 그대로입니다. */
+      const ICS = 0.8, ICT = 22 * ICS, ICW = 14 * ICS, GAPI = 5, MIDI = 12;
+      const tTxt = String(t.sup.towels), wTxt = String(t.sup.water);
+      ctx.font = '700 17px ' + WK_FT;
+      const tW = ctx.measureText(tTxt).width, wW = ctx.measureText(wTxt).width;
+      let px = cx - (ICT + GAPI + tW + MIDI + ICW + GAPI + wW) / 2;
+      const iy = y + ROOM + 7;
+      ctx.save(); ctx.translate(px + ICT / 2, iy); ctx.scale(ICS, ICS);
+      drawTowelIcon_(ctx, 0, 0); ctx.restore();
+      px += ICT + GAPI;
+      ctx.textAlign = 'left'; ctx.fillStyle = '#1b1b1b';
+      ctx.fillText(tTxt, px, iy + 16);
+      px += tW + MIDI;
+      ctx.save(); ctx.translate(px + ICW / 2, iy); ctx.scale(ICS, ICS);
+      drawWaterIcon_(ctx, 0, 0); ctx.restore();
+      px += ICW + GAPI;
+      ctx.fillText(wTxt, px, iy + 16);
+      ctx.textAlign = 'center';
       ctx.textAlign = 'left';
       y += ROOM + SUP;
     });
