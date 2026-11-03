@@ -143,15 +143,37 @@ function sheetMonths_() {
 }
 function sheetDaysIn_(ym) { const [y, m] = ym.split('-').map(Number); return new Date(y, m, 0).getDate(); }
 window.sheetSetView = function (v) { __sheetView = v; __sheetWeek = 'all'; renderSheet(); };
-/* [2026-09-01] 객단가 하한선 — 「이 아래로는 안 판다」고 정해둔 선. · 7~8월 실제 판매 데이터로 잡았습니다 (7월 1만원 · 8월 5천원 단위로 조정). · 여기까지 내려오면 99% 이상 팔립니다. 평상시 가격이 아니라 빈 날을 안 남기려는 마지막 선입니다. · 채널에 건 값이 그대로 들어오지 않습니다 — 에어비앤비 막바지 할인 10%, · 부킹닷컴 회원 혜택 15~20%가 더 빠집니다. */
+/* [2026-11-03] 객단가 하한선 — 전면 재작성.
+
+   전에는 7~8월 느낌으로 잡은 CMS 값 하나였습니다. 그런데 채널마다 깎이는 폭이 달라서,
+   같은 하한선인데 부킹으로 팔면 10만원, 아고다로 팔면 8만원이 들어왔습니다.
+   하한선이 아고다·익스에서만 조용히 뚫리고 있었습니다.
+
+   그래서 기준을 「거래액」으로 옮겼습니다.
+   · RATE_FLOOR_NET — 이 금액 아래로는 안 받는다는 선. 6/19~2/6 실판매 335박의 하위 10%.
+     최저 한 건은 사고일 수 있어 쓰지 않았습니다 (202호 8/18 에어 67,320원 같은 건).
+   · RATE_FLOOR — 그 금액을 받으려면 채널별로 CMS 에 얼마를 걸어야 하는지 역산한 값.
+
+   할인율(FLOOR_MID)은 어림값이 아니라 실측입니다.
+   10/4~11/14 CMS 요금과 실제 판매가를 박 단위로 1:1 대조한 188박 기준(중앙값):
+     부킹닷컴 136박 −23.1%  /  에어비앤비 28박 −15.0%
+     아고다     8박 −26.8%  /  익스피디아 16박 −25.7%
+   아고다가 제일 많이 깎입니다. CMS 에 +10% 얹는 이유고, 부킹과 맞추려면 +5% 가 더 필요합니다.
+   에어비앤비는 0.850 에 정확히 몰려 있어 고정 할인으로 보입니다. */
+const FLOOR_MID = { bk: 0.769, air: 0.850, ag: 0.732, ex: 0.743 };   // 중앙값 (실판매 ÷ CMS)
+const FLOOR_N   = { air: 28, bk: 136, ag: 8, ex: 16 };               // 대조 표본(박)
+
+/* 이 금액 아래로는 안 받는다 — 거래액 기준 (실판매 하위 5%) */
+const RATE_FLOOR_NET = { '101': 102000, '102': 97000, '201': 109000, '202': 102000, '301': 119000 };
+
+/* 위 금액을 받으려면 CMS 에 걸어야 하는 값 — 채널별 */
 const RATE_FLOOR = {
-  '101': [130000, 140000],
-  '102': [110000, 120000],
-  '201': [140000, 140000],
-  '202': [140000, 160000],
-  '301': [150000, 150000],
+  '101': { bk: 133000, air: 120000, ag: 140000, ex: 138000 },
+  '102': { bk: 127000, air: 115000, ag: 133000, ex: 131000 },
+  '201': { bk: 142000, air: 129000, ag: 149000, ex: 147000 },
+  '202': { bk: 133000, air: 120000, ag: 140000, ex: 138000 },
+  '301': { bk: 155000, air: 140000, ag: 163000, ex: 161000 },
 };
-const FLOOR_DISCOUNT = { air: [0.10, 0.10], bk: [0.20, 0.15] };   // [최대, 최소] 할인율
 // ── 매출 인사이트 카드 목록 (사이드바에서 켜고 끄기 · 선택은 브라우저에 저장) ──
 const AS_CARDS = [
   // [2026-08-24] 배치 개편 · '채널별 거래액'은 '채널별 실적'에 통합(거래액 중복 제거)
@@ -446,35 +468,42 @@ function renderSheet() {
     const tag = s.adr === minAdr && s.adr > 0 ? ' <span class="as-pill" style="background:#fbeae3;color:var(--red);">최저가</span>' : (s.adr === maxAdr && s.adr > 0 ? ' <span class="as-pill" style="background:#eae7fb;color:var(--ago);">최고가</span>' : '');
     return `<tr><td>${RH(s.room)}${tag}</td><td>${s.sold}</td><td>${s.occ.toFixed(0)}%</td><td>${KRW(s.adr)}</td><td>${KRW(s.rev)}</td><td class="as-pos">+${KRW(s.rev * 0.05)}</td><td class="as-pos">+${KRW(s.rev * 0.10)}</td></tr>`;
   }).join('');
-  /* [2026-09-01] 객단가 하한선 표 — 그 달 실제 ADR 과 나란히 놓아 · 하한선을 지켰는지, 올릴 여지가 있는지 한눈에 보이게 합니다. */
-  const _fw = (a, b) => a === b ? KRW(a) : KRW(a) + ' ~ ' + KRW(b);
+  /* [2026-11-03] 하한선 표 — 기준을 거래액으로 옮겼습니다.
+     채널마다 깎이는 폭이 달라서, CMS 값 하나로는 아고다·익스에서만 뚫립니다.
+     그래서 「이 금액 아래로는 안 받는다」를 먼저 정하고, 채널별 CMS 값을 역산해 보여줍니다. */
+  const _dc = (k) => '−' + Math.round((1 - FLOOR_MID[k]) * 100) + '%';
   const _rmAdr = {}; rStats.forEach(x => { _rmAdr[String(x.room)] = x.adr; });
   const floorRows = Object.keys(RATE_FLOOR).sort().map(rm => {
-    const [lo, hi] = RATE_FLOOR[rm];
-    const air = [Math.round(lo * (1 - FLOOR_DISCOUNT.air[0]) / 1000) * 1000,
-                 Math.round(hi * (1 - FLOOR_DISCOUNT.air[1]) / 1000) * 1000];
-    const bk  = [Math.round(lo * (1 - FLOOR_DISCOUNT.bk[0]) / 1000) * 1000,
-                 Math.round(hi * (1 - FLOOR_DISCOUNT.bk[1]) / 1000) * 1000];
+    const f = RATE_FLOOR[rm], net = RATE_FLOOR_NET[rm];
     const cur = _rmAdr[rm] || 0;
-    const gap = cur ? cur - lo : null;
+    const gap = cur ? cur - net : null;
     const gapHtml = gap === null ? '<span style="color:var(--mut);">—</span>'
       : gap >= 0 ? `<span class="as-pos">+${KRW(gap)}</span>`
                  : `<span style="color:var(--red);">하한선 아래</span>`;
-    return `<tr><td style="font-weight:700;">${RH(rm)}</td><td>${_fw(lo, hi)}</td>`
-         + `<td>${_fw(air[0], air[1])}</td><td>${_fw(bk[0], bk[1])}</td>`
+    return `<tr><td style="font-weight:700;">${RH(rm)}</td>`
+         + `<td style="font-weight:700;">${KRW(net)}</td>`
+         + `<td>${KRW(f.bk)}</td><td>${KRW(f.air)}</td><td>${KRW(f.ag)}</td><td>${KRW(f.ex)}</td>`
          + `<td>${cur ? KRW(cur) : '—'}</td><td>${gapHtml}</td></tr>`;
   }).join('');
   const floorTable = `
       <div style="height:14px;"></div>
-      <div class="as-sec" style="margin:0 0 3px;">객단가 하한선 <span style="color:var(--mut);font-weight:600;font-size:11.5px;">· 리드타임 3일 기준</span></div>
-      <div style="font-size:11px;color:var(--mut);margin-bottom:7px;">7~8월 실제 판매 데이터로 잡은 선 — 7월 1만원, 8월 5천원 단위로 조정</div>
+      <div class="as-sec" style="margin:0 0 3px;">객단가 하한선 <span style="color:var(--mut);font-weight:600;font-size:11.5px;">· 거래액 기준</span></div>
+      <div style="font-size:11px;color:var(--mut);margin-bottom:7px;">실판매 335박(6/19~2/6)의 하위 10% — 「이 금액 아래로는 안 받는다」</div>
       <div style="overflow-x:auto;">
-      <table class="as-tbl"><thead><tr><th>객실</th><th>CMS 하한선</th><th>에어비앤비 −10%</th><th>부킹닷컴 −15~20%</th><th>이 기간 ADR</th><th>여유</th></tr></thead>
+      <table class="as-tbl"><thead><tr><th>객실</th><th>하한선<br><span style="font-weight:600;color:var(--mut);">거래액</span></th>
+      <th>부킹닷컴<br><span style="font-weight:600;color:var(--mut);">${_dc('bk')}</span></th>
+      <th>에어비앤비<br><span style="font-weight:600;color:var(--mut);">${_dc('air')}</span></th>
+      <th>아고다<br><span style="font-weight:600;color:var(--mut);">${_dc('ag')}</span></th>
+      <th>익스피디아<br><span style="font-weight:600;color:var(--mut);">${_dc('ex')}</span></th>
+      <th>이 기간 ADR</th><th>여유</th></tr></thead>
       <tbody>${floorRows}</tbody></table>
       </div>
-      <div class="as-note">· <b>하한선</b>은 「이 아래로는 안 판다」고 정해둔 선입니다. 여기까지 내려오면 99% 이상 팔립니다.<br>
-      · <b>여유</b>가 「하한선 아래」면 그 달 실제 ADR 이 하한선보다 낮았다는 뜻 — 하한선이 안 지켜졌거나 너무 높게 잡힌 것입니다.<br>
-      · 채널에 건 값이 그대로 들어오지 않습니다. 에어비앤비 막바지 할인 10%, 부킹닷컴 회원 혜택 15~20%가 더 빠집니다.</div>`;
+      <div class="as-note">· <b>하한선</b>은 거래액(우리 장부에 잡히는 숙박료)입니다. 여기서 채널 수수료가 더 빠지는 건 별도입니다.<br>
+      · 가운데 네 칸은 <b>그 금액을 받으려면 CMS 에 걸어야 하는 값</b>입니다. 채널마다 깎이는 폭이 달라 값이 다릅니다.<br>
+      · 할인율은 어림값이 아니라 <b>실측</b>입니다 — 10/4~11/14 CMS 요금과 실판매가를 박 단위로 맞춘 188박 기준(중앙값).
+      표본은 부킹 ${FLOOR_N.bk}박 · 에어 ${FLOOR_N.air}박 · 아고다 ${FLOOR_N.ag}박 · 익스 ${FLOOR_N.ex}박이라, 아고다·익스는 참고로 보세요.<br>
+      · <b>아고다가 제일 많이 깎입니다</b>(−27%). CMS 에 +10% 얹는 이유고, 부킹과 손님가를 맞추려면 +5% 가 더 필요합니다.<br>
+      · <b>여유</b>가 「하한선 아래」면 그 달 실제 ADR 이 하한선보다 낮았다는 뜻입니다.</div>`;
   // 전월 대비 델타 (특정 월 · 월 전체일 때만)
   let mom = null;
   if (__sheetView !== 'all' && __sheetWeek === 'all') {
