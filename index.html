@@ -84,6 +84,8 @@
       html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none; }
       main ::-webkit-scrollbar { width: 0; height: 0; }
       main * { scrollbar-width: none; }
+      /* 끝에서 튕기는 기본 스크롤로 되돌림 (아이폰에서 뻑뻑하던 느낌) — 맨 위에서 당기면 새로고침됩니다 */
+      html, body { overscroll-behavior: auto !important; }
     }
   </style>
 </head>
