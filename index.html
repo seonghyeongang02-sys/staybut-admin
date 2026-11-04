@@ -9498,7 +9498,19 @@ function drawCardFooter_(ctx, y, W, en){
    이제 주 초에 한 장만 드리고, 바뀌면 그 분 것만 다시 뽑아 보내면 됩니다.
    담는 것은 날짜 · 객실 · 수건 · 생수뿐입니다. 박수·인원·금액은 넣지 않습니다
    (실장님이 챙기실 것은 비품 개수라서). */
-const WK_DOW = ['월','화','수','목','금'];
+const WK_DOW = ['월','화','수','목','금','토','일'];
+/* [2026-11-04] 주말에도 일하시는 실장님(staff.notes 에 「주말」)은 월~일 7칸으로 그립니다.
+   그 주에 토·일 청소가 배정돼 있어도 7칸으로 그립니다 — 빠뜨리지 않으려고. */
+function wkDaysFor_(staffName, monDs){
+  const st = (cachedStaff || []).find(s => (s.name || '').trim() === (staffName || '').trim());
+  if (st && /주말/.test(st.notes || '')) return 7;
+  const mon = new Date(monDs + 'T00:00:00');
+  for (const i of [5, 6]) {
+    const ds = ymd_(new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i));
+    if ((cleaningTasksByDate[ds] || []).some(t => t.status !== 'not_needed' && (t.assigned_staff?.name || '') === staffName)) return 7;
+  }
+  return 5;
+}
 /* [2026-11-02] 로고를 카드 머리말에 넣습니다. 파일을 불러오면 느리고 실패할 수 있어서
    이미지 자체를 코드에 박아 둡니다(5KB). 못 그려도 카드는 그대로 나옵니다. */
 const WK_LOGO_B64 = 'data:image/png;base64,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';
@@ -9514,15 +9526,15 @@ function wkLoadLogo_(){
 }
 /* 실장님 언어에 맞춘 말. 일별 카드와 같은 기준(staff.lang)을 씁니다. */
 const WK_L = {
-  ko: { title: '주간 청소 작업표', towel: '수건', water: '생수', note: '숫자는  수건 · 생수', dow: ['월','화','수','목','금'] },
-  ja: { title: '週間清掃予定表',   towel: 'タオル', water: '飲料水', note: '数字は  タオル・飲料水', dow: ['月','火','水','木','金'] },
-  en: { title: 'Weekly Cleaning',  towel: 'Towels', water: 'Water',  note: 'Numbers: towels · water', dow: ['Mon','Tue','Wed','Thu','Fri'] }
+  ko: { title: '주간 청소 작업표', towel: '수건', water: '생수', note: '숫자는  수건 · 생수', dow: ['월','화','수','목','금','토','일'] },
+  ja: { title: '週間清掃予定表',   towel: 'タオル', water: '飲料水', note: '数字は  タオル・飲料水', dow: ['月','火','水','木','金','土','日'] },
+  en: { title: 'Weekly Cleaning',  towel: 'Towels', water: 'Water',  note: 'Numbers: towels · water', dow: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] }
 };
 const WK_FT  = "'Apple SD Gothic Neo','Malgun Gothic','Noto Sans KR',-apple-system,sans-serif";
 /* 그 주 월요일부터 금요일까지, 이 실장님 몫만 요일별로 모읍니다. */
 function weekCardDays_(staffName, monDs){
   const mon = new Date(monDs + 'T00:00:00');
-  return WK_DOW.map((dow, i) => {
+  return WK_DOW.slice(0, wkDaysFor_(staffName, monDs)).map((dow, i) => {
     const d  = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + i);
     const ds = ymd_(d);
     const tasks = (cleaningTasksByDate[ds] || [])
@@ -9543,7 +9555,8 @@ function renderWeekCardCanvas_(staffName, monDs){
      칸을 132→120으로 좁히고 줄 높이·글씨를 키워 세로를 벌렸습니다(600×408).
      최소 3줄을 잡아 두는 이유: 방이 하나뿐인 주에도 카드 모양이 같아야
      매주 받으시는 분이 같은 자리에서 같은 걸 찾습니다. */
-  const COLW = 120, W = COLW * 5, SC = 3;
+  const ND = days.length;                      // 5 = 월~금, 7 = 월~일
+  const COLW = ND === 7 ? 110 : 120, W = COLW * ND, SC = 3;
   const HEAD = 84, DOWH = 48, CNTH = 30, ROOM = 38, SUP = 40, PADT = 18, PADB = 24;
   const bodyH = PADT + Math.max(maxRooms, 3) * (ROOM + SUP) + PADB;
   const NOTEH = 0;
@@ -9564,7 +9577,7 @@ function renderWeekCardCanvas_(staffName, monDs){
   const who = staffName ? (/실장님\s*$/.test(staffName) ? staffName : staffName + ' 실장님') : '미배정';
   ctx.fillStyle = '#ffffff'; ctx.font = '700 22px ' + WK_FT;
   ctx.fillText(who, tx, 40);
-  const last = days[4];
+  const last = days[ND - 1];
   ctx.fillStyle = '#bdbdb8'; ctx.font = '700 19px ' + WK_FT;
   ctx.fillText(`${days[0].md} ~ ${last.md}`, tx, 66);
   ctx.textAlign = 'right';
@@ -9592,7 +9605,7 @@ function renderWeekCardCanvas_(staffName, monDs){
 
   /* [2026-11-02] 세로줄을 더 연하게. 선이 셀수록 표가 빽빽해 보입니다. */
   ctx.strokeStyle = '#E6E6E2'; ctx.lineWidth = 1;
-  for (let i = 1; i < 5; i++){
+  for (let i = 1; i < ND; i++){
     ctx.beginPath(); ctx.moveTo(i * COLW + 0.5, HEAD); ctx.lineTo(i * COLW + 0.5, H - NOTEH); ctx.stroke();
   }
   ctx.beginPath(); ctx.moveTo(0, HEAD + DOWH + 0.5); ctx.lineTo(W, HEAD + DOWH + 0.5); ctx.stroke();
