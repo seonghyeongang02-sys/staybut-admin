@@ -58,6 +58,27 @@
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <!-- (스타일 2/5 → /admin.css 로 옮김) -->
+  <!-- 모바일 깨짐 수정 (2026-11-04) -->
+  <style id="mobile-fix-1104">
+    @media (max-width: 640px) {
+      /* 예약이 덜 찬 날 — 빈방 목록을 둘째 줄로 */
+      #pricing-board .pb-row { flex-wrap: wrap; row-gap: 4px; padding: 12px 14px !important; }
+      #pricing-board .pb-when { width: auto !important; margin-right: 10px; }
+      #pricing-board .pb-dn { width: auto !important; margin-right: 10px; }
+      #pricing-board .pb-sold { width: auto !important; }
+      #pricing-board .pb-act { margin-left: auto; }
+      #pricing-board .pb-free { order: 9; flex: 0 0 100% !important; padding-left: 20px; }
+      /* 상단 숫자 카드 — 가동률 글자 안 쪼개지게 */
+      #kpi-grid .kpi-occ { gap: 10px !important; }
+      #kpi-grid .kpi-occ-ring { width: 58px !important; height: 58px !important; }
+      #kpi-grid .kpi-occ > div:last-child, #kpi-grid .kpi-occ > div:last-child * { white-space: nowrap; font-size: 12px; }
+      #kpi-grid .kpi-occ > div:last-child > div:last-child { white-space: normal; line-height: 1.4; }
+      #kpi-grid .stat-sub { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      /* 청소 관리 버튼 줄 — 넘치면 다음 줄로 */
+      #view-cleaning .page-header { flex-wrap: wrap; gap: 10px; }
+      #view-cleaning .clean-actions { flex-wrap: wrap; }
+    }
+  </style>
 </head>
 <body>
   <!-- 로그인 화면                                                      -->
@@ -592,7 +613,7 @@
               <div class="page-title">청소 관리</div>
               <div class="page-subtitle">예약 저장 시 자동 생성됩니다. 캘린더에서 날짜를 클릭하면 상세가 보여요.</div>
             </div>
-            <div style="display:flex; gap:8px;">
+            <div class="clean-actions" style="display:flex; gap:8px;">
               <button class="btn btn-secondary" id="cleaning-week-card-btn">🗓 주간 카드</button>
               <button class="btn btn-secondary" id="cleaning-week-excel-btn">⬇ 주간 엑셀</button>
               <button class="btn btn-secondary" id="cleaning-bulk-btn">기간 일괄 조정</button>
@@ -4218,7 +4239,7 @@ async function loadDashboard() {
     _sparkHtml = `<div style="display:flex;align-items:flex-end;gap:6px;height:52px;margin-top:12px;">
       ${buckets.map(b => `<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;">
         <div title="${b.label} ${_w(b.v)}" style="width:100%;height:${Math.max(3, Math.round(b.v / mx * 38))}px;border-radius:3px;background:${b.cur ? 'var(--accent)' : 'var(--neutral-200)'};"></div>
-        <div style="font-size:10.5px;color:var(--text-muted);">${b.label}</div>
+        <div style="font-size:10.5px;color:var(--text-muted);white-space:nowrap;">${b.label}</div>
       </div>`).join('')}
     </div>`;
   } catch (e) { _sparkHtml = ''; }
@@ -4248,8 +4269,8 @@ async function loadDashboard() {
     </div>
     <div class="stat-card">
       <div class="stat-label">가동률</div>
-      <div style="display:flex;align-items:center;gap:16px;margin-top:6px;">
-        <div style="position:relative;width:74px;height:74px;flex-shrink:0;">
+      <div class="kpi-occ" style="display:flex;align-items:center;gap:16px;margin-top:6px;">
+        <div class="kpi-occ-ring" style="position:relative;width:74px;height:74px;flex-shrink:0;">
           <canvas id="kpi-occ-donut" role="img" aria-label="가동률 ${occupancyRate.toFixed(1)}퍼센트"></canvas>
           <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;">${occupancyRate.toFixed(0)}%</div>
         </div>
@@ -4602,13 +4623,13 @@ async function renderPricingBoard() {
   const line = r => {
     const d = new Date(r.stay_date + 'T00:00:00');
     const when = (d.getMonth() + 1) + '월 ' + d.getDate() + '일 (' + r.dow + ')';
-    return '<div style="display:flex;align-items:center;padding:14px 15px;border-bottom:1px solid var(--border);">'
-      + '<div style="width:9px;height:9px;border-radius:50%;background:#E24B4A;flex:none;margin-right:11px;"></div>'
-      + '<div style="font-size:14px;font-weight:600;width:112px;flex:none;">' + when + '</div>'
-      + '<div style="font-size:13px;color:var(--text-muted);width:66px;flex:none;">' + r.dn + '일 뒤</div>'
-      + '<div style="font-size:14px;width:66px;flex:none;"><b>' + r.rooms_sold + '</b><span style="color:var(--text-muted);">/' + r.rooms_total + '실</span></div>'
-      + '<div style="font-size:13px;color:var(--text-soft);flex:1;min-width:0;">빈방 ' + esc2(r.free_list || '') + '</div>'
-      + '<div style="font-size:13.5px;font-weight:600;color:#E24B4A;flex:none;">요금 내리기</div>'
+    return '<div class="pb-row" style="display:flex;align-items:center;padding:14px 15px;border-bottom:1px solid var(--border);">'
+      + '<div class="pb-dot" style="width:9px;height:9px;border-radius:50%;background:#E24B4A;flex:none;margin-right:11px;"></div>'
+      + '<div class="pb-when" style="font-size:14px;font-weight:600;width:112px;flex:none;white-space:nowrap;">' + when + '</div>'
+      + '<div class="pb-dn" style="font-size:13px;color:var(--text-muted);width:66px;flex:none;white-space:nowrap;">' + r.dn + '일 뒤</div>'
+      + '<div class="pb-sold" style="font-size:14px;width:66px;flex:none;white-space:nowrap;"><b>' + r.rooms_sold + '</b><span style="color:var(--text-muted);">/' + r.rooms_total + '실</span></div>'
+      + '<div class="pb-free" style="font-size:13px;color:var(--text-soft);flex:1;min-width:0;">빈방 ' + esc2(r.free_list || '') + '</div>'
+      + '<div class="pb-act" style="font-size:13.5px;font-weight:600;color:#E24B4A;flex:none;white-space:nowrap;">요금 내리기</div>'
       + '</div>';
   };
 
