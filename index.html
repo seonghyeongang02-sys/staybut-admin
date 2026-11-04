@@ -78,6 +78,13 @@
       #view-cleaning .page-header { flex-wrap: wrap; gap: 10px; }
       #view-cleaning .clean-actions { flex-wrap: wrap; }
     }
+    /* 폰·좁은 화면: 오른쪽 스크롤 막대를 숨깁니다. 손가락으로 내리는 건 그대로 됩니다. */
+    @media (max-width: 768px) {
+      html { scrollbar-width: none; -ms-overflow-style: none; }
+      html::-webkit-scrollbar, body::-webkit-scrollbar { width: 0 !important; height: 0 !important; display: none; }
+      main ::-webkit-scrollbar { width: 0; height: 0; }
+      main * { scrollbar-width: none; }
+    }
   </style>
 </head>
 <body>
