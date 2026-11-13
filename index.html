@@ -8379,18 +8379,21 @@ function renderCompactCleaningCard_(t) {
   const xp = t.status === 'not_needed' ? 0 : Number(t.extra_pay || 0);
   const isExtra = typeof t.notes === 'string' && t.notes.indexOf('[추가청소]') === 0;
   const extraReason = isExtra ? t.notes.replace('[추가청소]', '').trim() : '';
+  /* [2026-11-12] PC 주간 칸에도 폰 목록처럼 「차렵이불 N」과 메모를 보여줍니다. · 전에는 차렵이불은 폰에만, 메모는 추가보수가 있을 때만 PC에 떠서 · 같은 청소인데 PC에서는 챙길 물건이 안 보였습니다. */
+  let _bed = 0; try { _bed = Number(cleaningShareSupplies(t).bedding || 0); } catch (e) {}
+  const _memo = (t.memo && String(t.memo).trim()) ? String(t.memo).trim().replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])) : '';
   return `
     <!-- [2026-09-18] 글씨를 키웠습니다 — 객실 13→15px · 담당/인원 11→13px · 금액 11→13px -->
     <div class="wk-clean-card" onclick="openCleaningTaskModal_('${t.id}')" style="background:var(--surface); border:1px solid var(--border); border-radius:9px; padding:11px 12px; cursor:pointer; ${isExtra ? 'border-left:3px solid var(--text-warning);' : ''}">
       <div style="display:flex; align-items:center; justify-content:space-between;">
-        <span style="font-size:15px; font-weight:800; color:var(--text);">${RH(room)}${isExtra ? ' <span style="font-size:11px; font-weight:700; color:var(--text-warning); background:var(--bg-warning); padding:1px 6px; border-radius:10px; vertical-align:1px;">추가</span>' : ''}</span>
+        <span style="font-size:15px; font-weight:800; color:var(--text);">${RH(room)}${isExtra ? ' <span style="font-size:11px; font-weight:700; color:var(--text-warning); background:var(--bg-warning); padding:1px 6px; border-radius:10px; vertical-align:1px;">추가</span>' : ''}${_bed > 0 ? ` <span style="display:inline-block; font-size:10.5px; font-weight:800; border:1px solid var(--border-strong); color:var(--text-muted); border-radius:4px; padding:1px 6px; vertical-align:1px;">차렵이불 ${_bed}</span>` : ''}</span>
         <span style="width:9px; height:9px; border-radius:50%; background:${dot.c}; flex-shrink:0;"></span>
       </div>
       <div style="font-size:13px; color:var(--text-soft); margin-top:5px;">${isExtra ? (extraReason || '추가 청소') : (prevGuest + '인 · ' + dot.label)}</div>
       ${fee != null
         ? `<div style="font-size:13px; font-weight:600; color:var(--text); margin-top:3px;">₩${fee.toLocaleString('ko-KR')}${xp ? ` <span style="color:var(--text-warning); font-weight:700;">+₩${xp.toLocaleString('ko-KR')}</span>` : ''}</div>`
         : `<div style="font-size:13px; color:var(--text-muted); margin-top:3px;">청소 불필요</div>`}
-      ${xp && t.memo ? `<div style="font-size:11.5px; color:var(--text-warning); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${String(t.memo).replace(/</g,'&lt;')}</div>` : ''}
+      ${_memo ? `<div title="${_memo}" style="font-size:11.5px; color:var(--text-warning); margin-top:3px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${_memo}</div>` : ''}
     </div>`;
 }
 // 카드 클릭 → 상세 모달에 기존 청소 카드(카톡공유·배정·완료) 그대로 렌더
