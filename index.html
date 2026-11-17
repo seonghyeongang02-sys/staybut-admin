@@ -4284,7 +4284,7 @@ async function loadDashboard() {
           <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:700;">${occupancyRate.toFixed(0)}%</div>
         </div>
         <div style="font-size:12.5px;line-height:1.75;">
-          <div style="color:var(--text-muted);">판매 <b style="color:var(--text)">${soldNights}박</b></div>
+          <div style="color:var(--text-muted);">판매 <b style="color:var(--text)">${occNights}박</b> <span style="font-size:10.5px;">숙박일 기준</span></div>
           <div style="color:var(--text-muted);">가용 <b style="color:var(--text)">${totalAvailableNights}박</b></div>
           <div style="font-weight:600;">${_delta(occupancyRate, lastOccupancyRate, 'p')}</div>
         </div>
