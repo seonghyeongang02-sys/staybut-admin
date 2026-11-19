@@ -9624,7 +9624,17 @@ function renderWeekCardCanvas_(staffName, monDs){
       ctx.fillStyle = '#111111'; ctx.fillRect(x0 + 1, y, COLW - 2, ROOM);
       ctx.textAlign = 'center';
       ctx.fillStyle = '#ffffff'; ctx.font = '700 16px ' + WK_FT;
-      ctx.fillText(RH(t.room), cx, y + 26);
+      /* [2026-11-19] 주간 카드에도 차렵이불 표시 — 필요할 때만 객실 띠 오른쪽에 이불 아이콘과 개수.
+         전에는 일별 카드에만 있어서 주간 카드로 받으신 날은 이불을 못 챙길 수 있었습니다. */
+      const _bd = (t.sup && t.sup.bedding > 0) ? t.sup.bedding : 0;
+      ctx.fillText(RH(t.room), _bd ? cx - 12 : cx, y + 26);
+      if (_bd) {
+        const bx = x0 + COLW - 30;
+        ctx.save(); ctx.translate(bx, y + 8); ctx.scale(0.62, 0.62); drawBeddingIcon_(ctx, 0, 0); ctx.restore();
+        ctx.textAlign = 'left'; ctx.fillStyle = '#ffffff'; ctx.font = '700 13px ' + WK_FT;
+        ctx.fillText(String(_bd), bx + 9, y + 25);
+        ctx.textAlign = 'center';
+      }
       /* [2026-11-02] 연한 회색이라 폰에서 안 읽혀서 진하게·굵게 바꿨습니다.
          실장님이 실제로 챙기시는 숫자라 객실번호 다음으로 잘 보여야 합니다. */
       /* [2026-11-02] 「수건 6 · 생수 2」를 칸마다 적으니 같은 글자가 아홉 번 반복돼
